@@ -1,0 +1,38 @@
+name: Sync projects.js
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "projects/**"
+      - "scripts/generate-projects.js"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate assets/js/projects.js from projects/*/meta.json
+        run: node scripts/generate-projects.js
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet -- assets/js/projects.js; then
+            echo "No change in assets/js/projects.js"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/js/projects.js
+          git commit -m "chore: auto-sync assets/js/projects.js from projects/*/meta.json"
+          git push

@@ -5,58 +5,59 @@
 ## ফাইল স্ট্রাকচার
 
 ```
-index.html                 → মূল পেজ (structure/markup)
-assets/css/style.css       → সব স্টাইল (dark/light theme সহ)
-assets/js/projects.js      → ★ সিস্টেমের ডেটা — এখানেই নতুন প্রজেক্ট অ্যাড করবেন
-assets/js/main.js          → রেন্ডারিং, সার্চ, ফিল্টার লজিক
-assets/favicon.svg         → লোগো/ফেভিকন
-manifest.json              → PWA manifest
-robots.txt / sitemap.xml   → সার্চ ইঞ্জিন ক্রলিং
-llms.txt                   → AI/LLM ক্রলারদের জন্য সংক্ষিপ্ত সিস্টেম-তালিকা
+index.html                    → মূল পেজ (structure/markup)
+assets/css/style.css          → সব স্টাইল (dark/light theme সহ)
+assets/js/projects.js         → ⚠️ অটো-জেনারেটেড — হাতে এডিট করবেন না
+assets/js/main.js             → রেন্ডারিং, সার্চ, ফিল্টার লজিক
+assets/favicon.svg            → লোগো/ফেভিকন
+manifest.json                 → PWA manifest
+robots.txt / sitemap.xml      → সার্চ ইঞ্জিন ক্রলিং
+llms.txt                      → AI/LLM ক্রলারদের জন্য সংক্ষিপ্ত সিস্টেম-তালিকা
+projects/<slug>/index.html    → প্রতিটা প্রজেক্টের নিজস্ব পেজ
+projects/<slug>/meta.json     → ★ হাব কার্ডের তথ্য — নতুন প্রজেক্ট অ্যাড করতে এখানেই লিখবেন
+scripts/generate-projects.js  → projects/*/meta.json থেকে assets/js/projects.js বানায়
+.github/workflows/sync-projects.yml → push করলে উপরের স্ক্রিপ্ট অটোমেটিক চালায়
 ```
 
-## নতুন সিস্টেম অ্যাড করবেন কীভাবে
+## নতুন সিস্টেম/প্রজেক্ট অ্যাড করবেন কীভাবে (সম্পূর্ণ অটোমেটিক)
 
-`assets/js/projects.js` ফাইল খুলুন, `PROJECTS` array-এর শেষে একটা নতুন object যোগ করুন:
-
-```js
-{
-  id: "my-new-system",
-  title: "My New System",
-  tagline: "এক লাইনে এই সিস্টেম কী কাজ করে",
-  description: "দুই-তিন লাইনের বিস্তারিত বিবরণ।",
-  url: "https://my-new-system.subromart.com",
-  category: "Operations",       // filter chip এ এই নামেই দেখাবে
-  tags: ["keyword1", "keyword2"], // সার্চের জন্য
-  status: "live",                // live | beta | development
-  icon: "🚀"
-}
-```
-
-সেভ করুন — ব্যস, পেজে নতুন কার্ড, নতুন ফিল্টার চিপ (যদি নতুন ক্যাটাগরি হয়), এবং সার্চ — সব অটোমেটিক আপডেট হয়ে যাবে। কোনো বিল্ড/কম্পাইল স্টেপ নেই।
-
-(ঐচ্ছিক) SEO/AI সার্চের জন্য `llms.txt` এবং `sitemap.xml` ফাইলেও একই সিস্টেমের একটা লাইন যোগ করে রাখতে পারেন।
-
-## প্রজেক্টের নিজস্ব পেজ এই রিপোর ভেতরেই রাখতে চাইলে
-
-সব প্রজেক্টের আলাদা ডোমেইন না থাকলেও সমস্যা নেই — এই রিপোর ভেতরেই প্রতিটা প্রজেক্টের জন্য একটা ফোল্ডার বানিয়ে সেখানে তার নিজস্ব `index.html` রাখা যায়:
+`assets/js/projects.js` আর হাতে এডিট করতে হয় না — এটা অটো-জেনারেটেড। নতুন প্রজেক্ট অ্যাড করতে শুধু একটা ফোল্ডার বানান:
 
 ```
 projects/
-  notification/
-    index.html      → এই প্রজেক্টের নিজস্ব পেজ (নিজের স্টাইল/স্ক্রিপ্ট থাকতে পারে)
-  <আরেকটা-প্রজেক্ট>/
-    index.html
+  my-new-system/
+    index.html    → প্রজেক্টের নিজস্ব পেজ
+    meta.json      → হাব কার্ডের তথ্য
 ```
 
-তারপর `assets/js/projects.js`-এ সেই প্রজেক্টের `url` ফিল্ডে দিন: `"projects/<project-slug>/"`
+`meta.json`:
+
+```json
+{
+  "title": "My New System",
+  "tagline": "এক লাইনে এই সিস্টেম কী কাজ করে",
+  "description": "দুই-তিন লাইনের বিস্তারিত বিবরণ।",
+  "category": "Operations",
+  "tags": ["keyword1", "keyword2"],
+  "status": "live",
+  "icon": "🚀"
+}
+```
+
+তারপর `git add`, `commit`, `push` করুন main ব্রাঞ্চে — GitHub Actions (`.github/workflows/sync-projects.yml`) নিজে থেকেই `projects/*/meta.json` স্ক্যান করে `assets/js/projects.js` রিজেনারেট করে কমিট করে দেবে। মূল হাব পেজে (`index.html`) নতুন কার্ড, ফিল্টার চিপ ও সার্চ — সব অটোমেটিক আপডেট হয়ে যাবে। `url` ফিল্ড, `id` — কোনোটাই হাতে বসাতে হবে না, ফোল্ডারের নাম থেকেই তৈরি হয়।
+
+লোকালি টেস্ট করতে চাইলে push না করেও চালাতে পারেন:
+
+```bash
+node scripts/generate-projects.js
+```
 
 প্রতিটা প্রজেক্ট পেজে সুবিধার জন্য রাখুন:
 - `<title>` ও `<meta name="description">` — নিজের মতো করে
 - `<link rel="canonical" href="https://systems.subromart.com/projects/<slug>/">`
 - একটা "← Systems Hub" ব্যাক লিংক (`../../index.html`), `projects/notification/index.html`-এ যেভাবে আছে
 
-নতুন প্রজেক্ট পেজ অ্যাড করার পর `sitemap.xml`-এও একটা `<url>` এন্ট্রি যোগ করে রাখুন।
+(ঐচ্ছিক) SEO/AI সার্চের জন্য `llms.txt` এবং `sitemap.xml` ফাইলেও নতুন প্রজেক্টের একটা লাইন/এন্ট্রি যোগ করে রাখতে পারেন — এগুলো এখনও ম্যানুয়াল।
 
 ## লোকালি টেস্ট করা
 

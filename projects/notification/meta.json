@@ -1,0 +1,9 @@
+{
+  "title": "Push Notification System",
+  "tagline": "লাখো ইউজারকে রিয়েল-টাইম পুশ নোটিফিকেশন — স্কেলেবল ও রিলায়েবল",
+  "description": "queue-based (BullMQ) worker আর্কিটেকচার দিয়ে ৫ লাখ+ ইউজারকে batch-এ (FCM প্রতি কলে ৫০০ token) নোটিফিকেশন পাঠায়। cursor-based pagination, throttling, Redis distributed lock দিয়ে duplicate-job প্রতিরোধ, retry with exponential backoff, dead-token cleanup এবং cache-stampede প্রোটেকশন — সব একসাথে অ্যানিমেটেড স্টোরি আকারে ব্যাখ্যা করা আছে।",
+  "category": "Infrastructure",
+  "tags": ["notification", "push", "fcm", "queue", "bullmq", "redis", "scalability", "infrastructure"],
+  "status": "live",
+  "icon": "🔔"
+}
