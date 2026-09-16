@@ -1,0 +1,2444 @@
+<html data-theme="dark" style="color-scheme: dark;">
+
+<head><!-- frame-runtime -->
+    <script>window.__FRAME_PREAMBLE = { "v": 1, "capabilities": { "artifact": "artifact.BYHii2AW.js", "assets": "assets.8Gk803W0.js", "comments": "comments.BiSa9uTt.js", "db": "db.h-3sndFg.js", "downloads": "downloads.th1YuAIk.js", "embed": "embed.eqL6deQM.js", "endpoints": "endpoints.CfzSv5nM.js", "mcp": "mcp.Bvma3qD7.js", "network": "network.B5UA9Su4.js", "permissions": "permissions.BNySkLV5.js", "room": "room.VSdFwTE9.js", "sample": "sample.BW2Uysoh.js", "self": "artifact.BYHii2AW.js", "user": "user.BpKav-Rf.js" }, "transforms": "_transforms.DSB5x63f.js", "comments": "_comments.CySkkG-P.js", "translate": "_translate.5HCW4BJh.js", "ldx": "_ldx.DYFNSryD.js" }</script>
+    <script>(function () { "use strict"; var ce = ["light", "dark", "system"], le = /^[A-Za-z0-9_-]{1,64}$/, Z = /^[a-zA-Z_:][a-zA-Z0-9_:.-]{0,127}$/, ue = new Set(["class", "hidden", "value", "checked", "style", "title", "alt", "placeholder", "lang", "dir", "role", "tabindex", "disabled", "readonly", "contenteditable", "open", "colspan", "rowspan"]); function fe(e) { const t = e.toLowerCase(); return t.startsWith("data-") || t.startsWith("aria-") || ue.has(t) } var He = "http://www.w3.org/1999/xhtml", de = "http://www.w3.org/2000/svg", pe = new Set(["script", "style", "iframe", "noscript", "noframes", "noembed", "xmp", "plaintext", "template", "title", "textarea", "object", "embed"]), me = new Set(["script", "style"]); function he(e) { const t = e.localName.toLowerCase(); return e.namespaceURI === "http://www.w3.org/1999/xhtml" ? !pe.has(t) : e.namespaceURI === de ? !me.has(t) : !1 } function D(e, t) { return e === t || (e === 160 || e === 32) && (t === 160 || t === 32) } function _e(e, t) { const r = e.length, n = t.length; let s = 0; for (; s < r && s < n && D(e.charCodeAt(s), t.charCodeAt(s));)s++; let o = 0; for (; o < r - s && o < n - s && D(e.charCodeAt(r - 1 - o), t.charCodeAt(n - 1 - o));)o++; return { p: s, s: o } } function ve(e, t) { const r = e.firstChild; if (e.childNodes.length !== 1 || r === null || r.nodeType !== Node.TEXT_NODE) { e.textContent = t; return } const n = r.data, s = n.length, o = t.length, { p: i, s: c } = _e(n, t); i === s && c === 0 && s === o || r.replaceData(i, s - i - c, t.slice(i, o - c)); const m = r.data, d = e.ownerDocument.getSelection?.() ?? null, v = d !== null && d.rangeCount > 0 && (d.anchorNode === r || d.focusNode === r) ? { anchor: d.anchorNode, anchorOffset: d.anchorOffset, focus: d.focusNode, focusOffset: d.focusOffset } : null; let p = -1, y = -1; for (let h = 0; h < m.length && h < t.length; h++) { const E = m.charCodeAt(h), A = t.charCodeAt(h); E !== A && D(E, A) && (p < 0 && (p = h), y = h) } const w = p >= 0; if (w && r.replaceData(p, y - p + 1, t.slice(p, y + 1)), w && v !== null && v.anchor !== null && v.focus !== null) try { d.setBaseAndExtent(v.anchor, v.anchorOffset, v.focus, v.focusOffset) } catch { } } var ye = new Set(["html", "head", "body", "frameset"]); function we(e) { return e.namespaceURI === "http://www.w3.org/1999/xhtml" && ye.has(e.localName) } function ge(e) { if (e === null || typeof e != "object") return !1; const t = e; if (typeof t.target != "string" || !le.test(t.target) || t.text !== void 0 && typeof t.text != "string") return !1; if (t.attrsSet !== void 0) { if (t.attrsSet === null || typeof t.attrsSet != "object") return !1; for (const [r, n] of Object.entries(t.attrsSet)) if (!Z.test(r) || typeof n != "string") return !1 } if (t.attrsRemoved !== void 0) { if (!Array.isArray(t.attrsRemoved)) return !1; for (const r of t.attrsRemoved) if (typeof r != "string" || !Z.test(r)) return !1 } return !0 } function Ee(e, t) { if (e === null || typeof e != "object") return !1; const { seq: r, elements: n } = e; if (typeof r != "number" || !Number.isSafeInteger(r) || !Array.isArray(n) || n.length === 0 || n.length > 64) return !1; for (let s = 0; s < n.length; s++)if (!t(n[s])) return !1; return !0 } function be(e) { return e === null || typeof e != "object" ? !1 : Ee(e.__frame_patch, ge) } function Ae(e) { if (e === null || typeof e != "object") return !1; const t = e.__frame_init; return t !== null && typeof t == "object" } function Te(e) { return e !== null && typeof e == "object" && e.__frame_size_poke === !0 } function Re(e) { if (e === null || typeof e != "object") return !1; const t = e.__frame_theme; if (t === null || typeof t != "object") return !1; const r = t.theme; return typeof r == "string" && ce.includes(r) } var S = /^[\w.-]+\.js$/; function Se(e, t, r) { return r ? "inert" : typeof t == "string" && S.test(t) ? e ? [t] : "inert" : e ? "inert" : "framed" } var We = "frame_ldx_runtime", Ke = "script#an-form"; function Le() { return { post(e, t) { parent.postMessage(e, t) }, on(e) { const t = r => { r.source === parent && e(r.data, r.origin, r.isTrusted) }; return addEventListener("message", t), () => removeEventListener("message", t) } } } function ke() { return { post: () => { }, on: () => () => { } } } var I = "__frame_scroll", Pe = 150, Oe = 310, Ce = 160, Me = 3e4; function je() { let e = 0, t = !1, r = !1, n = !1, s = 0, o = null; const i = u => { try { sessionStorage.setItem(I, JSON.stringify({ y: u })) } catch { } }, c = () => { if (clearTimeout(e), o === null) return; const u = o; o = null, i(u) }, m = () => { if (t) { t = !1; return } r = !0, o = scrollY, clearTimeout(e), e = setTimeout(c, Pe) }; try { addEventListener("scroll", m, { passive: !0 }), addEventListener("pagehide", c) } catch { } const d = () => { let u; try { u = sessionStorage.getItem(I) } catch { return null } if (u === null) return null; let a; try { a = JSON.parse(u) } catch { a = null } const f = a?.y; if (!(typeof f == "number" && Number.isFinite(f) && f >= 0)) { try { sessionStorage.removeItem(I) } catch { } return null } return f }; let v = !1; const p = u => { try { const a = scrollY; scrollTo({ top: u, left: 0, behavior: "instant" }), s = u, n = !0, clearTimeout(e), o = null, i(u); const f = scrollY; f !== a && (t = !0), f !== u && !v && (v = !0, addEventListener("load", () => { try { if (scrollY === f) { const b = d(); p(b !== null ? b : s) } } catch { } }, { once: !0 })) } catch { } }, y = () => { try { return !!location.hash } catch { return !0 } }; let w = !1; const h = () => { try { if (w || innerWidth > Oe || innerHeight > Ce) return; w = !0; const u = Date.now(), a = () => { try { removeEventListener("resize", a) } catch { } if (Date.now() - u > Me || r || y()) return; const f = d(); p(f !== null ? f : s) }; addEventListener("resize", a) } catch { } }; let E = !1, A = !1; return { restore() { if (E || (E = !0, y())) return; const u = d(); u !== null && (p(u), h()) }, promoted() { if (A || (A = !0, y())) return; const u = d(); u !== null ? (p(u), h()) : n && p(s) } } } function Ne(e, t, r, n) { let s = null; try { s = window.trustedTypes?.createPolicy("frame-runtime", { createScriptURL: m => m }) ?? null } catch { } const o = window.Worker, i = o?.prototype, c = Object.freeze({ Worker: o, workerOn: i?.addEventListener, workerPost: i?.postMessage, workerTerminate: i?.terminate, fetch: window.fetch.bind(window), preventDefault: Event.prototype.preventDefault, policy: s, origins: t }); r(e).then(m => m?.bootTopLevel ? m.bootTopLevel(c, n) : n.settle()).catch(() => n.settle()) } var $e = "modulepreload", qe = function (e) { return "/" + e }, Xe = {}, Be = function (t, r, n) { let s = Promise.resolve(); function o(i) { const c = new Event("vite:preloadError", { cancelable: !0 }); if (c.payload = i, window.dispatchEvent(c), !c.defaultPrevented) throw i } return s.then(i => { for (const c of i || []) c.status === "rejected" && o(c.reason); return t().catch(o) }) }, De = window === top, J = Object.getOwnPropertyDescriptor(window, "claude"), O = Se(De, window.__FRAME_PREAMBLE?.topLevel, J?.writable === !1), U = typeof O == "object" && O[0], _ = U ? ke() : Le(); (function () { const e = Object.defineProperty, t = globalThis, r = ["RTCPeerConnection", "webkitRTCPeerConnection", "RTCDataChannel", "RTCIceCandidate", "RTCSessionDescription", "RTCRtpSender", "RTCRtpReceiver"]; let n = 0; for (let s = 0; s < r.length; s++) { const o = r[s]; try { e(t, o, { value: void 0, writable: !1, configurable: !1 }) } catch { try { delete t[o] } catch { } try { e(t, o, { value: void 0, writable: !1, configurable: !0 }) } catch { } } typeof t[o] == "function" && n++ } if (n && O === "framed") try { _.post({ __frame_rtc_lockdown_failed: n }, "*") } catch { } })(); var Ie = 1e4, Ue = 2e3, Q = Object.freeze([...window.__FRAME_PREAMBLE?.origins ?? ["https://claude.ai", "https://preview.claude.ai"]]); function ee(e) { for (const t of Q) if (t.endsWith(":*")) try { const r = new URL(e); if (`${r.protocol}//${r.hostname}:*` === t) return !0 } catch { } else if (e === t) return !0; return !1 } var C = Object.freeze({ ...window.__FRAME_PREAMBLE?.capabilities }), x = window.__FRAME_PREAMBLE?.transforms, F = window.__FRAME_PREAMBLE?.comments, z = window.__FRAME_PREAMBLE?.translate, H = window.__FRAME_PREAMBLE?.ldx; function L(e) { return Be(() => import("/_runtime/" + e), void 0) } function te(e, t) { return { contract: e.contract, changes: new Set(e.changes ?? []), flags: new Set(e.flags ?? []), capabilities: e.capabilities ?? {}, capBudgets: e.capBudgets ?? {}, transforms: new Map, shellOrigin: t, mount: $, hooks: j, pipe: () => ({ wrap: (r, n) => (...s) => { try { return n(...s) } catch (o) { return Promise.reject(o) } } }) } } var M = null, T = null; function re(e, t, r) { try { Object.defineProperty(e, t, { value: r, writable: !1, configurable: !1, enumerable: !0 }) } catch { try { Object.defineProperty(e, t, { value: r, writable: !1, configurable: !0, enumerable: !0 }) } catch { } } } var W = !1, j = { editBefore: null, edit: null }; function xe(e, t, r = !1) { const n = []; let s; if (r) try { j.editBefore?.(e) } catch { } for (const o of e.elements) { const i = document.querySelector(`[data-id="${o.target}"]`); if (!i) { s = o.target; break } if ([...Object.keys(o.attrsSet ?? {}), ...o.attrsRemoved ?? []].some(c => !fe(c))) { s = o.target; break } if (o.text !== void 0 && (!he(i) || we(i))) { s = o.target; break } for (const [c, m] of Object.entries(o.attrsSet ?? {})) if (!oe(i, c)) { try { i.setAttribute(c, m) } catch { } ne(i, c, m) } for (const c of o.attrsRemoved ?? []) oe(i, c) || (i.removeAttribute(c), ne(i, c, null)); typeof o.text == "string" && ve(i, o.text), n.push(o.target) } if (r) try { j.edit?.(e.seq, n, s) } catch { } if (s !== void 0) { _.post({ __frame_patch_miss: { seq: e.seq } }, t); return } try { document.dispatchEvent(new CustomEvent("claude:edit", { detail: { seq: e.seq, targets: n } })) } catch { } } function ne(e, t, r) { if (!(e instanceof HTMLInputElement)) return; const n = t.toLowerCase(); n === "checked" ? e.checked = r !== null : n === "value" && e.type !== "file" && (e.value = r ?? "") } function oe(e, t) { const r = t.toLowerCase(), n = e; return r === "data-id" || (r === "value" || r === "checked") && (n.__artifactSecret === !0 || /^(password|hidden|file)$/.test(n.type ?? "") || /(^|\s)(cc-|one-time-code|current-password|new-password)/i.test(`${e.getAttribute("autocomplete") ?? ""} ${n.autocomplete ?? ""}`)) } function se(e) { const t = document.documentElement; e === "light" || e === "dark" ? (t.dataset.theme = e, t.style.colorScheme = e, W = !0) : W && (delete t.dataset.theme, t.style.colorScheme = "", W = !1) } var N = new Map; function Fe() { let e; const t = { u: new Promise(r => { e = r }), r: r => { t.done = !0, e(r) }, done: !1, nulled: !1 }; return t } function K() { for (const e of N.values()) e.done || (e.nulled = !0, e.r(null)) } var ze = Object.freeze(Object.assign(Object.create(null), { call: Function.prototype.call, apply: Function.prototype.apply, bind: Function.prototype.bind })), $ = (e, t) => { const r = N.get(e); if (!r || r.done) { r?.nulled && T && _.post({ __frame_cap_telemetry: { kind: "cap-load-error", cap: e } }, T); return } const n = typeof t == "function" ? Object.setPrototypeOf(t, ze) : Object.assign(Object.create(null), t); typeof n.then == "function" && delete n.then, r.r(Object.freeze(n)) }; function ae() { const e = J?.value ?? {}; re(window, "claude", e); for (const t of Object.keys(C)) { if (e[t] !== void 0) { re(e, t, e[t]); continue } N.set(t, Fe()) } if (e.use === void 0) { const t = r => { if (typeof r != "string" || !Object.hasOwn(C, r)) return Promise.resolve(null); const n = N.get(r); return n ? n.u : Promise.resolve(e[r] ?? null) }; try { Object.defineProperty(e, "use", { value: t, writable: !0, configurable: !0, enumerable: !1 }) } catch { } } } if (O === "framed") { const e = x && S.test(x) ? L(x).catch(() => { }) : Promise.resolve(void 0), t = a => { if (a.type === "auxclick" && a.button !== 1) return; const f = a.target, b = f && f.closest ? f.closest("a[href],area[href]") : null; if (!b) return; const P = b.getAttribute("href"); if (!P) return; let R; try { R = new URL(P, document.baseURI) } catch { return } if ((R.protocol === "http:" || R.protocol === "https:") && R.origin !== location.origin) { a.preventDefault(); const k = (b.getAttribute("target") ?? "").toLowerCase(), g = a.type === "auxclick" || a.metaKey || a.ctrlKey || a.shiftKey || a.altKey || !["", "_self", "_top", "_parent"].includes(k); _.post({ __frame_nav: !0, url: R.href, newTab: g }, "*") } }; addEventListener("click", t, !0), addEventListener("auxclick", t, !0); const r = {}, n = a => { a.isTrusted && (r.pointer = !0) }, s = a => { a.isTrusted && (r.click = !0) }; addEventListener("pointermove", n, { capture: !0, passive: !0 }), addEventListener("click", s, { capture: !0, passive: !0 }), e.then(a => { a?.wireNav && (a.wireNav(), removeEventListener("click", t, !0), removeEventListener("auxclick", t, !0), removeEventListener("pointermove", n, !0), removeEventListener("click", s, !0), a.wireEngagement?.(r)) }); let o = null; try { o = je() } catch { } ae(); let i = null, c = null, m = 0; const d = _.on((a, f) => { ee(f) && Ae(a) && (i = a.__frame_init, T = f, d(), clearTimeout(m), c?.()) }); _.post({ __frame_connect: !0 }, "*"); const v = setTimeout, p = clearTimeout; let y = 0; const w = () => { try { _.post({ __frame_alive: !0 }, "*") } catch { } y = v(w, Ue) }, h = () => p(y); w(), addEventListener("load", h, { once: !0 }); const E = new Promise(a => { c = a, m = setTimeout(() => { d(), a() }, Ie) }), A = document.readyState === "loading" ? new Promise(a => document.addEventListener("DOMContentLoaded", () => a(), { once: !0 })) : Promise.resolve(); A.then(() => { try { o?.restore() } catch { } }); const u = { cb: null }; _.on((a, f) => { if (ee(f) && Te(a)) { try { o?.promoted() } catch { } u.cb?.() } }), E.then(async () => { if (!i || !T) { K(); return } se(i.theme); const a = T; let f = !1, b = !1; _.on((l, X, B) => { if (X !== a) return; Re(l) && se(l.__frame_theme.theme), be(l) && xe(l.__frame_patch, a, B); const Y = l?.__fc_mode; Y && typeof Y == "object" && !f && F && S.test(F) && (f = !0, L(F).then(V => V.install?.(a, Y.on === !0)).catch(() => { })); const G = l?.__ft_cmd; G && typeof G == "object" && !b && z && S.test(z) && (b = !0, L(z).then(V => V.install?.(a, G)).catch(() => { })) }); const P = Object.keys(i.capabilities ?? {}).filter(l => Object.hasOwn(C, l)).map(l => [l, C[l]]).filter(l => typeof l[1] == "string" && S.test(l[1])), R = await Promise.allSettled(P.map(([, l]) => L(l))), k = await e, g = T; if (k?.buildBoot || _.post({ __frame_cap_telemetry: { kind: "cap-load-error", cap: "_transforms" } }, g), k?.buildBoot) try { M = k.buildBoot(i, k.TRANSFORMS ?? {}, { shellOrigin: g, mount: $, hooks: j }, l => _.post({ __frame_cap_telemetry: l }, g)) } catch { _.post({ __frame_cap_telemetry: { kind: "cap-load-error", cap: "_transforms" } }, g), M = te(i, g) } else M = te(i, g); const q = l => _.post({ __frame_cap_telemetry: { kind: "cap-load-error", cap: l } }, g), ie = M; R.forEach((l, X) => { const B = P[X][0]; if (l.status !== "fulfilled") { q(B); return } try { l.value?.install?.(ie) } catch { q(B) } }), K(), await A, h(), _.post({ __frame_ready: !0 }, T), e.then(l => l?.installSizeReporter?.(g, u)), ie.flags.has("frame_ldx_runtime") && H && S.test(H) && document.querySelector("script#an-form") && L(H).then(l => l?.boot?.()).catch(() => !1).then(l => { l !== !0 && q("_ldx") }) }) } else U && (ae(), Ne(U, Q, L, { settle: K, mount: $ })) })();</script>
+    <!-- /frame-runtime -->
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style class="native-dark-class-modified">
+        :root {
+            color-scheme: light
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font: 14px -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #faf9f5;
+            color: #141413
+        }
+
+        img {
+            max-width: 100%
+        }
+
+        [hidden]:not([hidden=until-found]) {
+            display: none !important
+        }
+    </style>
+    <link type="text/css" rel="stylesheet" id="dark-mode-custom-link">
+    <link type="text/css" rel="stylesheet" id="dark-mode-general-link">
+    <style lang="en" type="text/css" id="dark-mode-custom-style"></style>
+    <style lang="en" type="text/css" id="dark-mode-native-style"></style>
+    <style lang="en" type="text/css" id="dark-mode-native-sheet"></style>
+</head>
+
+<body>
+    <title>৫ লাখ ইউজারের গল্প</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@600;700&amp;family=Hind+Siliguri:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+    <style class="native-dark-class-modified">
+        /* ============================================================
+   ৫ লাখ ইউজারের গল্প — একটা চেইন।
+   একটা সমস্যা → তার সমাধান → সেই সমাধান থেকে নতুন সমস্যা → …
+   প্রতি পেজে একটাই বিষয়। এনিমেশন নিজে চলে, পেজ ইউজারের হাতে।
+   ============================================================ */
+        :root {
+            --ground: #0B0E15;
+            --panel: #141926;
+            --panel-2: #1A2030;
+            --line: #28303F;
+            --line-soft: #1E2532;
+            --ink: #E9EDF6;
+            --ink-2: #AEB7C9;
+            --muted: #7A8496;
+            --redis: #3FC9C0;
+            --redis-dim: #1C6D68;
+            --pg: #9A8CF0;
+            --pg-dim: #463C82;
+            --work: #F5A63C;
+            --work-dim: #8A5F22;
+            --bad: #E2607A;
+            --bad-dim: #7A3448;
+            --ok: #7BD88F;
+            --ok-dim: #2E6B44;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            background: var(--ground);
+            color: var(--ink);
+            font-family: "Hind Siliguri", "Noto Sans Bengali", system-ui, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .deck {
+            position: relative;
+            width: min(100vw, calc(100vh * 16 / 9));
+            height: min(100vh, calc(100vw * 9 / 16));
+            background: var(--ground);
+            overflow: hidden;
+            --u: 1vw;
+        }
+
+        @supports (container-type:size) {
+            .deck {
+                container-type: size;
+                --u: 1cqw
+            }
+        }
+
+        /* the page's mood is the story beat: a problem, or the fix for it */
+        .deck[data-k="prob"] {
+            background: radial-gradient(120% 85% at 50% -10%, rgba(226, 96, 122, .12), transparent 62%), var(--ground)
+        }
+
+        .deck[data-k="sol"] {
+            background: radial-gradient(120% 85% at 50% -10%, rgba(63, 201, 192, .11), transparent 62%), var(--ground)
+        }
+
+        .deck[data-k="setup"] {
+            background: radial-gradient(120% 85% at 50% -10%, rgba(245, 166, 60, .10), transparent 62%), var(--ground)
+        }
+
+        .page {
+            position: absolute;
+            inset: 0;
+            padding: calc(var(--u) * 3.0) calc(var(--u) * 4.0) calc(var(--u) * 4.6);
+            display: none;
+            flex-direction: column;
+            gap: calc(var(--u) * 1.25);
+        }
+
+        .page.on {
+            display: flex
+        }
+
+        /* ---------- head ---------- */
+        .eye {
+            font-family: "JetBrains Mono", monospace;
+            font-size: calc(var(--u) * .92);
+            letter-spacing: .2em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: calc(var(--u) * .85);
+        }
+
+        .eye .step {
+            color: var(--muted)
+        }
+
+        .eye .chip {
+            padding: calc(var(--u) * .2) calc(var(--u) * .7);
+            border-radius: 99px;
+            font-weight: 700;
+            letter-spacing: .16em;
+        }
+
+        .prob .eye .chip {
+            color: var(--bad);
+            border: 1px solid var(--bad-dim);
+            background: rgba(226, 96, 122, .07)
+        }
+
+        .sol .eye .chip {
+            color: var(--ok);
+            border: 1px solid var(--ok-dim);
+            background: rgba(123, 216, 143, .07)
+        }
+
+        .setup .eye .chip {
+            color: var(--work);
+            border: 1px solid var(--work-dim);
+            background: rgba(245, 166, 60, .07)
+        }
+
+        .page h2 {
+            font-family: "Anek Bangla", "Hind Siliguri", sans-serif;
+            font-size: calc(var(--u) * 3.0);
+            font-weight: 700;
+            margin: 0;
+            line-height: 1.12;
+            letter-spacing: -.012em;
+            text-wrap: balance;
+            max-width: 30ch;
+        }
+
+        .prob h2 em {
+            font-style: normal;
+            color: var(--bad)
+        }
+
+        .sol h2 em {
+            font-style: normal;
+            color: var(--ok)
+        }
+
+        .setup h2 em {
+            font-style: normal;
+            color: var(--work)
+        }
+
+        .page .sub {
+            margin: 0;
+            font-size: calc(var(--u) * 1.42);
+            color: var(--ink-2);
+            font-weight: 300;
+            max-width: 88ch;
+            line-height: 1.45;
+        }
+
+        .page .sub b {
+            color: var(--ink);
+            font-weight: 600
+        }
+
+        /* ---------- the running scene ---------- */
+        .scene {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: calc(var(--u) * 18);
+            border-radius: calc(var(--u) * .6);
+            background: #080B11;
+            border: 1px solid var(--line-soft);
+            overflow: hidden;
+        }
+
+        .scene::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(var(--line-soft) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+            background-size: calc(var(--u) * 2.4) calc(var(--u) * 2.4);
+            opacity: .45;
+        }
+
+        .page:not(.on) .scene * {
+            animation: none !important
+        }
+
+        .bx {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            border: 1px solid var(--line);
+            background: var(--panel-2);
+            border-radius: calc(var(--u) * .32);
+            padding: calc(var(--u) * .62) calc(var(--u) * 1.05);
+            font-family: "JetBrains Mono", monospace;
+            font-size: calc(var(--u) * 1.24);
+            color: var(--ink-2);
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .bx i {
+            display: block;
+            font-style: normal;
+            font-size: calc(var(--u) * .98);
+            color: var(--muted);
+            letter-spacing: .06em;
+            margin-top: calc(var(--u) * .1)
+        }
+
+        .bx.r {
+            border-color: var(--redis-dim);
+            color: var(--redis)
+        }
+
+        .bx.p {
+            border-color: var(--pg-dim);
+            color: var(--pg)
+        }
+
+        .bx.w {
+            border-color: var(--work-dim);
+            color: var(--work)
+        }
+
+        .bx.g {
+            border-color: var(--ok-dim);
+            color: var(--ok)
+        }
+
+        .bx.x {
+            border-color: var(--bad-dim);
+            color: var(--bad)
+        }
+
+        .bx.big {
+            font-size: calc(var(--u) * 1.5);
+            padding: calc(var(--u) * .7) calc(var(--u) * 1.2)
+        }
+
+        .wire {
+            position: absolute;
+            height: 2px;
+            background: var(--line);
+            transform: translateY(-50%)
+        }
+
+        .wire.v {
+            width: 2px;
+            transform: translateX(-50%)
+        }
+
+        .wire.d {
+            background: repeating-linear-gradient(90deg, var(--line) 0 7px, transparent 7px 14px)
+        }
+
+        .wire.rd {
+            background: var(--redis-dim)
+        }
+
+        .wire.bd {
+            background: var(--bad-dim)
+        }
+
+        .dot {
+            position: absolute;
+            width: calc(var(--u) * .95);
+            height: calc(var(--u) * .95);
+            border-radius: 50%;
+            background: var(--work);
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 calc(var(--u) * 1.1) rgba(245, 166, 60, .6);
+            left: var(--a, 50%);
+        }
+
+        .dot.r {
+            background: var(--redis);
+            box-shadow: 0 0 calc(var(--u) * 1.1) rgba(63, 201, 192, .6)
+        }
+
+        .dot.g {
+            background: var(--ok);
+            box-shadow: 0 0 calc(var(--u) * 1.1) rgba(123, 216, 143, .6)
+        }
+
+        .dot.x {
+            background: var(--bad);
+            box-shadow: 0 0 calc(var(--u) * 1.1) rgba(226, 96, 122, .6)
+        }
+
+        .dot.p {
+            background: var(--pg);
+            box-shadow: 0 0 calc(var(--u) * 1.1) rgba(154, 140, 240, .6)
+        }
+
+        .dot.q {
+            background: #5B6478;
+            box-shadow: none
+        }
+
+        .dot.sq {
+            border-radius: calc(var(--u) * .16)
+        }
+
+        .dot.lg {
+            width: calc(var(--u) * 1.45);
+            height: calc(var(--u) * 1.45)
+        }
+
+        .dot.sm {
+            width: calc(var(--u) * .66);
+            height: calc(var(--u) * .66);
+            box-shadow: none
+        }
+
+        .stamp {
+            position: absolute;
+            transform: translate(-50%, -50%) rotate(-4deg);
+            font-family: "JetBrains Mono", monospace;
+            font-size: calc(var(--u) * 1.75);
+            letter-spacing: .14em;
+            border: 2px solid var(--bad);
+            color: var(--bad);
+            padding: calc(var(--u) * .3) calc(var(--u) * .85);
+            border-radius: calc(var(--u) * .25);
+            opacity: 0;
+            background: rgba(11, 14, 21, .85);
+        }
+
+        .stamp.ok {
+            border-color: var(--ok);
+            color: var(--ok)
+        }
+
+        .stamp.w {
+            border-color: var(--work);
+            color: var(--work)
+        }
+
+        .meter {
+            position: absolute;
+            height: calc(var(--u) * .8);
+            background: var(--panel-2);
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            overflow: hidden;
+            transform: translateY(-50%)
+        }
+
+        .meter>b {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: var(--bad);
+            border-radius: 99px
+        }
+
+        .meter.g>b {
+            background: var(--ok)
+        }
+
+        .meter.r>b {
+            background: var(--redis)
+        }
+
+        .col {
+            position: absolute;
+            bottom: 8%;
+            transform: translateX(-50%);
+            border-radius: 2px 2px 0 0
+        }
+
+        .txt {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            font-family: "JetBrains Mono", monospace;
+            font-size: calc(var(--u) * 1.16);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .txt.b {
+            color: var(--bad)
+        }
+
+        .txt.o {
+            color: var(--ok)
+        }
+
+        .txt.r {
+            color: var(--redis)
+        }
+
+        .txt.w {
+            color: var(--work)
+        }
+
+        .txt.lg {
+            font-size: calc(var(--u) * 1.6);
+            color: var(--ink)
+        }
+
+        /* ---------- bullets ---------- */
+        .pts {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 1fr;
+            gap: calc(var(--u) * 2.2);
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            flex: 0 0 auto
+        }
+
+        .pts li {
+            position: relative;
+            padding-left: calc(var(--u) * 1.5);
+            font-size: calc(var(--u) * 1.24);
+            color: var(--ink-2);
+            font-weight: 300;
+            line-height: 1.42;
+        }
+
+        .pts li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: calc(var(--u) * .62);
+            width: calc(var(--u) * .55);
+            height: 2px;
+            background: var(--muted)
+        }
+
+        .prob .pts li::before {
+            background: var(--bad)
+        }
+
+        .sol .pts li::before {
+            background: var(--ok)
+        }
+
+        .setup .pts li::before {
+            background: var(--work)
+        }
+
+        .pts b {
+            color: var(--ink);
+            font-weight: 600
+        }
+
+        .mono {
+            font-family: "JetBrains Mono", monospace;
+            font-size: .9em
+        }
+
+        /* ---------- chain rail ---------- */
+        .nav {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: calc(var(--u) * 1.0);
+            padding: 0 calc(var(--u) * 4.0) calc(var(--u) * 1.4)
+        }
+
+        .btn {
+            font-family: "JetBrains Mono", monospace;
+            font-size: calc(var(--u) * .95);
+            color: var(--ground);
+            background: var(--redis);
+            border: 1px solid var(--redis);
+            border-radius: calc(var(--u) * .32);
+            padding: calc(var(--u) * .46) calc(var(--u) * 1.0);
+            cursor: pointer;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .btn.ghost {
+            color: var(--ink-2);
+            background: var(--panel);
+            border-color: var(--line);
+            font-weight: 400
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--work);
+            outline-offset: 2px
+        }
+
+        .rail {
+            display: flex;
+            gap: calc(var(--u) * .18);
+            flex: 1;
+            align-items: center
+        }
+
+        .pd {
+            flex: 1 1 auto;
+            height: calc(var(--u) * .36);
+            border: 0;
+            border-radius: 99px;
+            padding: 0;
+            cursor: pointer;
+            background: #232B39;
+            transition: background .2s, transform .2s
+        }
+
+        .pd[data-k="prob"] {
+            background: var(--bad-dim)
+        }
+
+        .pd[data-k="sol"] {
+            background: var(--ok-dim)
+        }
+
+        .pd[data-k="setup"] {
+            background: var(--work-dim)
+        }
+
+        .pd.on {
+            transform: scaleY(2.2)
+        }
+
+        .pd.on[data-k="prob"] {
+            background: var(--bad)
+        }
+
+        .pd.on[data-k="sol"] {
+            background: var(--ok)
+        }
+
+        .pd.on[data-k="setup"] {
+            background: var(--work)
+        }
+
+        .keys {
+            font-family: "JetBrains Mono", monospace;
+            font-size: calc(var(--u) * .8);
+            color: var(--muted);
+            white-space: nowrap
+        }
+
+        @keyframes travel {
+            0% {
+                left: var(--a);
+                opacity: 0
+            }
+
+            8% {
+                opacity: 1
+            }
+
+            92% {
+                opacity: 1
+            }
+
+            100% {
+                left: var(--b);
+                opacity: 0
+            }
+        }
+
+        @keyframes keep {
+            0% {
+                left: var(--a);
+                opacity: 0
+            }
+
+            12% {
+                opacity: 1
+            }
+
+            100% {
+                left: var(--b);
+                opacity: 1
+            }
+        }
+
+        @keyframes back {
+            0% {
+                left: var(--a);
+                opacity: 0
+            }
+
+            12% {
+                opacity: 1
+            }
+
+            46% {
+                left: var(--b)
+            }
+
+            54% {
+                left: var(--b)
+            }
+
+            88% {
+                opacity: 1
+            }
+
+            100% {
+                left: var(--a);
+                opacity: 0
+            }
+        }
+
+        @keyframes vdrop {
+            0% {
+                top: var(--a);
+                opacity: 0
+            }
+
+            10% {
+                opacity: 1
+            }
+
+            90% {
+                opacity: 1
+            }
+
+            100% {
+                top: var(--b);
+                opacity: 0
+            }
+        }
+
+        @keyframes flash {
+
+            0%,
+            52% {
+                opacity: 0;
+                transform: translate(-50%, -50%) rotate(-4deg) scale(1.5)
+            }
+
+            62% {
+                opacity: 1;
+                transform: translate(-50%, -50%) rotate(-4deg) scale(1)
+            }
+
+            94% {
+                opacity: 1
+            }
+
+            100% {
+                opacity: 0
+            }
+        }
+
+        @keyframes fill {
+            0% {
+                width: 0
+            }
+
+            75% {
+                width: 100%
+            }
+
+            100% {
+                width: 100%
+            }
+        }
+
+        @keyframes creep {
+            0% {
+                width: 0
+            }
+
+            100% {
+                width: 9%
+            }
+        }
+
+        @keyframes hold {
+
+            0%,
+            100% {
+                opacity: .28;
+                transform: translate(-50%, -50%) scale(.72)
+            }
+
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1)
+            }
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: .25
+            }
+
+            50% {
+                opacity: 1
+            }
+        }
+
+        @keyframes swell {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 rgba(226, 96, 122, 0)
+            }
+
+            50% {
+                box-shadow: 0 0 calc(var(--u) * 2.4) rgba(226, 96, 122, .5)
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%)
+            }
+
+            25% {
+                transform: translate(-52.5%, -50%)
+            }
+
+            75% {
+                transform: translate(-47.5%, -50%)
+            }
+        }
+
+        @keyframes rise {
+            0% {
+                height: 10%
+            }
+
+            100% {
+                height: var(--h)
+            }
+        }
+
+        @keyframes sweepx {
+            0% {
+                left: 4%
+            }
+
+            100% {
+                left: 90%
+            }
+        }
+
+        @keyframes dimOut {
+
+            0%,
+            55% {
+                opacity: 1
+            }
+
+            72%,
+            100% {
+                opacity: .18
+            }
+        }
+
+        @keyframes popIn {
+
+            0%,
+            50% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(.7)
+            }
+
+            62%,
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1)
+            }
+        }
+
+        @keyframes popOut {
+
+            0%,
+            45% {
+                opacity: 1
+            }
+
+            58%,
+            100% {
+                opacity: 0
+            }
+        }
+
+        @keyframes drift {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1)
+            }
+
+            20% {
+                opacity: 1
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -140%) scale(.6)
+            }
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+            .scene * {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important
+            }
+
+            .stamp {
+                opacity: 1
+            }
+        }
+    </style>
+
+    <div class="deck" id="deck" data-k="setup">
+        <section class="page setup on">
+            <div class="eye"><span class="chip">উদাহরণ</span><span class="step">শুরু · ১/২৯</span></div>
+            <h2>তোমার অ্যাপে <em>৫,০০,০০০</em> ইউজার</h2>
+            <p class="sub">প্রত্যেকের FCM টোকেন ডাটাবেজে সেভ করা আছে। অ্যাডমিন এখন <b>একটা নোটিফিকেশন সবাইকে</b> পাঠাতে
+                চায়। এই একটামাত্র কাজ থেকেই পুরো গল্পটা শুরু।</p>
+            <div class="scene">
+                <div class="bx w" style="left:10%;top:50%">ADMIN<i>পাঠাও ▸</i></div>
+                <div class="wire " style="left:17%;top:50%;width:11%"></div>
+                <div class="bx " style="left:34%;top:50%">API<i>/broadcast</i></div>
+                <div class="wire " style="left:41%;top:50%;width:10%"></div>
+                <div class="bx p" style="left:56%;top:50%">POSTGRES<i>৫,০০,০০০ টোকেন</i></div>
+                <div class="dot q sm" style="left:72%;top:20%;animation:hold 3.2s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:76%;top:20%;animation:hold 3.2s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:80%;top:20%;animation:hold 3.2s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:84%;top:20%;animation:hold 3.2s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:88%;top:20%;animation:hold 3.2s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:92%;top:20%;animation:hold 3.2s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:96%;top:20%;animation:hold 3.2s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:72%;top:35%;animation:hold 3.2s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:76%;top:35%;animation:hold 3.2s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:80%;top:35%;animation:hold 3.2s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:84%;top:35%;animation:hold 3.2s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:88%;top:35%;animation:hold 3.2s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:92%;top:35%;animation:hold 3.2s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:96%;top:35%;animation:hold 3.2s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:72%;top:50%;animation:hold 3.2s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:76%;top:50%;animation:hold 3.2s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:80%;top:50%;animation:hold 3.2s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:84%;top:50%;animation:hold 3.2s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:88%;top:50%;animation:hold 3.2s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:92%;top:50%;animation:hold 3.2s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:96%;top:50%;animation:hold 3.2s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:72%;top:65%;animation:hold 3.2s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:76%;top:65%;animation:hold 3.2s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:80%;top:65%;animation:hold 3.2s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:84%;top:65%;animation:hold 3.2s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:88%;top:65%;animation:hold 3.2s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:92%;top:65%;animation:hold 3.2s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:96%;top:65%;animation:hold 3.2s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:72%;top:80%;animation:hold 3.2s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:76%;top:80%;animation:hold 3.2s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:80%;top:80%;animation:hold 3.2s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:84%;top:80%;animation:hold 3.2s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:88%;top:80%;animation:hold 3.2s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:92%;top:80%;animation:hold 3.2s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:96%;top:80%;animation:hold 3.2s ease-in-out infinite 1.26s"></div>
+                <div class="txt w" style="left:86%;top:88%">৫ লাখ ডিভাইস</div>
+                <div class="dot " style="--a:18%;--b:32%;top:50%;animation:travel 3.2s linear infinite"></div>
+                <div class="dot p" style="--a:43%;--b:53%;top:50%;animation:travel 3.2s linear infinite .8s"></div>
+            </div>
+            <ul class="pts">
+                <li>প্রতিটা ডিভাইসের <b>একটা করে FCM টোকেন</b> — ফোন, ট্যাব, ব্রাউজার আলাদা</li>
+                <li>অ্যাডমিন এক ক্লিক করবে, বাকিটা ব্যাকএন্ডের দায়িত্ব</li>
+                <li>প্রশ্ন একটাই — <b>এই ৫ লাখে পৌঁছাব কীভাবে?</b></li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">সমস্যা</span><span class="step">ধাপ ০১ · ২/২৯</span></div>
+            <h2>সোজা API-তেই <em>লুপ চালালে</em> কী হয়</h2>
+            <p class="sub">সবচেয়ে সহজ কোডটা এটাই — টোকেনগুলো নিয়ে এসো, একটা <span class="mono">for</span> লুপে একটার
+                পর একটা পাঠাও। রিকোয়েস্টটা ততক্ষণ খোলা থাকে।</p>
+            <div class="scene">
+                <div class="bx " style="left:13%;top:42%">API<i>for (const t of tokens)</i></div>
+                <div class="wire " style="left:21%;top:42%;width:58%"></div>
+                <div class="bx x" style="left:85%;top:42%">৫ লাখ ফোন</div>
+                <div class="dot " style="--a:23%;--b:80%;top:42%;animation:keep 11s linear infinite"></div>
+                <div class="dot " style="--a:23%;--b:80%;top:42%;animation:keep 11s linear infinite 3.6s"></div>
+                <div class="dot " style="--a:23%;--b:80%;top:42%;animation:keep 11s linear infinite 7.2s"></div>
+                <div class="meter " style="left:13%;top:76%;width:66%"><b
+                        style="animation:creep 11s linear infinite"></b></div>
+                <div class="txt b" style="left:13%;top:88%">পাঠানো হয়েছে: ৩,২১৪ / ৫,০০,০০০</div>
+                <div class="txt " style="left:70%;top:88%">সময় গেছে: ১০ মিনিট ৪২ সেকেন্ড</div>
+            </div>
+            <ul class="pts">
+                <li>একটা FCM কল ≈ <b>২০০ মিলিসেকেন্ড</b></li>
+                <li>৫,০০,০০০ × ২০০ms = <b>প্রায় ২৭ ঘণ্টা</b></li>
+                <li>আর এই পুরো সময় <b>HTTP রিকোয়েস্টটা খোলা</b> থাকতে হবে</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">সমস্যা</span><span class="step">ধাপ ০২ · ৩/২৯</span></div>
+            <h2>৩০ সেকেন্ডেই <em>ফেল</em> — কে পেয়েছে জানার উপায় নেই</h2>
+            <p class="sub">Nginx কানেকশন কেটে দিল, প্রসেসটা মরে গেল। এখন সবচেয়ে খারাপ প্রশ্নটা — <b>কার কার কাছে
+                    গিয়েছিল?</b></p>
+            <div class="scene">
+                <div class="bx x" style="left:13%;top:40%">API<i>কানেকশন কাটা</i></div>
+                <div class="wire bd" style="left:21%;top:40%;width:26%"></div>
+                <div class="stamp " style="left:40%;top:40%;animation:flash 6s linear infinite">TIMEOUT</div>
+                <div class="txt o" style="left:60%;top:14%">✓ পেয়েছে — ৩,২১৪</div>
+                <div class="dot g sm" style="left:56%;top:26%;animation:hold 3s ease-in-out infinite 0s"></div>
+                <div class="dot g sm" style="left:59.6%;top:26%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                <div class="dot g sm" style="left:63.2%;top:26%;animation:hold 3s ease-in-out infinite 0.36s"></div>
+                <div class="txt b" style="left:70%;top:44%">? জানা নেই — ৪,৯৬,৭৮৬</div>
+                <div class="dot q sm" style="left:52%;top:58%;animation:hold 3s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:55.6%;top:58%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:59.2%;top:58%;animation:hold 3s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:62.8%;top:58%;animation:hold 3s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:66.4%;top:58%;animation:hold 3s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:70%;top:58%;animation:hold 3s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:73.6%;top:58%;animation:hold 3s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:77.2%;top:58%;animation:hold 3s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:80.8%;top:58%;animation:hold 3s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:84.4%;top:58%;animation:hold 3s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:88%;top:58%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:91.6%;top:58%;animation:hold 3s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:95.2%;top:58%;animation:hold 3s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:52%;top:70%;animation:hold 3s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:55.6%;top:70%;animation:hold 3s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:59.2%;top:70%;animation:hold 3s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:62.8%;top:70%;animation:hold 3s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:66.4%;top:70%;animation:hold 3s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:70%;top:70%;animation:hold 3s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:73.6%;top:70%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:77.2%;top:70%;animation:hold 3s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:80.8%;top:70%;animation:hold 3s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:84.4%;top:70%;animation:hold 3s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:88%;top:70%;animation:hold 3s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:91.6%;top:70%;animation:hold 3s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:95.2%;top:70%;animation:hold 3s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:52%;top:82%;animation:hold 3s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:55.6%;top:82%;animation:hold 3s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:59.2%;top:82%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:62.8%;top:82%;animation:hold 3s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:66.4%;top:82%;animation:hold 3s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:70%;top:82%;animation:hold 3s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:73.6%;top:82%;animation:hold 3s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:77.2%;top:82%;animation:hold 3s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:80.8%;top:82%;animation:hold 3s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:84.4%;top:82%;animation:hold 3s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:88%;top:82%;animation:hold 3s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:91.6%;top:82%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:95.2%;top:82%;animation:hold 3s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:52%;top:94%;animation:hold 3s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:55.6%;top:94%;animation:hold 3s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:59.2%;top:94%;animation:hold 3s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:62.8%;top:94%;animation:hold 3s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:66.4%;top:94%;animation:hold 3s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:70%;top:94%;animation:hold 3s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:73.6%;top:94%;animation:hold 3s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:77.2%;top:94%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:80.8%;top:94%;animation:hold 3s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:84.4%;top:94%;animation:hold 3s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:88%;top:94%;animation:hold 3s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:91.6%;top:94%;animation:hold 3s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:95.2%;top:94%;animation:hold 3s ease-in-out infinite 1.08s"></div>
+                <div class="dot x" style="--a:23%;--b:44%;top:40%;animation:travel 6s linear infinite"></div>
+            </div>
+            <ul class="pts">
+                <li>কোথায় থেমেছে তার <b>কোনো রেকর্ড নেই</b> — সবটা মেমোরিতে ছিল</li>
+                <li>আবার চালালে প্রথম ৩,২১৪ জন <b>দুইবার</b> পাবে</li>
+                <li>না চালালে বাকি ৪.৯৬ লাখ <b>কখনোই পাবে না</b></li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ০৩ · ৪/২৯</span></div>
+            <h2>কাজটা <em>Redis-এ লিখে রাখি</em>, তারপর ছেড়ে দিই</h2>
+            <p class="sub">API আর নিজে পাঠাবে না। সে একটা <b>জব</b> Redis-এর কিউতে ঢুকিয়ে দেবে, ডাটাবেজে একটা লগ রো
+                বানাবে, আর সাথে সাথে উত্তর দিয়ে দেবে।</p>
+            <div class="scene">
+                <div class="bx " style="left:11%;top:34%">API<i>শুধু ঢোকায়</i></div>
+                <div class="wire " style="left:18%;top:34%;width:14%"></div>
+                <div class="bx r" style="left:39%;top:34%">QUEUE<i>BullMQ · Redis</i></div>
+                <div class="wire " style="left:47%;top:34%;width:13%"></div>
+                <div class="bx w" style="left:68%;top:34%">WORKER<i>আলাদা প্রসেস</i></div>
+                <div class="wire " style="left:75%;top:34%;width:10%"></div>
+                <div class="bx g" style="left:90%;top:34%">৫ লাখ ফোন</div>
+                <div class="wire d" style="left:18%;top:76%;width:14%"></div>
+                <div class="bx g" style="left:11%;top:76%">200 OK<i>~৪০ms</i></div>
+                <div class="dot " style="--a:20%;--b:37%;top:34%;animation:travel 3.2s linear infinite"></div>
+                <div class="dot r" style="--a:49%;--b:66%;top:34%;animation:travel 3.2s linear infinite .7s"></div>
+                <div class="dot g" style="--a:77%;--b:88%;top:34%;animation:travel 3.2s linear infinite 1.4s"></div>
+                <div class="dot g" style="--a:33%;--b:13%;top:76%;animation:travel 3.2s linear infinite .9s"></div>
+            </div>
+            <ul class="pts">
+                <li>একজনকে পাঠাও বা ৫ লাখকে — রেসপন্স <b>একই ~৪০ms</b></li>
+                <li>জব Redis-এ টিকে থাকে — <b>সার্ভার ক্র্যাশ করলেও হারায় না</b></li>
+                <li>ওয়ার্কার আলাদা প্রসেস, তাই সে ব্যস্ত থাকলেও <b>সাইট স্লো হয় না</b></li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ০৪ · ৫/২৯</span></div>
+            <h2>ওয়ার্কার ৫ লাখ টোকেন <em>কীভাবে</em> বের করবে</h2>
+            <p class="sub">জব তো পেল। কিন্তু ডাটাবেজ থেকে ৫ লাখ রো আনবে কীভাবে? দুইটা সহজ উত্তরই ভুল।</p>
+            <div class="scene">
+                <div class="txt b" style="left:26%;top:12%">skip: 0 → 5000 → 10000 → …</div>
+                <div class="wire bd" style="left:6%;top:90%;width:42%"></div>
+                <div class="col"
+                    style="left:10%;width:5.2%;--h:18%;height:18%;background:var(--bad);animation:rise 3.4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:17%;width:5.2%;--h:28%;height:28%;background:var(--bad);animation:rise 3.4s ease-out infinite 0.1s">
+                </div>
+                <div class="col"
+                    style="left:24%;width:5.2%;--h:40%;height:40%;background:var(--bad);animation:rise 3.4s ease-out infinite 0.2s">
+                </div>
+                <div class="col"
+                    style="left:31%;width:5.2%;--h:52%;height:52%;background:var(--bad);animation:rise 3.4s ease-out infinite 0.3s">
+                </div>
+                <div class="col"
+                    style="left:38%;width:5.2%;--h:62%;height:62%;background:var(--bad);animation:rise 3.4s ease-out infinite 0.4s">
+                </div>
+                <div class="col"
+                    style="left:45%;width:5.2%;--h:72%;height:72%;background:var(--bad);animation:rise 3.4s ease-out infinite 0.5s">
+                </div>
+                <div class="txt b" style="left:26%;top:97%">প্রতি পেজ আগেরটার চেয়ে ধীর</div>
+                <div class="bx p" style="left:78%;top:26%">findMany()<i>৫ লাখ রো একসাথে</i></div>
+                <div class="meter " style="left:64%;top:58%;width:28%"><b
+                        style="animation:fill 3.4s ease-in infinite"></b></div>
+                <div class="txt b" style="left:78%;top:72%">RAM ভরে যাচ্ছে</div>
+                <div class="stamp " style="left:78%;top:88%;animation:flash 3.4s linear infinite">OUT OF MEMORY</div>
+            </div>
+            <ul class="pts">
+                <li><span class="mono">findMany()</span> — ৫ লাখ রো একসাথে RAM-এ, <b>প্রসেস মরে যায়</b></li>
+                <li><span class="mono">skip: 495000</span> — Postgres ৪,৯৫,০০০ রো <b>পড়ে, তারপর ফেলে দেয়</b></li>
+                <li>শেষ পেজে পৌঁছাতে পৌঁছাতে কোয়েরি <b>অসহ্য ধীর</b></li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ০৫ · ৬/২৯</span></div>
+            <h2><em>Cursor</em> — শেষ আইডি মনে রেখে সরাসরি লাফ</h2>
+            <p class="sub">পুরো লিস্ট না চেয়ে বলি — "গতবার এই আইডিতে ছিলাম, তার পরেরগুলো দাও"। Postgres তখন ইনডেক্সে
+                <b>সরাসরি ওই জায়গায়</b> বসে পড়ে।</p>
+            <div class="scene">
+                <div class="txt o" style="left:50%;top:12%">cursor: { courseId_studentId } · take: 5000</div>
+                <div class="wire " style="left:6%;top:90%;width:88%"></div>
+                <div class="col"
+                    style="left:12%;width:5.2%;--h:26%;height:26%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:21%;width:5.2%;--h:24%;height:24%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0.1s">
+                </div>
+                <div class="col"
+                    style="left:30%;width:5.2%;--h:27%;height:27%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0.2s">
+                </div>
+                <div class="col"
+                    style="left:39%;width:5.2%;--h:25%;height:25%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0.3s">
+                </div>
+                <div class="col"
+                    style="left:48%;width:5.2%;--h:26%;height:26%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0.4s">
+                </div>
+                <div class="col"
+                    style="left:57%;width:5.2%;--h:24%;height:24%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0.5s">
+                </div>
+                <div class="col"
+                    style="left:66%;width:5.2%;--h:27%;height:27%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0.6s">
+                </div>
+                <div class="col"
+                    style="left:75%;width:5.2%;--h:25%;height:25%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0.7s">
+                </div>
+                <div class="col"
+                    style="left:84%;width:5.2%;--h:26%;height:26%;background:var(--ok-dim);animation:rise 3.4s ease-out infinite 0.8s">
+                </div>
+                <div class="dot g" style="--a:10%;--b:86%;top:52%;animation:travel 3.4s linear infinite"></div>
+                <div class="txt o" style="left:50%;top:97%">প্রতিটা পেজ সমান দ্রুত — শেষটাও প্রথমটার মতো</div>
+            </div>
+            <ul class="pts">
+                <li>শেষ পেজও <b>প্রথম পেজের মতোই দ্রুত</b></li>
+                <li><span class="mono">async function*</span> — মেমোরিতে একসাথে <b>৫০০০ আইডি</b>, ৫ লাখ নয়</li>
+                <li>প্রতিবার <span class="mono">yield</span> করে দিয়ে পরেরটায় যায়</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ০৬ · ৭/২৯</span></div>
+            <h2>FCM এক কলে <em>৫০০-র বেশি</em> টোকেন নেয় না</h2>
+            <p class="sub">হাতে ৫০০০ টোকেন। একসাথে পাঠাতে গেলাম — Firebase সরাসরি রিকোয়েস্টটাই ফিরিয়ে দিল। এটা তাদের
+                <b>হার্ড লিমিট</b>।</p>
+            <div class="scene">
+                <div class="bx w" style="left:12%;top:50%">WORKER<i>৫০০০ টোকেন হাতে</i></div>
+                <div class="wire bd" style="left:20%;top:50%;width:44%"></div>
+                <div class="bx x" style="left:78%;top:50%">FIREBASE FCM<i>max 500 / call</i></div>
+                <div class="dot " style="--a:22%;--b:68%;top:20%;animation:travel 2.6s linear infinite 0.00s"></div>
+                <div class="dot " style="--a:22%;--b:68%;top:31%;animation:travel 2.6s linear infinite 0.05s"></div>
+                <div class="dot " style="--a:22%;--b:68%;top:42%;animation:travel 2.6s linear infinite 0.10s"></div>
+                <div class="dot " style="--a:22%;--b:68%;top:53%;animation:travel 2.6s linear infinite 0.15s"></div>
+                <div class="dot " style="--a:22%;--b:68%;top:64%;animation:travel 2.6s linear infinite 0.20s"></div>
+                <div class="dot " style="--a:22%;--b:68%;top:75%;animation:travel 2.6s linear infinite 0.25s"></div>
+                <div class="stamp " style="left:48%;top:50%;animation:flash 2.6s linear infinite">REJECTED</div>
+            </div>
+            <ul class="pts">
+                <li><span class="mono">sendEachForMulticast</span> — সর্বোচ্চ <b>৫০০ টোকেন</b></li>
+                <li>একটাও বেশি দিলে পুরো কলটাই বাতিল</li>
+                <li>মানে ৫০০০ টোকেন <b>ভাগ করতেই হবে</b></li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ০৭ · ৮/২৯</span></div>
+            <h2><em>৫০০ করে</em> ভাগ করে পাঠাই</h2>
+            <p class="sub"><span class="mono">chunk(tokens, 500)</span> — ৫০০০ টোকেন মানে ১০টা কল। আর পুরো ৫ লাখের জন্য
+                ঠিক <b>১,০০০ কল</b>।</p>
+            <div class="scene">
+                <div class="bx w" style="left:12%;top:50%">WORKER<i>chunk(tokens, 500)</i></div>
+                <div class="wire " style="left:20%;top:50%;width:20%"></div>
+                <div class="bx r" style="left:48%;top:50%">৫০০-র ব্যাচ<i>× ১,০০০</i></div>
+                <div class="wire " style="left:56%;top:50%;width:20%"></div>
+                <div class="bx g" style="left:86%;top:50%">FCM<i>প্রতিটার আলাদা রেজাল্ট</i></div>
+                <div class="dot sq lg" style="--a:22%;--b:45%;top:50%;animation:travel 2.8s linear infinite"></div>
+                <div class="dot sq lg" style="--a:22%;--b:45%;top:50%;animation:travel 2.8s linear infinite .9s"></div>
+                <div class="dot sq lg" style="--a:22%;--b:45%;top:50%;animation:travel 2.8s linear infinite 1.8s"></div>
+                <div class="dot g sq lg" style="--a:58%;--b:82%;top:50%;animation:travel 2.8s linear infinite .45s">
+                </div>
+                <div class="dot g sq lg" style="--a:58%;--b:82%;top:50%;animation:travel 2.8s linear infinite 1.35s">
+                </div>
+                <div class="dot g sq lg" style="--a:58%;--b:82%;top:50%;animation:travel 2.8s linear infinite 2.25s">
+                </div>
+                <div class="txt r" style="left:48%;top:80%">৫,০০,০০০ ÷ ৫০০ = ১,০০০ কল</div>
+            </div>
+            <ul class="pts">
+                <li><span class="mono">chunk(tokens, 500)</span> — সহজ, কিন্তু বাধ্যতামূলক</li>
+                <li><span class="mono">sendEachForMulticast</span> <b>প্রতিটা টোকেনের আলাদা রেজাল্ট</b> ফেরত দেয়</li>
+                <li>তাই কোনটা গেল, কোনটা ফেল করল — সব জানা যায়</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ০৮ · ৯/২৯</span></div>
+            <h2>১,০০০ কল <em>একসাথে</em> ছেড়ে দিলে</h2>
+            <p class="sub">ভাগ তো হলো। এবার সবগুলো একসাথে ছেড়ে দিলাম — দশ সেকেন্ডেই শেষ হওয়ার কথা। কিন্তু <b>দুই দিক
+                    থেকে</b> ধাক্কা এলো।</p>
+            <div class="scene">
+                <div class="bx w" style="left:11%;top:50%">WORKER<i>১,০০০ কল একসাথে</i></div>
+                <div class="wire bd" style="left:19%;top:50%;width:26%"></div>
+                <div class="wire bd" style="left:19%;top:78%;width:46%"></div>
+                <div class="bx x" style="left:60%;top:26%">FCM<i>কোটা ছাড়িয়ে গেছে</i></div>
+                <div class="bx x" style="left:78%;top:78%">POSTGRES<i>প্রতি ব্যাচের আগে টোকেন কোয়েরি</i></div>
+                <div class="dot " style="--a:21%;--b:50%;top:20%;animation:travel 2s linear infinite 0.00s"></div>
+                <div class="dot " style="--a:21%;--b:50%;top:28%;animation:travel 2s linear infinite 0.04s"></div>
+                <div class="dot " style="--a:21%;--b:50%;top:36%;animation:travel 2s linear infinite 0.08s"></div>
+                <div class="dot " style="--a:21%;--b:50%;top:44%;animation:travel 2s linear infinite 0.12s"></div>
+                <div class="dot " style="--a:21%;--b:50%;top:52%;animation:travel 2s linear infinite 0.16s"></div>
+                <div class="dot " style="--a:21%;--b:66%;top:86%;animation:travel 2s linear infinite 0.00s"></div>
+                <div class="dot " style="--a:21%;--b:66%;top:92%;animation:travel 2s linear infinite 0.04s"></div>
+                <div class="dot " style="--a:21%;--b:66%;top:98%;animation:travel 2s linear infinite 0.08s"></div>
+                <div class="stamp " style="left:60%;top:50%;animation:flash 2s linear infinite">429</div>
+                <div class="txt b" style="left:40%;top:92%">নিজের ডাটাবেজও একসাথে ১,০০০ কোয়েরি খাচ্ছে</div>
+            </div>
+            <ul class="pts">
+                <li>FCM-এর <b>কোটা</b> আছে — ছাড়ালে গুগল রিকোয়েস্ট ফিরিয়ে দেয়</li>
+                <li>প্রতিটা ব্যাচের আগে টোকেন কোয়েরি হয় — <b>নিজের Postgres-ই বসে যায়</b></li>
+                <li>দ্রুত পাঠাতে গিয়ে <b>কিছুই পাঠানো হয় না</b></li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ০৯ · ১০/২৯</span></div>
+            <h2><em>থ্রটল</em> — সেকেন্ডে সর্বোচ্চ ১০ ব্যাচ</h2>
+            <p class="sub">নিজেকেই গতি বেঁধে দিই। একটা ছোট টোকেন-বাকেট: প্রতি সেকেন্ডে <b>১০টার বেশি ব্যাচ যাবে না</b>।
+                বাকিরা লাইনে অপেক্ষা করে।</p>
+            <div class="scene">
+                <div class="bx w" style="left:11%;top:50%">WORKER</div>
+                <div class="wire " style="left:19%;top:50%;width:18%"></div>
+                <div class="bx r" style="left:43%;top:50%">throttle.wait()<i>১০ ব্যাচ / সেকেন্ড</i></div>
+                <div class="wire " style="left:52%;top:50%;width:20%"></div>
+                <div class="bx g" style="left:84%;top:50%">FCM<i>৫,০০০ notification/sec</i></div>
+                <div class="dot sq lg" style="--a:21%;--b:39%;top:50%;animation:travel 2.6s linear infinite"></div>
+                <div class="dot sq lg" style="--a:21%;--b:39%;top:50%;animation:travel 2.6s linear infinite .85s"></div>
+                <div class="dot sq lg" style="--a:21%;--b:39%;top:50%;animation:travel 2.6s linear infinite 1.7s"></div>
+                <div class="dot " style="left:30%;top:26%;animation:hold 2.6s ease-in-out infinite 0s"></div>
+                <div class="dot " style="left:34%;top:26%;animation:hold 2.6s ease-in-out infinite 0.3s"></div>
+                <div class="dot " style="left:38%;top:26%;animation:hold 2.6s ease-in-out infinite 0.6s"></div>
+                <div class="dot " style="left:30%;top:74%;animation:hold 2.6s ease-in-out infinite 0.15s"></div>
+                <div class="dot " style="left:34%;top:74%;animation:hold 2.6s ease-in-out infinite 0.45s"></div>
+                <div class="dot " style="left:38%;top:74%;animation:hold 2.6s ease-in-out infinite 0.75s"></div>
+                <div class="dot g sq lg" style="--a:54%;--b:80%;top:50%;animation:travel 2.6s linear infinite .4s">
+                </div>
+                <div class="dot g sq lg" style="--a:54%;--b:80%;top:50%;animation:travel 2.6s linear infinite 1.25s">
+                </div>
+                <div class="txt o" style="left:50%;top:88%">১০ × ৫০০ = ৫,০০০ / সেকেন্ড → ৫ লাখ = ~১০০ সেকেন্ড</div>
+            </div>
+            <ul class="pts">
+                <li><span class="mono">maxBatchesPerSec: 10</span> — ১০ × ৫০০ = <b>৫,০০০ / সেকেন্ড</b></li>
+                <li>৫,০০,০০০ ÷ ৫,০০০ = <b>প্রায় ১০০ সেকেন্ডে</b> পুরো ব্রডকাস্ট</li>
+                <li>সার্ভার বড় হলে সংখ্যাটা বাড়িয়ে দিলেই সময় কমে</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ১০ · ১১/২৯</span></div>
+            <h2>অ্যাডমিন <em>দুইবার</em> ক্লিক করে ফেলল</h2>
+            <p class="sub">সবই ঠিক চলছিল। তারপর অ্যাডমিন বাটনটা দুইবার চাপল — বা BullMQ টাইমআউট ভেবে জবটা আবার দিল। ফল
+                একই: <b>সবাই একই মেসেজ দুইবার পেল</b>।</p>
+            <div class="scene">
+                <div class="bx " style="left:10%;top:26%">ক্লিক ১</div>
+                <div class="bx " style="left:10%;top:74%">ক্লিক ২<i>ভুলে</i></div>
+                <div class="wire " style="left:16%;top:26%;width:16%"></div>
+                <div class="wire " style="left:16%;top:74%;width:16%"></div>
+                <div class="bx r" style="left:40%;top:50%">QUEUE<i>২টা আলাদা জব</i></div>
+                <div class="wire " style="left:48%;top:50%;width:14%"></div>
+                <div class="bx w" style="left:70%;top:50%">WORKER<i>দুইবার চালালো</i></div>
+                <div class="wire " style="left:77%;top:50%;width:8%"></div>
+                <div class="bx x" style="left:92%;top:50%">ফোন<i>২টা নোটিফিকেশন</i></div>
+                <div class="dot " style="--a:18%;--b:36%;top:26%;animation:travel 3.4s linear infinite"></div>
+                <div class="dot " style="--a:18%;--b:36%;top:74%;animation:travel 3.4s linear infinite .5s"></div>
+                <div class="dot x" style="--a:50%;--b:88%;top:44%;animation:travel 3.4s linear infinite 1.2s"></div>
+                <div class="dot x" style="--a:50%;--b:88%;top:58%;animation:travel 3.4s linear infinite 1.5s"></div>
+                <div class="stamp " style="left:70%;top:20%;animation:flash 3.4s linear infinite">×২</div>
+            </div>
+            <ul class="pts">
+                <li>ভুলে দুইবার ক্লিক — সবচেয়ে সাধারণ কারণ</li>
+                <li>BullMQ টাইমআউট ভেবে <b>নিজেই রিট্রাই</b> করতে পারে</li>
+                <li>দুইটা ওয়ার্কার <b>একই জব</b> তুলে নিতে পারে</li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ১১ · ১২/২৯</span></div>
+            <h2><em>SET NX</em> — একজনই ঢুকতে পারে</h2>
+            <p class="sub">Redis-এর একটামাত্র কমান্ড। <span class="mono">NX</span> মানে — key না থাকলেই কেবল লিখবে।
+                Redis একটাই থ্রেডে চলে, তাই এটা <b>পুরোপুরি atomic</b>।</p>
+            <div class="scene">
+                <div class="bx " style="left:10%;top:20%">ক্লিক ১</div>
+                <div class="bx " style="left:10%;top:50%">ক্লিক ২</div>
+                <div class="bx " style="left:10%;top:80%">রিট্রাই</div>
+                <div class="wire " style="left:16%;top:20%;width:22%"></div>
+                <div class="wire " style="left:16%;top:50%;width:22%"></div>
+                <div class="wire " style="left:16%;top:80%;width:22%"></div>
+                <div class="bx r" style="left:50%;top:50%">SET key 1 NX EX 900<i>একজনই OK পায়</i></div>
+                <div class="wire " style="left:59%;top:50%;width:14%"></div>
+                <div class="bx g" style="left:82%;top:50%">QUEUE<i>১টাই জব</i></div>
+                <div class="dot g" style="--a:18%;--b:44%;top:20%;animation:keep 3.8s linear infinite"></div>
+                <div class="dot x" style="--a:18%;--b:44%;top:50%;animation:back 3.8s linear infinite .2s"></div>
+                <div class="dot x" style="--a:18%;--b:44%;top:80%;animation:back 3.8s linear infinite .4s"></div>
+                <div class="dot g" style="--a:61%;--b:76%;top:50%;animation:travel 3.8s linear infinite 1.4s"></div>
+                <div class="txt o" style="left:26%;top:10%">OK</div>
+                <div class="txt b" style="left:26%;top:62%">null</div>
+                <div class="txt b" style="left:26%;top:92%">null</div>
+            </div>
+            <ul class="pts">
+                <li><span class="mono">NX</span> — key না থাকলেই লিখবে, তাই <b>প্রথমজনই কেবল OK পায়</b></li>
+                <li><span class="mono">EX</span> — নিজে থেকেই মুছে যায়, ক্র্যাশ করলেও <b>চিরকাল আটকে থাকে না</b></li>
+                <li>দুই স্তরে — কিউতে ঢোকার আগে <span class="mono">dedup</span>, প্রসেসের আগে <span
+                        class="mono">lock</span></li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ১২ · ১৩/২৯</span></div>
+            <h2>লক ছাড়তে গিয়ে <em>অন্যের লক</em> মুছে ফেলা</h2>
+            <p class="sub">A লক নিল, কিন্তু কাজটা লকের মেয়াদের চেয়ে বেশি সময় নিল। লক এক্সপায়ার করল, B নতুন লক নিল।
+                তারপর A কাজ শেষ করে <span class="mono">DEL</span> করল — <b>কিন্তু সেটা এখন B-র লক</b>।</p>
+            <div class="scene">
+                <div class="bx w" style="left:12%;top:22%">WORKER A<i>কাজ ধীর হলো</i></div>
+                <div class="bx w" style="left:12%;top:78%">WORKER B<i>নতুন লক নিল</i></div>
+                <div class="wire bd" style="left:20%;top:22%;width:24%"></div>
+                <div class="wire " style="left:20%;top:78%;width:24%"></div>
+                <div class="bx r" style="left:52%;top:50%">lock<i>tok = c3d4</i></div>
+                <div class="wire bd" style="left:60%;top:50%;width:16%"></div>
+                <div class="bx x" style="left:86%;top:50%">POSTGRES<i>দুইজন একসাথে</i></div>
+                <div class="dot x" style="--a:22%;--b:47%;top:22%;animation:keep 4.6s linear infinite"></div>
+                <div class="stamp " style="left:52%;top:18%;animation:flash 4.6s linear infinite">DEL</div>
+                <div class="dot x" style="--a:62%;--b:82%;top:42%;animation:travel 4.6s linear infinite 2.6s"></div>
+                <div class="dot x" style="--a:62%;--b:82%;top:58%;animation:travel 4.6s linear infinite 2.9s"></div>
+            </div>
+            <ul class="pts">
+                <li>A-র লক এক্সপায়ার করেছিল, সে জানেই না</li>
+                <li>তার <span class="mono">DEL</span> মুছল <b>B-র লক</b></li>
+                <li>এখন দুইজন একসাথে চলছে — <b>লক থাকা আর না থাকা সমান</b></li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ১৩ · ১৪/২৯</span></div>
+            <h2><em>টোকেন মিলিয়ে</em> তবেই DEL — Lua দিয়ে</h2>
+            <p class="sub">প্রতিটা লকের সাথে একটা র‍্যান্ডম টোকেন রাখি। ছাড়ার সময় Lua স্ক্রিপ্টে <b>GET আর DEL
+                    একসাথে</b> চালাই — মাঝখানে রেস ঢোকার ফাঁকই থাকে না।</p>
+            <div class="scene">
+                <div class="bx w" style="left:12%;top:22%">WORKER A<i>tok = a1b2</i></div>
+                <div class="bx w" style="left:12%;top:78%">WORKER B<i>tok = c3d4</i></div>
+                <div class="wire bd" style="left:20%;top:22%;width:26%"></div>
+                <div class="wire " style="left:20%;top:78%;width:26%"></div>
+                <div class="bx r" style="left:56%;top:50%">if GET == ARGV[1] then DEL<i>Lua · atomic</i></div>
+                <div class="wire d" style="left:68%;top:50%;width:10%"></div>
+                <div class="bx g" style="left:88%;top:50%">lock<i>c3d4 · অক্ষত</i></div>
+                <div class="dot x" style="--a:22%;--b:50%;top:22%;animation:back 4.2s linear infinite"></div>
+                <div class="stamp " style="left:50%;top:16%;animation:flash 4.2s linear infinite">✗ মেলেনি</div>
+                <div class="dot g" style="left:88%;top:72%;animation:hold 4.2s ease-in-out infinite 0s"></div>
+            </div>
+            <ul class="pts">
+                <li>টোকেন না মিললে <b>কিছুই হয় না</b> — শুধু <span class="mono">0</span> ফেরত</li>
+                <li>Lua-তে পুরোটা <b>একটাই অবিভাজ্য অপারেশন</b></li>
+                <li>একই প্যাটার্ন তিন জায়গায় — ক্যাশ ফিল, ক্যাম্পেইন, ডেস্কটপ লগইন</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ১৪ · ১৫/২৯</span></div>
+            <h2>FCM <em>সাময়িক ডাউন</em> — ওই ব্যাচ হারিয়ে গেল</h2>
+            <p class="sub">নেটওয়ার্ক বা FCM মাঝে মাঝে সাড়া দেবে না — এটা স্বাভাবিক। কিন্তু তখন যদি জবটা মরে যায়,
+                <b>ওই ৫০০ জন কখনোই নোটিফিকেশন পাবে না</b>।</p>
+            <div class="scene">
+                <div class="bx w" style="left:14%;top:50%">WORKER</div>
+                <div class="wire bd" style="left:22%;top:50%;width:34%"></div>
+                <div class="bx x" style="left:68%;top:50%">FCM<i>সাময়িক আউটেজ</i></div>
+                <div class="dot " style="--a:24%;--b:60%;top:50%;animation:travel 3s linear infinite"></div>
+                <div class="dot " style="--a:24%;--b:60%;top:50%;animation:travel 3s linear infinite 1s"></div>
+                <div class="stamp " style="left:68%;top:22%;animation:flash 3s linear infinite">✗ হারিয়ে গেল</div>
+                <div class="txt b" style="left:68%;top:82%">৫০০ জন বাদ · কোনো রেকর্ড নেই</div>
+            </div>
+            <ul class="pts">
+                <li>এক্সেপশন থ্রো হলে জব <b>মুছে যায়</b></li>
+                <li>ওই ব্যাচের কেউ পাবে না — <b>আর কোনোদিন না</b></li>
+                <li>কতজন বাদ পড়ল, সেই <b>হিসাবটাও থাকে না</b></li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ১৫ · ১৬/২৯</span></div>
+            <h2><em>৩ বার</em> চেষ্টা, প্রতিবার দ্বিগুণ অপেক্ষা</h2>
+            <p class="sub">ফেল করলে জবটা কিউতে ফেরত যায়। তারপর ১০ সেকেন্ড, ২০ সেকেন্ড, ৪০ সেকেন্ড — <b>দ্বিগুণ করে
+                    অপেক্ষা</b>, যাতে FCM শ্বাস নেওয়ার সময় পায়।</p>
+            <div class="scene">
+                <div class="bx w" style="left:13%;top:50%">WORKER</div>
+                <div class="wire " style="left:21%;top:50%;width:26%"></div>
+                <div class="bx r" style="left:44%;top:18%">delayed set<i>১০s → ২০s → ৪০s</i></div>
+                <div class="bx g" style="left:60%;top:50%">FCM<i>ফিরে এসেছে</i></div>
+                <div class="wire d" style="left:67%;top:50%;width:12%"></div>
+                <div class="bx x" style="left:88%;top:50%">failed set<i>৩ বারের পর</i></div>
+                <div class="dot x" style="--a:23%;--b:50%;top:50%;animation:back 5.4s linear infinite"></div>
+                <div class="dot " style="--a:50%;--b:23%;top:80%;animation:travel 5.4s linear infinite 1.3s"></div>
+                <div class="wire d" style="left:21%;top:80%;width:28%"></div>
+                <div class="dot g" style="--a:23%;--b:57%;top:50%;animation:travel 5.4s linear infinite 3.4s"></div>
+                <div class="txt w" style="left:44%;top:32%">অপেক্ষা…</div>
+            </div>
+            <ul class="pts">
+                <li>ফেল করলে জব <b>কিউতে ফেরত যায়</b>, হারায় না</li>
+                <li>দ্বিগুণ কেন — সাথে সাথে আবার হামলা করলে <b>অবস্থা আরও খারাপ</b> হয়</li>
+                <li>৩ বারেই থামি — নাহলে একটা বিষাক্ত জব <b>চিরকাল ওয়ার্কার দখল</b> করে রাখত</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ১৬ · ১৭/২৯</span></div>
+            <h2>টোকেনগুলোর একটা অংশ <em>মরা</em></h2>
+            <p class="sub">ছয় মাস চলার পর দেখা গেল — অনেক টোকেনে পাঠানোই যাচ্ছে না। অ্যাপ আনইনস্টল হয়েছে, ডেটা
+                ক্লিয়ার হয়েছে। কিন্তু সেগুলো এখনো <b>প্রতিটা ক্যাম্পেইনে যাচ্ছে</b>।</p>
+            <div class="scene">
+                <div class="bx w" style="left:12%;top:50%">WORKER</div>
+                <div class="wire " style="left:20%;top:50%;width:44%"></div>
+                <div class="bx x" style="left:76%;top:50%">FCM<i>token-not-registered</i></div>
+                <div class="dot " style="--a:22%;--b:70%;top:20%;animation:travel 3.2s linear infinite"></div>
+                <div class="dot x" style="--a:22%;--b:70%;top:32%;animation:travel 3.2s linear infinite .3s"></div>
+                <div class="dot " style="--a:22%;--b:70%;top:44%;animation:travel 3.2s linear infinite .6s"></div>
+                <div class="dot x" style="--a:22%;--b:70%;top:56%;animation:travel 3.2s linear infinite .9s"></div>
+                <div class="dot " style="--a:22%;--b:70%;top:68%;animation:travel 3.2s linear infinite 1.2s"></div>
+                <div class="dot x" style="--a:22%;--b:70%;top:80%;animation:travel 3.2s linear infinite 1.5s"></div>
+                <div class="txt b" style="left:76%;top:84%">অযথা API কল · অযথা সময়</div>
+            </div>
+            <ul class="pts">
+                <li>অ্যাপ আনইনস্টল, ডেটা ক্লিয়ার, বা মাসের পর মাস অ্যাপ না খোলা</li>
+                <li>প্রতিটা ক্যাম্পেইনে ওগুলোতে <b>অযথা কল</b> যায়</li>
+                <li>ছয় মাস পর অর্ধেক টোকেনই মরা হতে পারে</li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ১৭ · ১৮/২৯</span></div>
+            <h2>মরা টোকেন <em>নিভিয়ে দিই</em> — ডিলিট করি না</h2>
+            <p class="sub">FCM নিজেই বলে দেয় কোন টোকেনটা আর নেই। সেগুলো জমিয়ে <span class="mono">isValid =
+                    false</span> করে দিই। <b>পরের ক্যাম্পেইনে ওগুলো কোয়েরিতেই আসবে না।</b></p>
+            <div class="scene">
+                <div class="bx w" style="left:12%;top:50%">WORKER</div>
+                <div class="wire " style="left:20%;top:50%;width:26%"></div>
+                <div class="bx g" style="left:50%;top:50%">FCM<i>প্রতিটার আলাদা রেজাল্ট</i></div>
+                <div class="wire " style="left:58%;top:50%;width:16%"></div>
+                <div class="bx p" style="left:84%;top:50%">isValid = false<i>ডিলিট না, নিভিয়ে দেওয়া</i></div>
+                <div class="dot " style="--a:22%;--b:45%;top:38%;animation:travel 3.4s linear infinite"></div>
+                <div class="dot x" style="--a:22%;--b:45%;top:62%;animation:travel 3.4s linear infinite .4s"></div>
+                <div class="dot x" style="--a:60%;--b:78%;top:62%;animation:travel 3.4s linear infinite 1.6s"></div>
+                <div class="dot g" style="--a:60%;--b:78%;top:38%;animation:travel 3.4s linear infinite 1.2s"></div>
+                <div class="txt o" style="left:50%;top:82%">প্রতিটা ক্যাম্পেইন টোকেন টেবিলকে একটু একটু করে সুস্থ করে
+                </div>
+            </div>
+            <ul class="pts">
+                <li>দুইটা এরর কোড খুঁজি — <span class="mono">token-not-registered</span> আর <span
+                        class="mono">invalid-token</span></li>
+                <li>ডিলিট করি না, কারণ তাহলে <b>কতজন অ্যাপ ছেড়ে গেছে</b> সেই হিসাবটা হারাত</li>
+                <li>এক <span class="mono">updateMany</span>-তে সবগুলো একসাথে</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ১৮ · ১৯/২৯</span></div>
+            <h2>পুশ তো গেল — এখন <em>৫ লাখ ইউজার অ্যাপ খুলল</em></h2>
+            <p class="sub">নোটিফিকেশন পেয়ে সবাই প্রায় একসাথে অ্যাপ খুলবে, নোটিফিকেশন লিস্ট দেখবে, বারবার রিফ্রেশ করবে।
+                <b>ব্রডকাস্টের ঠিক পরের এক মিনিটই সবচেয়ে বড় ঢেউ।</b></p>
+            <div class="scene">
+                <div class="dot q sm" style="left:6%;top:18%;animation:hold 2.4s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:9.6%;top:18%;animation:hold 2.4s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:13.2%;top:18%;animation:hold 2.4s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:16.8%;top:18%;animation:hold 2.4s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:20.4%;top:18%;animation:hold 2.4s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:6%;top:38%;animation:hold 2.4s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:9.6%;top:38%;animation:hold 2.4s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:13.2%;top:38%;animation:hold 2.4s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:16.8%;top:38%;animation:hold 2.4s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:20.4%;top:38%;animation:hold 2.4s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:6%;top:58%;animation:hold 2.4s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:9.6%;top:58%;animation:hold 2.4s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:13.2%;top:58%;animation:hold 2.4s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:16.8%;top:58%;animation:hold 2.4s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:20.4%;top:58%;animation:hold 2.4s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:6%;top:78%;animation:hold 2.4s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:9.6%;top:78%;animation:hold 2.4s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:13.2%;top:78%;animation:hold 2.4s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:16.8%;top:78%;animation:hold 2.4s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:20.4%;top:78%;animation:hold 2.4s ease-in-out infinite 0.18s"></div>
+                <div class="txt " style="left:14%;top:94%">৫ লাখ ইউজার</div>
+                <div class="wire bd" style="left:24%;top:50%;width:26%"></div>
+                <div class="bx " style="left:36%;top:50%">API<i>অথ + পারমিশন + লিস্ট</i></div>
+                <div class="wire bd" style="left:44%;top:50%;width:24%"></div>
+                <div class="bx x" style="left:80%;top:50%">POSTGRES<i>প্রতিটায় ৩–৪টা কোয়েরি</i></div>
+                <div class="dot " style="--a:26%;--b:72%;top:22%;animation:travel 1.9s linear infinite 0.00s"></div>
+                <div class="dot " style="--a:26%;--b:72%;top:33%;animation:travel 1.9s linear infinite 0.04s"></div>
+                <div class="dot " style="--a:26%;--b:72%;top:44%;animation:travel 1.9s linear infinite 0.08s"></div>
+                <div class="dot " style="--a:26%;--b:72%;top:55%;animation:travel 1.9s linear infinite 0.12s"></div>
+                <div class="dot " style="--a:26%;--b:72%;top:66%;animation:travel 1.9s linear infinite 0.16s"></div>
+                <div class="dot " style="--a:26%;--b:72%;top:77%;animation:travel 1.9s linear infinite 0.20s"></div>
+                <div class="stamp " style="left:62%;top:50%;animation:flash 1.9s linear infinite">OVERLOAD</div>
+            </div>
+            <ul class="pts">
+                <li>প্রতিটা প্রোটেক্টেড রিকোয়েস্টে <b>৩–৪টা কোয়েরি</b> — শুধু "তুমি কে, তোমার অ্যাক্সেস আছে কি" জানতেই
+                </li>
+                <li>নোটিফিকেশন পাঠানোর <b>ঠিক পরেই</b> সবচেয়ে বড় ট্রাফিক</li>
+                <li>পাঠানোর সমস্যা মিটল, এবার <b>পড়ার সমস্যা</b></li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ১৯ · ২০/২৯</span></div>
+            <h2>উত্তরটা <em>Redis-এ</em> রেখে দিই</h2>
+            <p class="sub">একবার ডাটাবেজ থেকে পড়ে উত্তরটা Redis-এ রাখি, একটা মেয়াদ সহ। পরের হাজারটা রিকোয়েস্ট
+                <b>ডাটাবেজের ধারেকাছেও যায় না</b>।</p>
+            <div class="scene">
+                <div class="dot q sm" style="left:6%;top:18%;animation:hold 2.4s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:9.6%;top:18%;animation:hold 2.4s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:13.2%;top:18%;animation:hold 2.4s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:16.8%;top:18%;animation:hold 2.4s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:20.4%;top:18%;animation:hold 2.4s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:6%;top:38%;animation:hold 2.4s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:9.6%;top:38%;animation:hold 2.4s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:13.2%;top:38%;animation:hold 2.4s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:16.8%;top:38%;animation:hold 2.4s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:20.4%;top:38%;animation:hold 2.4s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:6%;top:58%;animation:hold 2.4s ease-in-out infinite 0.18s"></div>
+                <div class="dot q sm" style="left:9.6%;top:58%;animation:hold 2.4s ease-in-out infinite 0.36s"></div>
+                <div class="dot q sm" style="left:13.2%;top:58%;animation:hold 2.4s ease-in-out infinite 0.54s"></div>
+                <div class="dot q sm" style="left:16.8%;top:58%;animation:hold 2.4s ease-in-out infinite 0.72s"></div>
+                <div class="dot q sm"
+                    style="left:20.4%;top:58%;animation:hold 2.4s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot q sm" style="left:6%;top:78%;animation:hold 2.4s ease-in-out infinite 1.08s"></div>
+                <div class="dot q sm" style="left:9.6%;top:78%;animation:hold 2.4s ease-in-out infinite 1.26s"></div>
+                <div class="dot q sm" style="left:13.2%;top:78%;animation:hold 2.4s ease-in-out infinite 1.44s"></div>
+                <div class="dot q sm" style="left:16.8%;top:78%;animation:hold 2.4s ease-in-out infinite 0s"></div>
+                <div class="dot q sm" style="left:20.4%;top:78%;animation:hold 2.4s ease-in-out infinite 0.18s"></div>
+                <div class="wire " style="left:24%;top:50%;width:20%"></div>
+                <div class="bx r" style="left:44%;top:50%">REDIS<i>freshUntil + TTL</i></div>
+                <div class="wire d" style="left:52%;top:50%;width:18%"></div>
+                <div class="bx p" style="left:82%;top:50%">POSTGRES<i>প্রায় বসে থাকে</i></div>
+                <div class="dot " style="--a:26%;--b:40%;top:26%;animation:back 2.4s linear infinite"></div>
+                <div class="dot " style="--a:26%;--b:40%;top:42%;animation:back 2.4s linear infinite .4s"></div>
+                <div class="dot " style="--a:26%;--b:40%;top:58%;animation:back 2.4s linear infinite .8s"></div>
+                <div class="dot " style="--a:26%;--b:40%;top:74%;animation:back 2.4s linear infinite 1.2s"></div>
+                <div class="dot p" style="--a:54%;--b:78%;top:50%;animation:travel 14s linear infinite 4s"></div>
+                <div class="txt o" style="left:44%;top:84%">অথ চেক এখন ০টা DB কোয়েরিতে</div>
+            </div>
+            <ul class="pts">
+                <li>TTL ঠিক করি <b>গুরুত্ব দিয়ে</b> — নোটিফিকেশন ফিড ২০s, অথ ৬০s, পারমিশন ২ মিনিট</li>
+                <li>অথ চেক এখন <b>শূন্য ডাটাবেজ কোয়েরিতে</b> শেষ</li>
+                <li>এটা এক এন্ডপয়েন্টের লাভ না — <b>সব এন্ডপয়েন্টের</b></li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ২০ · ২১/২৯</span></div>
+            <h2>ক্যাশ <em>এক্সপায়ার হওয়ার মুহূর্তে</em></h2>
+            <p class="sub">TTL শেষ হলো। ঠিক সেই সেকেন্ডে হাজার হাজার রিকোয়েস্ট এলো — সবাই মিস পেল, আর <b>সবাই একসাথে
+                    ডাটাবেজে গেল</b>। একেই বলে cache stampede।</p>
+            <div class="scene">
+                <div class="bx x" style="left:12%;top:50%">CACHE<i>এইমাত্র এক্সপায়ার</i></div>
+                <div class="wire bd" style="left:20%;top:50%;width:58%"></div>
+                <div class="bx x" style="left:84%;top:50%">POSTGRES<i>১০,০০০ একই কোয়েরি</i></div>
+                <div class="dot " style="--a:22%;--b:78%;top:16%;animation:travel 1.8s linear infinite 0.00s"></div>
+                <div class="dot " style="--a:22%;--b:78%;top:26%;animation:travel 1.8s linear infinite 0.03s"></div>
+                <div class="dot " style="--a:22%;--b:78%;top:36%;animation:travel 1.8s linear infinite 0.06s"></div>
+                <div class="dot " style="--a:22%;--b:78%;top:46%;animation:travel 1.8s linear infinite 0.09s"></div>
+                <div class="dot " style="--a:22%;--b:78%;top:56%;animation:travel 1.8s linear infinite 0.12s"></div>
+                <div class="dot " style="--a:22%;--b:78%;top:66%;animation:travel 1.8s linear infinite 0.15s"></div>
+                <div class="dot " style="--a:22%;--b:78%;top:76%;animation:travel 1.8s linear infinite 0.18s"></div>
+                <div class="stamp " style="left:50%;top:50%;animation:flash 1.8s linear infinite">STAMPEDE</div>
+            </div>
+            <ul class="pts">
+                <li>১০,০০০ রিকোয়েস্ট = <b>১০,০০০ হুবহু একই কোয়েরি</b>, এক সেকেন্ডে</li>
+                <li>ক্যাশ যত ভালো কাজ করে, <b>ধাক্কাটা তত বড়</b> হয়</li>
+                <li>ক্যাশ থাকা সত্ত্বেও ডাটাবেজ পড়ে যেতে পারে</li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ২১ · ২২/২৯</span></div>
+            <h2><em>একজন</em> ডাটাবেজে যায়, বাকিরা অপেক্ষা করে</h2>
+            <p class="sub">তিন স্তর একসাথে: এক প্রসেসে <span class="mono">singleFlight</span>, প্রসেসের বাইরে <b>Redis
+                    লক</b>, আর বাকিরা ৪০–১০০ms এলোমেলো গ্যাপে ক্যাশ চেক করতে থাকে।</p>
+            <div class="scene">
+                <div class="bx x" style="left:11%;top:50%">CACHE<i>মিস</i></div>
+                <div class="wire " style="left:18%;top:50%;width:18%"></div>
+                <div class="bx r" style="left:42%;top:50%">SET NX<i>একজনই OK</i></div>
+                <div class="wire " style="left:50%;top:50%;width:20%"></div>
+                <div class="bx p" style="left:80%;top:50%">POSTGRES<i>১টা কোয়েরি</i></div>
+                <div class="dot " style="--a:20%;--b:38%;top:50%;animation:keep 4s linear infinite"></div>
+                <div class="dot g" style="--a:52%;--b:76%;top:50%;animation:travel 4s linear infinite 1.3s"></div>
+                <div class="dot " style="left:34%;top:20%;animation:hold 4s ease-in-out infinite 0.1s"></div>
+                <div class="dot " style="left:39%;top:20%;animation:hold 4s ease-in-out infinite 0.3s"></div>
+                <div class="dot " style="left:44%;top:20%;animation:hold 4s ease-in-out infinite 0.5s"></div>
+                <div class="dot " style="left:49%;top:20%;animation:hold 4s ease-in-out infinite 0.7s"></div>
+                <div class="dot " style="left:34%;top:80%;animation:hold 4s ease-in-out infinite 0.2s"></div>
+                <div class="dot " style="left:39%;top:80%;animation:hold 4s ease-in-out infinite 0.4s"></div>
+                <div class="dot " style="left:44%;top:80%;animation:hold 4s ease-in-out infinite 0.6s"></div>
+                <div class="dot " style="left:49%;top:80%;animation:hold 4s ease-in-out infinite 0.8s"></div>
+                <div class="txt r" style="left:42%;top:92%">বাকিরা ৪০–১০০ms পরপর চেক করছে</div>
+            </div>
+            <ul class="pts">
+                <li><span class="mono">singleFlight</span> — এক প্রসেসের ভেতর সবাই <b>একটাই Promise</b> ভাগ করে</li>
+                <li><b>Redis লক</b> — ছয় ইনস্ট্যান্সের মধ্যে একজনই DB-তে যায়</li>
+                <li>লোডার ধীর হলে <span class="mono">heartbeat</span> লকের মেয়াদ বাড়ায়, যাতে লক ছুটে না যায়</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ২২ · ২৩/২৯</span></div>
+            <h2>সব key <em>একই সেকেন্ডে</em> এক্সপায়ার করে</h2>
+            <p class="sub">ব্রডকাস্টের পর সব ক্যাশ প্রায় একই মুহূর্তে ভরেছিল। TTL একই, তাই সেগুলো <b>একই মুহূর্তে মরেও
+                    যায়</b> — আর প্রতি ৩০ সেকেন্ডে একটা করে ঢেউ আসে।</p>
+            <div class="scene">
+                <div class="txt b" style="left:50%;top:14%">সব key একসাথে ভরেছে → একসাথেই এক্সপায়ার</div>
+                <div class="wire " style="left:6%;top:90%;width:88%"></div>
+                <div class="col"
+                    style="left:12%;width:5.2%;--h:80%;height:80%;background:var(--bad);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:20%;width:5.2%;--h:10%;height:10%;background:var(--bad);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:28%;width:5.2%;--h:10%;height:10%;background:var(--bad);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:36%;width:5.2%;--h:10%;height:10%;background:var(--bad);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:44%;width:5.2%;--h:80%;height:80%;background:var(--bad);animation:rise 4s ease-out infinite 0.1s">
+                </div>
+                <div class="col"
+                    style="left:52%;width:5.2%;--h:10%;height:10%;background:var(--bad);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:60%;width:5.2%;--h:10%;height:10%;background:var(--bad);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:68%;width:5.2%;--h:10%;height:10%;background:var(--bad);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:76%;width:5.2%;--h:80%;height:80%;background:var(--bad);animation:rise 4s ease-out infinite 0.2s">
+                </div>
+                <div class="col"
+                    style="left:84%;width:5.2%;--h:10%;height:10%;background:var(--bad);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="txt b" style="left:50%;top:97%">প্রতি TTL-এ একটা করে স্পাইক</div>
+            </div>
+            <ul class="pts">
+                <li>একসাথে লেখা হাজারটা key-এর <b>TTL-ও একই</b></li>
+                <li>তাই ডাটাবেজের লোড <b>সমান না, ঢেউয়ের মতো</b></li>
+                <li>প্রতিটা ঢেউ আবার stampede-এর ঝুঁকি নিয়ে আসে</li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ২৩ · ২৪/২৯</span></div>
+            <h2>TTL-এ <em>±১০% এলোমেলো</em> মিশিয়ে দিই</h2>
+            <p class="sub">৩০ সেকেন্ড না দিয়ে ২৭ থেকে ৩৩ সেকেন্ডের মধ্যে যেকোনো একটা। ছোট পরিবর্তন — কিন্তু এতে
+                <b>এক্সপায়ার ছড়িয়ে যায়</b>, আর ঢেউটা সমান স্রোত হয়ে যায়।</p>
+            <div class="scene">
+                <div class="txt o" style="left:50%;top:14%">applyJitter(ttl, 0.1) → ২৭s … ৩৩s</div>
+                <div class="wire " style="left:6%;top:90%;width:88%"></div>
+                <div class="col"
+                    style="left:12%;width:5.2%;--h:30%;height:30%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:20%;width:5.2%;--h:26%;height:26%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:28%;width:5.2%;--h:32%;height:32%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:36%;width:5.2%;--h:28%;height:28%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:44%;width:5.2%;--h:30%;height:30%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:52%;width:5.2%;--h:27%;height:27%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:60%;width:5.2%;--h:31%;height:31%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:68%;width:5.2%;--h:28%;height:28%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:76%;width:5.2%;--h:30%;height:30%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="col"
+                    style="left:84%;width:5.2%;--h:27%;height:27%;background:var(--ok-dim);animation:rise 4s ease-out infinite 0s">
+                </div>
+                <div class="txt o" style="left:50%;top:97%">লোড সমান — আর কোনো স্পাইক নেই</div>
+            </div>
+            <ul class="pts">
+                <li><span class="mono">freshTtl ± ১০%</span> — প্রতিটা key আলাদা সময়ে মরে</li>
+                <li>ডাটাবেজের লোড <b>ঢেউ থেকে সমান স্রোতে</b> বদলে যায়</li>
+                <li>তিন লাইনের কোড, কিন্তু প্রোডাকশনে পার্থক্যটা বিশাল</li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">নতুন সমস্যা</span><span class="step">ধাপ ২৪ · ২৫/২৯</span></div>
+            <h2>কোর্স এডিট হলে ক্যাশ <em>কীভাবে</em> মুছব</h2>
+            <p class="sub">অ্যাডমিন একটা কোর্সের নাম বদলাল। কিন্তু ওই কোর্স <b>কোন কোন ক্যাশ key-তে আছে</b> — সেটা তো
+                জানা নেই। কোয়েরি, হোস্ট, পেজ মিলিয়ে হাজার হাজার key।</p>
+            <div class="scene">
+                <div class="bx x" style="left:50%;top:14%">REDIS<i>SCAN চলছে — সব কমান্ড লাইনে</i></div>
+                <div class="dot r sm" style="left:8%;top:46%;animation:hold 3.6s ease-in-out infinite 0s"></div>
+                <div class="dot r sm" style="left:15.2%;top:46%;animation:hold 3.6s ease-in-out infinite 0.18s"></div>
+                <div class="dot r sm" style="left:22.4%;top:46%;animation:hold 3.6s ease-in-out infinite 0.36s"></div>
+                <div class="dot r sm" style="left:29.6%;top:46%;animation:hold 3.6s ease-in-out infinite 0.54s"></div>
+                <div class="dot r sm" style="left:36.8%;top:46%;animation:hold 3.6s ease-in-out infinite 0.72s"></div>
+                <div class="dot r sm"
+                    style="left:44%;top:46%;animation:hold 3.6s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot r sm" style="left:51.2%;top:46%;animation:hold 3.6s ease-in-out infinite 1.08s"></div>
+                <div class="dot r sm" style="left:58.4%;top:46%;animation:hold 3.6s ease-in-out infinite 1.26s"></div>
+                <div class="dot r sm" style="left:65.6%;top:46%;animation:hold 3.6s ease-in-out infinite 1.44s"></div>
+                <div class="dot r sm" style="left:72.8%;top:46%;animation:hold 3.6s ease-in-out infinite 0s"></div>
+                <div class="dot r sm" style="left:80%;top:46%;animation:hold 3.6s ease-in-out infinite 0.18s"></div>
+                <div class="dot r sm" style="left:87.2%;top:46%;animation:hold 3.6s ease-in-out infinite 0.36s"></div>
+                <div class="dot r sm" style="left:8%;top:72%;animation:hold 3.6s ease-in-out infinite 0.54s"></div>
+                <div class="dot r sm" style="left:15.2%;top:72%;animation:hold 3.6s ease-in-out infinite 0.72s"></div>
+                <div class="dot r sm"
+                    style="left:22.4%;top:72%;animation:hold 3.6s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="dot r sm" style="left:29.6%;top:72%;animation:hold 3.6s ease-in-out infinite 1.08s"></div>
+                <div class="dot r sm" style="left:36.8%;top:72%;animation:hold 3.6s ease-in-out infinite 1.26s"></div>
+                <div class="dot r sm" style="left:44%;top:72%;animation:hold 3.6s ease-in-out infinite 1.44s"></div>
+                <div class="dot r sm" style="left:51.2%;top:72%;animation:hold 3.6s ease-in-out infinite 0s"></div>
+                <div class="dot r sm" style="left:58.4%;top:72%;animation:hold 3.6s ease-in-out infinite 0.18s"></div>
+                <div class="dot r sm" style="left:65.6%;top:72%;animation:hold 3.6s ease-in-out infinite 0.36s"></div>
+                <div class="dot r sm" style="left:72.8%;top:72%;animation:hold 3.6s ease-in-out infinite 0.54s"></div>
+                <div class="dot r sm" style="left:80%;top:72%;animation:hold 3.6s ease-in-out infinite 0.72s"></div>
+                <div class="dot r sm"
+                    style="left:87.2%;top:72%;animation:hold 3.6s ease-in-out infinite 0.8999999999999999s"></div>
+                <div class="wire v"
+                    style="left:4%;top:36%;height:44%;background:var(--bad);animation:sweepx 4s linear infinite"></div>
+                <div class="txt b" style="left:50%;top:92%">SCAN — Redis একটাই থ্রেডে চলে, তাই বাকি সব থেমে থাকে</div>
+            </div>
+            <ul class="pts">
+                <li>key-এর নাম <b>আগে থেকে জানা নেই</b></li>
+                <li><span class="mono">SCAN</span> চলার সময় বাকি সব কমান্ড <b>অপেক্ষা করে</b></li>
+                <li>ইনভ্যালিডেট করতে গিয়ে <b>পুরো সাইট ধীর</b> হয়ে যেত</li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ২৫ · ২৬/২৯</span></div>
+            <h2>মুছি না — <em>ভার্সন বাড়াই</em></h2>
+            <p class="sub">ভার্সন নম্বরটা key-এর নামের <b>ভেতরেই</b> বসিয়ে রেখেছি। কোর্স এডিট হলে শুধু একটা <span
+                    class="mono">INCR</span> — পরের রিকোয়েস্ট আর পুরনো নামটা চাইবেই না।</p>
+            <div class="scene">
+                <div class="bx r" style="left:50%;top:14%">INCR …:version<i>41 → 42</i></div>
+                <div class="bx " style="left:26%;top:44%">…:list:…:v41<i>পুরনো</i></div>
+                <div class="bx g" style="left:70%;top:44%">…:list:…:v42<i>নতুন</i></div>
+                <div style="position:absolute;left:0;right:0;top:74%;animation:dimOut 5s linear infinite">
+                    <div class="dot r sm" style="left:10%;top:0%;animation:hold 3s ease-in-out infinite 0s"></div>
+                    <div class="dot r sm" style="left:17.4%;top:0%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                    <div class="dot r sm" style="left:24.8%;top:0%;animation:hold 3s ease-in-out infinite 0.36s"></div>
+                    <div class="dot r sm" style="left:32.2%;top:0%;animation:hold 3s ease-in-out infinite 0.54s"></div>
+                    <div class="dot r sm" style="left:39.6%;top:0%;animation:hold 3s ease-in-out infinite 0.72s"></div>
+                    <div class="dot r sm"
+                        style="left:47%;top:0%;animation:hold 3s ease-in-out infinite 0.8999999999999999s"></div>
+                    <div class="dot r sm"
+                        style="left:54.400000000000006%;top:0%;animation:hold 3s ease-in-out infinite 1.08s"></div>
+                    <div class="dot r sm"
+                        style="left:61.800000000000004%;top:0%;animation:hold 3s ease-in-out infinite 1.26s"></div>
+                    <div class="dot r sm" style="left:69.2%;top:0%;animation:hold 3s ease-in-out infinite 1.44s"></div>
+                    <div class="dot r sm"
+                        style="left:76.60000000000001%;top:0%;animation:hold 3s ease-in-out infinite 0s"></div>
+                    <div class="dot r sm" style="left:84%;top:0%;animation:hold 3s ease-in-out infinite 0.18s"></div>
+                </div>
+                <div class="txt b" style="left:50%;top:90%">পুরনো key অনাথ — TTL শেষে Redis নিজেই মুছে দেবে</div>
+            </div>
+            <ul class="pts">
+                <li><b>একটা কমান্ড</b>, শূন্যটা SCAN</li>
+                <li>পুরনো key কেউ আর চায় না — তাই <b>অনাথ হয়ে যায়</b></li>
+                <li>TTL শেষে Redis নিজেই পরিষ্কার করে — <b>আমাদের কিছু করতে হয় না</b></li>
+            </ul>
+        </section>
+        <section class="page prob">
+            <div class="eye"><span class="chip">শেষ সমস্যা</span><span class="step">ধাপ ২৬ · ২৭/২৯</span></div>
+            <h2><em>Redis নিজেই</em> ধীর হয়ে গেলে</h2>
+            <p class="sub">পুরো সিস্টেমটা এখন Redis-এর ওপর দাঁড়িয়ে। কিন্তু Redis যদি ধীর হয়ে যায়? ডিফল্ট ক্লায়েন্ট
+                <b>অসীমকাল চেষ্টা করতে থাকে</b> — আর প্রতিটা রিকোয়েস্ট ঝুলে যায়।</p>
+            <div class="scene">
+                <div class="bx " style="left:13%;top:50%">API</div>
+                <div class="wire bd" style="left:21%;top:50%;width:32%"></div>
+                <div class="bx x" style="left:64%;top:50%">REDIS<i>সাড়া দিচ্ছে না</i></div>
+                <div class="dot " style="left:34%;top:26%;animation:hold 3.6s ease-in-out infinite 0s"></div>
+                <div class="dot " style="left:40%;top:34%;animation:hold 3.6s ease-in-out infinite 0.25s"></div>
+                <div class="dot " style="left:46%;top:26%;animation:hold 3.6s ease-in-out infinite 0.5s"></div>
+                <div class="dot " style="left:34%;top:74%;animation:hold 3.6s ease-in-out infinite 0.15s"></div>
+                <div class="dot " style="left:40%;top:66%;animation:hold 3.6s ease-in-out infinite 0.4s"></div>
+                <div class="dot " style="left:46%;top:74%;animation:hold 3.6s ease-in-out infinite 0.65s"></div>
+                <div class="stamp " style="left:40%;top:50%;animation:flash 3.6s linear infinite">সব ঝুলে আছে</div>
+                <div class="txt b" style="left:64%;top:80%">খালি কানেকশনই আর থাকে না</div>
+            </div>
+            <ul class="pts">
+                <li>ডিফল্ট <span class="mono">ioredis</span> <b>অসীমকাল</b> রিট্রাই করে</li>
+                <li>প্রতিটা রিকোয়েস্ট আটকে থাকে — Node-এর হাতে <b>খালি কানেকশন থাকে না</b></li>
+                <li>ক্যাশ ধীর হওয়ার কারণে <b>পুরো সাইট কার্যত ডাউন</b></li>
+            </ul>
+        </section>
+        <section class="page sol">
+            <div class="eye"><span class="chip">সমাধান</span><span class="step">ধাপ ২৭ · ২৮/২৯</span></div>
+            <h2><em>১৫০০ms</em> এ হাল ছেড়ে সোজা ডাটাবেজে</h2>
+            <p class="sub">ক্যাশের জন্য <b>আলাদা একটা কানেকশন</b> রাখি, যার টাইমআউট দেড় সেকেন্ড আর রিট্রাই মাত্র একবার।
+                ফেল করলে <span class="mono">catch</span> ধরে সরাসরি ডাটাবেজ থেকে পড়ে।</p>
+            <div class="scene">
+                <div class="bx " style="left:12%;top:50%">API<i>try / catch</i></div>
+                <div class="wire d" style="left:20%;top:26%;width:22%"></div>
+                <div class="bx x" style="left:50%;top:26%">REDIS<i>commandTimeout 1500ms</i></div>
+                <div class="wire " style="left:20%;top:74%;width:38%"></div>
+                <div class="bx p" style="left:68%;top:74%">POSTGRES<i>loader()</i></div>
+                <div class="wire " style="left:76%;top:74%;width:10%"></div>
+                <div class="bx g" style="left:92%;top:74%">উত্তর</div>
+                <div class="dot x" style="--a:22%;--b:46%;top:26%;animation:back 4.4s linear infinite"></div>
+                <div class="dot p" style="--a:22%;--b:64%;top:74%;animation:travel 4.4s linear infinite 1.7s"></div>
+                <div class="dot g" style="--a:70%;--b:90%;top:74%;animation:travel 4.4s linear infinite 3s"></div>
+                <div class="txt o" style="left:50%;top:92%">সাইট ধীর হয় — বন্ধ হয় না</div>
+            </div>
+            <ul class="pts">
+                <li>ক্যাশ একটা <b>অপ্টিমাইজেশন, নির্ভরতা নয়</b></li>
+                <li>প্রতিটা <span class="mono">getCached…</span> ফাংশনে <span class="mono">try/catch</span>, catch-এ
+                    <span class="mono">loader()</span></li>
+                <li>তবে <b>কিউ আর স্ট্রিম</b> Redis ছাড়া চলবে না — ওখানে এটা আসল নির্ভরতা</li>
+            </ul>
+        </section>
+        <section class="page setup">
+            <div class="eye"><span class="chip">পুরো পথ</span><span class="step">শেষ · ২৯/২৯</span></div>
+            <h2>শুরুর সেই <em>এক ক্লিক</em> — শেষ পর্যন্ত</h2>
+            <p class="sub">একটা সহজ কাজ ছিল: ৫ লাখ ইউজারকে একটা নোটিফিকেশন পাঠানো। প্রতিটা সমাধান একটা নতুন সমস্যা
+                এনেছে, আর সেই চেইনটাই <b>পুরো আর্কিটেকচারটা</b> বানিয়ে দিয়েছে।</p>
+            <div class="scene">
+                <div class="bx " style="left:7%;top:50%">ADMIN</div>
+                <div class="wire " style="left:12%;top:50%;width:7%"></div>
+                <div class="bx " style="left:23%;top:50%">API<i>৪০ms</i></div>
+                <div class="wire " style="left:29%;top:50%;width:7%"></div>
+                <div class="bx r" style="left:40%;top:50%">QUEUE</div>
+                <div class="wire " style="left:46%;top:50%;width:7%"></div>
+                <div class="bx w" style="left:57%;top:50%">WORKER<i>লক · পেজ · ব্যাচ · থ্রটল</i></div>
+                <div class="wire " style="left:66%;top:50%;width:6%"></div>
+                <div class="bx " style="left:78%;top:50%">FCM</div>
+                <div class="wire " style="left:83%;top:50%;width:6%"></div>
+                <div class="bx g" style="left:93%;top:50%">৫ লাখ<i>~১০০s</i></div>
+                <div class="dot " style="--a:13%;--b:21%;top:50%;animation:travel 3s linear infinite"></div>
+                <div class="dot r" style="--a:30%;--b:38%;top:50%;animation:travel 3s linear infinite .5s"></div>
+                <div class="dot w" style="--a:47%;--b:55%;top:50%;animation:travel 3s linear infinite 1s"></div>
+                <div class="dot " style="--a:67%;--b:76%;top:50%;animation:travel 3s linear infinite 1.5s"></div>
+                <div class="dot g" style="--a:84%;--b:91%;top:50%;animation:travel 3s linear infinite 2s"></div>
+                <div class="txt r" style="left:50%;top:84%">আর ফিরতি পথে — ক্যাশ, লক, jitter, ভার্সন, fallback</div>
+            </div>
+            <ul class="pts">
+                <li><b>কিউ</b> দেয় নিরাপত্তা · <b>ব্যাচ আর থ্রটল</b> দেয় গতি</li>
+                <li><b>লক</b> দেয় বিশ্বাস · <b>ক্যাশ আর ভার্সন</b> দেয় স্কেল</li>
+                <li>কোনোটাই শুরুতে ছিল না — <b>প্রতিটা একটা সমস্যার উত্তর</b></li>
+            </ul>
+        </section>
+        <nav class="nav">
+            <button class="btn ghost" id="prevBtn" type="button">◀ আগের</button>
+            <button class="btn" id="nextBtn" type="button">পরের ▶</button>
+            <div class="rail" id="rail"><button class="pd on" type="button" data-k="setup"
+                    aria-label="উদাহরণ — শুরু"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="সমস্যা — ধাপ ০১"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="সমস্যা — ধাপ ০২"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ০৩"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ০৪"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ০৫"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ০৬"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ০৭"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ০৮"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ০৯"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ১০"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ১১"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ১২"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ১৩"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ১৪"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ১৫"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ১৬"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ১৭"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ১৮"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ১৯"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ২০"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ২১"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ২২"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ২৩"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="নতুন সমস্যা — ধাপ ২৪"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ২৫"></button><button class="pd" type="button" data-k="prob"
+                    aria-label="শেষ সমস্যা — ধাপ ২৬"></button><button class="pd" type="button" data-k="sol"
+                    aria-label="সমাধান — ধাপ ২৭"></button><button class="pd" type="button" data-k="setup"
+                    aria-label="পুরো পথ — শেষ"></button></div>
+            <span class="keys">← → পেজ · F ফুলস্ক্রিন</span>
+        </nav>
+    </div>
+
+    <script>
+        (() => {
+            "use strict";
+
+            /* ---- scene builders: everything is a % inside the scene box ---- */
+            const bx = (c, x, y, l, s = "") => `<div class="bx ${c}" style="left:${x}%;top:${y}%">${l}${s ? `<i>${s}</i>` : ""}</div>`;
+            const w = (x, y, ww, c = "") => `<div class="wire ${c}" style="left:${x}%;top:${y}%;width:${ww}%"></div>`;
+            const dot = (c, a, b, y, an) => `<div class="dot ${c}" style="--a:${a}%;--b:${b}%;top:${y}%;animation:${an}"></div>`;
+            const hold = (c, x, y, d, dur = 3) => `<div class="dot ${c}" style="left:${x}%;top:${y}%;animation:hold ${dur}s ease-in-out infinite ${d}s"></div>`;
+            const stm = (c, x, y, t, an) => `<div class="stamp ${c}" style="left:${x}%;top:${y}%;animation:${an}">${t}</div>`;
+            const txt = (c, x, y, t) => `<div class="txt ${c}" style="left:${x}%;top:${y}%">${t}</div>`;
+            const mtr = (c, x, y, ww, an) => `<div class="meter ${c}" style="left:${x}%;top:${y}%;width:${ww}%"><b style="animation:${an}"></b></div>`;
+            const col = (bg, x, h, d, dur = 3.4) => `<div class="col" style="left:${x}%;width:5.2%;--h:${h}%;height:${h}%;background:${bg};animation:rise ${dur}s ease-out infinite ${d}s"></div>`;
+            /* a field of user devices */
+            const field = (x0, y0, cols, rows, dx, dy, cls, dur) => {
+                let o = "";
+                for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++)
+                    o += hold(cls + " sm", x0 + c * dx, y0 + r * dy, ((r * cols + c) % 9) * 0.18, dur);
+                return o;
+            };
+            /* a burst of dots all travelling the same path */
+            const burst = (c, a, b, y0, rows, dy, dur, stagger) => {
+                let o = "";
+                for (let i = 0; i < rows; i++) o += dot(c, a, b, y0 + i * dy, `travel ${dur}s linear infinite ${(i * stagger).toFixed(2)}s`);
+                return o;
+            };
+
+            const RED = "var(--bad)", GRN = "var(--ok-dim)", TEAL = "var(--redis-dim)";
+
+            /* ══════════════ THE CHAIN ══════════════════════════════════ */
+            const P = [
+
+                {
+                    k: "setup", eye: "শুরু", chip: "উদাহরণ",
+                    h: 'তোমার অ্যাপে <em>৫,০০,০০০</em> ইউজার',
+                    s: 'প্রত্যেকের FCM টোকেন ডাটাবেজে সেভ করা আছে। অ্যাডমিন এখন <b>একটা নোটিফিকেশন সবাইকে</b> পাঠাতে চায়। এই একটামাত্র কাজ থেকেই পুরো গল্পটা শুরু।',
+                    sc: bx("w", 10, 50, "ADMIN", "পাঠাও ▸") + w(17, 50, 11)
+                        + bx("", 34, 50, "API", "/broadcast") + w(41, 50, 10)
+                        + bx("p", 56, 50, "POSTGRES", "৫,০০,০০০ টোকেন")
+                        + field(72, 20, 7, 5, 4, 15, "q", 3.2)
+                        + txt("w", 86, 88, "৫ লাখ ডিভাইস")
+                        + dot("", 18, 32, 50, "travel 3.2s linear infinite")
+                        + dot("p", 43, 53, 50, "travel 3.2s linear infinite .8s"),
+                    p: ['প্রতিটা ডিভাইসের <b>একটা করে FCM টোকেন</b> — ফোন, ট্যাব, ব্রাউজার আলাদা',
+                        'অ্যাডমিন এক ক্লিক করবে, বাকিটা ব্যাকএন্ডের দায়িত্ব',
+                        'প্রশ্ন একটাই — <b>এই ৫ লাখে পৌঁছাব কীভাবে?</b>']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ০১", chip: "সমস্যা",
+                    h: 'সোজা API-তেই <em>লুপ চালালে</em> কী হয়',
+                    s: 'সবচেয়ে সহজ কোডটা এটাই — টোকেনগুলো নিয়ে এসো, একটা <span class="mono">for</span> লুপে একটার পর একটা পাঠাও। রিকোয়েস্টটা ততক্ষণ খোলা থাকে।',
+                    sc: bx("", 13, 42, "API", "for (const t of tokens)") + w(21, 42, 58)
+                        + bx("x", 85, 42, "৫ লাখ ফোন", "")
+                        + dot("", 23, 80, 42, "keep 11s linear infinite")
+                        + dot("", 23, 80, 42, "keep 11s linear infinite 3.6s")
+                        + dot("", 23, 80, 42, "keep 11s linear infinite 7.2s")
+                        + mtr("", 13, 76, 66, "creep 11s linear infinite")
+                        + txt("b", 13, 88, "পাঠানো হয়েছে: ৩,২১৪ / ৫,০০,০০০")
+                        + txt("", 70, 88, "সময় গেছে: ১০ মিনিট ৪২ সেকেন্ড"),
+                    p: ['একটা FCM কল ≈ <b>২০০ মিলিসেকেন্ড</b>',
+                        '৫,০০,০০০ × ২০০ms = <b>প্রায় ২৭ ঘণ্টা</b>',
+                        'আর এই পুরো সময় <b>HTTP রিকোয়েস্টটা খোলা</b> থাকতে হবে']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ০২", chip: "সমস্যা",
+                    h: '৩০ সেকেন্ডেই <em>ফেল</em> — কে পেয়েছে জানার উপায় নেই',
+                    s: 'Nginx কানেকশন কেটে দিল, প্রসেসটা মরে গেল। এখন সবচেয়ে খারাপ প্রশ্নটা — <b>কার কার কাছে গিয়েছিল?</b>',
+                    sc: bx("x", 13, 40, "API", "কানেকশন কাটা") + w(21, 40, 26, "bd")
+                        + stm("", 40, 40, "TIMEOUT", "flash 6s linear infinite")
+                        + txt("o", 60, 14, "✓ পেয়েছে — ৩,২১৪")
+                        + field(56, 26, 3, 1, 3.6, 0, "g", 3)
+                        + txt("b", 70, 44, "? জানা নেই — ৪,৯৬,৭৮৬")
+                        + field(52, 58, 13, 4, 3.6, 12, "q", 3)
+                        + dot("x", 23, 44, 40, "travel 6s linear infinite"),
+                    p: ['কোথায় থেমেছে তার <b>কোনো রেকর্ড নেই</b> — সবটা মেমোরিতে ছিল',
+                        'আবার চালালে প্রথম ৩,২১৪ জন <b>দুইবার</b> পাবে',
+                        'না চালালে বাকি ৪.৯৬ লাখ <b>কখনোই পাবে না</b>']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ০৩", chip: "সমাধান",
+                    h: 'কাজটা <em>Redis-এ লিখে রাখি</em>, তারপর ছেড়ে দিই',
+                    s: 'API আর নিজে পাঠাবে না। সে একটা <b>জব</b> Redis-এর কিউতে ঢুকিয়ে দেবে, ডাটাবেজে একটা লগ রো বানাবে, আর সাথে সাথে উত্তর দিয়ে দেবে।',
+                    sc: bx("", 11, 34, "API", "শুধু ঢোকায়") + w(18, 34, 14)
+                        + bx("r", 39, 34, "QUEUE", "BullMQ · Redis") + w(47, 34, 13)
+                        + bx("w", 68, 34, "WORKER", "আলাদা প্রসেস") + w(75, 34, 10)
+                        + bx("g", 90, 34, "৫ লাখ ফোন", "")
+                        + w(18, 76, 14, "d") + bx("g", 11, 76, "200 OK", "~৪০ms")
+                        + dot("", 20, 37, 34, "travel 3.2s linear infinite")
+                        + dot("r", 49, 66, 34, "travel 3.2s linear infinite .7s")
+                        + dot("g", 77, 88, 34, "travel 3.2s linear infinite 1.4s")
+                        + dot("g", 33, 13, 76, "travel 3.2s linear infinite .9s"),
+                    p: ['একজনকে পাঠাও বা ৫ লাখকে — রেসপন্স <b>একই ~৪০ms</b>',
+                        'জব Redis-এ টিকে থাকে — <b>সার্ভার ক্র্যাশ করলেও হারায় না</b>',
+                        'ওয়ার্কার আলাদা প্রসেস, তাই সে ব্যস্ত থাকলেও <b>সাইট স্লো হয় না</b>']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ০৪", chip: "নতুন সমস্যা",
+                    h: 'ওয়ার্কার ৫ লাখ টোকেন <em>কীভাবে</em> বের করবে',
+                    s: 'জব তো পেল। কিন্তু ডাটাবেজ থেকে ৫ লাখ রো আনবে কীভাবে? দুইটা সহজ উত্তরই ভুল।',
+                    sc: txt("b", 26, 12, "skip: 0 → 5000 → 10000 → …") + w(6, 90, 42, "bd")
+                        + col(RED, 10, 18, 0) + col(RED, 17, 28, .1) + col(RED, 24, 40, .2) + col(RED, 31, 52, .3)
+                        + col(RED, 38, 62, .4) + col(RED, 45, 72, .5)
+                        + txt("b", 26, 97, "প্রতি পেজ আগেরটার চেয়ে ধীর")
+                        + bx("p", 78, 26, "findMany()", "৫ লাখ রো একসাথে")
+                        + mtr("", 64, 58, 28, "fill 3.4s ease-in infinite")
+                        + txt("b", 78, 72, "RAM ভরে যাচ্ছে")
+                        + stm("", 78, 88, "OUT OF MEMORY", "flash 3.4s linear infinite"),
+                    p: ['<span class="mono">findMany()</span> — ৫ লাখ রো একসাথে RAM-এ, <b>প্রসেস মরে যায়</b>',
+                        '<span class="mono">skip: 495000</span> — Postgres ৪,৯৫,০০০ রো <b>পড়ে, তারপর ফেলে দেয়</b>',
+                        'শেষ পেজে পৌঁছাতে পৌঁছাতে কোয়েরি <b>অসহ্য ধীর</b>']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ০৫", chip: "সমাধান",
+                    h: '<em>Cursor</em> — শেষ আইডি মনে রেখে সরাসরি লাফ',
+                    s: 'পুরো লিস্ট না চেয়ে বলি — "গতবার এই আইডিতে ছিলাম, তার পরেরগুলো দাও"। Postgres তখন ইনডেক্সে <b>সরাসরি ওই জায়গায়</b> বসে পড়ে।',
+                    sc: txt("o", 50, 12, "cursor: { courseId_studentId }  ·  take: 5000") + w(6, 90, 88, "")
+                        + col(GRN, 12, 26, 0) + col(GRN, 21, 24, .1) + col(GRN, 30, 27, .2) + col(GRN, 39, 25, .3)
+                        + col(GRN, 48, 26, .4) + col(GRN, 57, 24, .5) + col(GRN, 66, 27, .6) + col(GRN, 75, 25, .7)
+                        + col(GRN, 84, 26, .8)
+                        + dot("g", 10, 86, 52, "travel 3.4s linear infinite")
+                        + txt("o", 50, 97, "প্রতিটা পেজ সমান দ্রুত — শেষটাও প্রথমটার মতো"),
+                    p: ['শেষ পেজও <b>প্রথম পেজের মতোই দ্রুত</b>',
+                        '<span class="mono">async function*</span> — মেমোরিতে একসাথে <b>৫০০০ আইডি</b>, ৫ লাখ নয়',
+                        'প্রতিবার <span class="mono">yield</span> করে দিয়ে পরেরটায় যায়']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ০৬", chip: "নতুন সমস্যা",
+                    h: 'FCM এক কলে <em>৫০০-র বেশি</em> টোকেন নেয় না',
+                    s: 'হাতে ৫০০০ টোকেন। একসাথে পাঠাতে গেলাম — Firebase সরাসরি রিকোয়েস্টটাই ফিরিয়ে দিল। এটা তাদের <b>হার্ড লিমিট</b>।',
+                    sc: bx("w", 12, 50, "WORKER", "৫০০০ টোকেন হাতে") + w(20, 50, 44, "bd")
+                        + bx("x", 78, 50, "FIREBASE FCM", "max 500 / call")
+                        + burst("", 22, 68, 20, 6, 11, 2.6, .05)
+                        + stm("", 48, 50, "REJECTED", "flash 2.6s linear infinite"),
+                    p: ['<span class="mono">sendEachForMulticast</span> — সর্বোচ্চ <b>৫০০ টোকেন</b>',
+                        'একটাও বেশি দিলে পুরো কলটাই বাতিল',
+                        'মানে ৫০০০ টোকেন <b>ভাগ করতেই হবে</b>']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ০৭", chip: "সমাধান",
+                    h: '<em>৫০০ করে</em> ভাগ করে পাঠাই',
+                    s: '<span class="mono">chunk(tokens, 500)</span> — ৫০০০ টোকেন মানে ১০টা কল। আর পুরো ৫ লাখের জন্য ঠিক <b>১,০০০ কল</b>।',
+                    sc: bx("w", 12, 50, "WORKER", "chunk(tokens, 500)") + w(20, 50, 20)
+                        + bx("r", 48, 50, "৫০০-র ব্যাচ", "× ১,০০০") + w(56, 50, 20)
+                        + bx("g", 86, 50, "FCM", "প্রতিটার আলাদা রেজাল্ট")
+                        + dot("sq lg", 22, 45, 50, "travel 2.8s linear infinite")
+                        + dot("sq lg", 22, 45, 50, "travel 2.8s linear infinite .9s")
+                        + dot("sq lg", 22, 45, 50, "travel 2.8s linear infinite 1.8s")
+                        + dot("g sq lg", 58, 82, 50, "travel 2.8s linear infinite .45s")
+                        + dot("g sq lg", 58, 82, 50, "travel 2.8s linear infinite 1.35s")
+                        + dot("g sq lg", 58, 82, 50, "travel 2.8s linear infinite 2.25s")
+                        + txt("r", 48, 80, "৫,০০,০০০ ÷ ৫০০ = ১,০০০ কল"),
+                    p: ['<span class="mono">chunk(tokens, 500)</span> — সহজ, কিন্তু বাধ্যতামূলক',
+                        '<span class="mono">sendEachForMulticast</span> <b>প্রতিটা টোকেনের আলাদা রেজাল্ট</b> ফেরত দেয়',
+                        'তাই কোনটা গেল, কোনটা ফেল করল — সব জানা যায়']
+                },
+            ];
+
+            P.push(
+                {
+                    k: "prob", eye: "ধাপ ০৮", chip: "নতুন সমস্যা",
+                    h: '১,০০০ কল <em>একসাথে</em> ছেড়ে দিলে',
+                    s: 'ভাগ তো হলো। এবার সবগুলো একসাথে ছেড়ে দিলাম — দশ সেকেন্ডেই শেষ হওয়ার কথা। কিন্তু <b>দুই দিক থেকে</b> ধাক্কা এলো।',
+                    sc: bx("w", 11, 50, "WORKER", "১,০০০ কল একসাথে") + w(19, 50, 26, "bd") + w(19, 78, 46, "bd")
+                        + bx("x", 60, 26, "FCM", "কোটা ছাড়িয়ে গেছে")
+                        + bx("x", 78, 78, "POSTGRES", "প্রতি ব্যাচের আগে টোকেন কোয়েরি")
+                        + burst("", 21, 50, 20, 5, 8, 2, .04)
+                        + burst("", 21, 66, 86, 3, 6, 2, .04)
+                        + stm("", 60, 50, "429", "flash 2s linear infinite")
+                        + txt("b", 40, 92, "নিজের ডাটাবেজও একসাথে ১,০০০ কোয়েরি খাচ্ছে"),
+                    p: ['FCM-এর <b>কোটা</b> আছে — ছাড়ালে গুগল রিকোয়েস্ট ফিরিয়ে দেয়',
+                        'প্রতিটা ব্যাচের আগে টোকেন কোয়েরি হয় — <b>নিজের Postgres-ই বসে যায়</b>',
+                        'দ্রুত পাঠাতে গিয়ে <b>কিছুই পাঠানো হয় না</b>']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ০৯", chip: "সমাধান",
+                    h: '<em>থ্রটল</em> — সেকেন্ডে সর্বোচ্চ ১০ ব্যাচ',
+                    s: 'নিজেকেই গতি বেঁধে দিই। একটা ছোট টোকেন-বাকেট: প্রতি সেকেন্ডে <b>১০টার বেশি ব্যাচ যাবে না</b>। বাকিরা লাইনে অপেক্ষা করে।',
+                    sc: bx("w", 11, 50, "WORKER", "") + w(19, 50, 18)
+                        + bx("r", 43, 50, "throttle.wait()", "১০ ব্যাচ / সেকেন্ড") + w(52, 50, 20)
+                        + bx("g", 84, 50, "FCM", "৫,০০০ notification/sec")
+                        + dot("sq lg", 21, 39, 50, "travel 2.6s linear infinite")
+                        + dot("sq lg", 21, 39, 50, "travel 2.6s linear infinite .85s")
+                        + dot("sq lg", 21, 39, 50, "travel 2.6s linear infinite 1.7s")
+                        + hold("", 30, 26, 0, 2.6) + hold("", 34, 26, .3, 2.6) + hold("", 38, 26, .6, 2.6)
+                        + hold("", 30, 74, .15, 2.6) + hold("", 34, 74, .45, 2.6) + hold("", 38, 74, .75, 2.6)
+                        + dot("g sq lg", 54, 80, 50, "travel 2.6s linear infinite .4s")
+                        + dot("g sq lg", 54, 80, 50, "travel 2.6s linear infinite 1.25s")
+                        + txt("o", 50, 88, "১০ × ৫০০ = ৫,০০০ / সেকেন্ড  →  ৫ লাখ = ~১০০ সেকেন্ড"),
+                    p: ['<span class="mono">maxBatchesPerSec: 10</span> — ১০ × ৫০০ = <b>৫,০০০ / সেকেন্ড</b>',
+                        '৫,০০,০০০ ÷ ৫,০০০ = <b>প্রায় ১০০ সেকেন্ডে</b> পুরো ব্রডকাস্ট',
+                        'সার্ভার বড় হলে সংখ্যাটা বাড়িয়ে দিলেই সময় কমে']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ১০", chip: "নতুন সমস্যা",
+                    h: 'অ্যাডমিন <em>দুইবার</em> ক্লিক করে ফেলল',
+                    s: 'সবই ঠিক চলছিল। তারপর অ্যাডমিন বাটনটা দুইবার চাপল — বা BullMQ টাইমআউট ভেবে জবটা আবার দিল। ফল একই: <b>সবাই একই মেসেজ দুইবার পেল</b>।',
+                    sc: bx("", 10, 26, "ক্লিক ১", "") + bx("", 10, 74, "ক্লিক ২", "ভুলে")
+                        + w(16, 26, 16) + w(16, 74, 16)
+                        + bx("r", 40, 50, "QUEUE", "২টা আলাদা জব") + w(48, 50, 14)
+                        + bx("w", 70, 50, "WORKER", "দুইবার চালালো") + w(77, 50, 8)
+                        + bx("x", 92, 50, "ফোন", "২টা নোটিফিকেশন")
+                        + dot("", 18, 36, 26, "travel 3.4s linear infinite")
+                        + dot("", 18, 36, 74, "travel 3.4s linear infinite .5s")
+                        + dot("x", 50, 88, 44, "travel 3.4s linear infinite 1.2s")
+                        + dot("x", 50, 88, 58, "travel 3.4s linear infinite 1.5s")
+                        + stm("", 70, 20, "×২", "flash 3.4s linear infinite"),
+                    p: ['ভুলে দুইবার ক্লিক — সবচেয়ে সাধারণ কারণ',
+                        'BullMQ টাইমআউট ভেবে <b>নিজেই রিট্রাই</b> করতে পারে',
+                        'দুইটা ওয়ার্কার <b>একই জব</b> তুলে নিতে পারে']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ১১", chip: "সমাধান",
+                    h: '<em>SET NX</em> — একজনই ঢুকতে পারে',
+                    s: 'Redis-এর একটামাত্র কমান্ড। <span class="mono">NX</span> মানে — key না থাকলেই কেবল লিখবে। Redis একটাই থ্রেডে চলে, তাই এটা <b>পুরোপুরি atomic</b>।',
+                    sc: bx("", 10, 20, "ক্লিক ১", "") + bx("", 10, 50, "ক্লিক ২", "") + bx("", 10, 80, "রিট্রাই", "")
+                        + w(16, 20, 22) + w(16, 50, 22) + w(16, 80, 22)
+                        + bx("r", 50, 50, "SET key 1 NX EX 900", "একজনই OK পায়")
+                        + w(59, 50, 14) + bx("g", 82, 50, "QUEUE", "১টাই জব")
+                        + dot("g", 18, 44, 20, "keep 3.8s linear infinite")
+                        + dot("x", 18, 44, 50, "back 3.8s linear infinite .2s")
+                        + dot("x", 18, 44, 80, "back 3.8s linear infinite .4s")
+                        + dot("g", 61, 76, 50, "travel 3.8s linear infinite 1.4s")
+                        + txt("o", 26, 10, "OK") + txt("b", 26, 62, "null") + txt("b", 26, 92, "null"),
+                    p: ['<span class="mono">NX</span> — key না থাকলেই লিখবে, তাই <b>প্রথমজনই কেবল OK পায়</b>',
+                        '<span class="mono">EX</span> — নিজে থেকেই মুছে যায়, ক্র্যাশ করলেও <b>চিরকাল আটকে থাকে না</b>',
+                        'দুই স্তরে — কিউতে ঢোকার আগে <span class="mono">dedup</span>, প্রসেসের আগে <span class="mono">lock</span>']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ১২", chip: "নতুন সমস্যা",
+                    h: 'লক ছাড়তে গিয়ে <em>অন্যের লক</em> মুছে ফেলা',
+                    s: 'A লক নিল, কিন্তু কাজটা লকের মেয়াদের চেয়ে বেশি সময় নিল। লক এক্সপায়ার করল, B নতুন লক নিল। তারপর A কাজ শেষ করে <span class="mono">DEL</span> করল — <b>কিন্তু সেটা এখন B-র লক</b>।',
+                    sc: bx("w", 12, 22, "WORKER A", "কাজ ধীর হলো")
+                        + bx("w", 12, 78, "WORKER B", "নতুন লক নিল")
+                        + w(20, 22, 24, "bd") + w(20, 78, 24)
+                        + bx("r", 52, 50, "lock", "tok = c3d4")
+                        + w(60, 50, 16, "bd") + bx("x", 86, 50, "POSTGRES", "দুইজন একসাথে")
+                        + dot("x", 22, 47, 22, "keep 4.6s linear infinite")
+                        + stm("", 52, 18, "DEL", "flash 4.6s linear infinite")
+                        + dot("x", 62, 82, 42, "travel 4.6s linear infinite 2.6s")
+                        + dot("x", 62, 82, 58, "travel 4.6s linear infinite 2.9s"),
+                    p: ['A-র লক এক্সপায়ার করেছিল, সে জানেই না',
+                        'তার <span class="mono">DEL</span> মুছল <b>B-র লক</b>',
+                        'এখন দুইজন একসাথে চলছে — <b>লক থাকা আর না থাকা সমান</b>']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ১৩", chip: "সমাধান",
+                    h: '<em>টোকেন মিলিয়ে</em> তবেই DEL — Lua দিয়ে',
+                    s: 'প্রতিটা লকের সাথে একটা র‍্যান্ডম টোকেন রাখি। ছাড়ার সময় Lua স্ক্রিপ্টে <b>GET আর DEL একসাথে</b> চালাই — মাঝখানে রেস ঢোকার ফাঁকই থাকে না।',
+                    sc: bx("w", 12, 22, "WORKER A", "tok = a1b2")
+                        + bx("w", 12, 78, "WORKER B", "tok = c3d4")
+                        + w(20, 22, 26, "bd") + w(20, 78, 26)
+                        + bx("r", 56, 50, 'if GET == ARGV[1] then DEL', "Lua · atomic")
+                        + w(68, 50, 10, "d") + bx("g", 88, 50, "lock", "c3d4 · অক্ষত")
+                        + dot("x", 22, 50, 22, "back 4.2s linear infinite")
+                        + stm("", 50, 16, "✗ মেলেনি", "flash 4.2s linear infinite")
+                        + hold("g", 88, 72, 0, 4.2),
+                    p: ['টোকেন না মিললে <b>কিছুই হয় না</b> — শুধু <span class="mono">0</span> ফেরত',
+                        'Lua-তে পুরোটা <b>একটাই অবিভাজ্য অপারেশন</b>',
+                        'একই প্যাটার্ন তিন জায়গায় — ক্যাশ ফিল, ক্যাম্পেইন, ডেস্কটপ লগইন']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ১৪", chip: "নতুন সমস্যা",
+                    h: 'FCM <em>সাময়িক ডাউন</em> — ওই ব্যাচ হারিয়ে গেল',
+                    s: 'নেটওয়ার্ক বা FCM মাঝে মাঝে সাড়া দেবে না — এটা স্বাভাবিক। কিন্তু তখন যদি জবটা মরে যায়, <b>ওই ৫০০ জন কখনোই নোটিফিকেশন পাবে না</b>।',
+                    sc: bx("w", 14, 50, "WORKER", "") + w(22, 50, 34, "bd")
+                        + bx("x", 68, 50, "FCM", "সাময়িক আউটেজ")
+                        + dot("", 24, 60, 50, "travel 3s linear infinite")
+                        + dot("", 24, 60, 50, "travel 3s linear infinite 1s")
+                        + stm("", 68, 22, "✗ হারিয়ে গেল", "flash 3s linear infinite")
+                        + txt("b", 68, 82, "৫০০ জন বাদ · কোনো রেকর্ড নেই"),
+                    p: ['এক্সেপশন থ্রো হলে জব <b>মুছে যায়</b>',
+                        'ওই ব্যাচের কেউ পাবে না — <b>আর কোনোদিন না</b>',
+                        'কতজন বাদ পড়ল, সেই <b>হিসাবটাও থাকে না</b>']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ১৫", chip: "সমাধান",
+                    h: '<em>৩ বার</em> চেষ্টা, প্রতিবার দ্বিগুণ অপেক্ষা',
+                    s: 'ফেল করলে জবটা কিউতে ফেরত যায়। তারপর ১০ সেকেন্ড, ২০ সেকেন্ড, ৪০ সেকেন্ড — <b>দ্বিগুণ করে অপেক্ষা</b>, যাতে FCM শ্বাস নেওয়ার সময় পায়।',
+                    sc: bx("w", 13, 50, "WORKER", "") + w(21, 50, 26)
+                        + bx("r", 44, 18, "delayed set", "১০s → ২০s → ৪০s")
+                        + bx("g", 60, 50, "FCM", "ফিরে এসেছে") + w(67, 50, 12, "d")
+                        + bx("x", 88, 50, "failed set", "৩ বারের পর")
+                        + dot("x", 23, 50, 50, "back 5.4s linear infinite")
+                        + dot("", 50, 23, 80, "travel 5.4s linear infinite 1.3s") + w(21, 80, 28, "d")
+                        + dot("g", 23, 57, 50, "travel 5.4s linear infinite 3.4s")
+                        + txt("w", 44, 32, "অপেক্ষা…"),
+                    p: ['ফেল করলে জব <b>কিউতে ফেরত যায়</b>, হারায় না',
+                        'দ্বিগুণ কেন — সাথে সাথে আবার হামলা করলে <b>অবস্থা আরও খারাপ</b> হয়',
+                        '৩ বারেই থামি — নাহলে একটা বিষাক্ত জব <b>চিরকাল ওয়ার্কার দখল</b> করে রাখত']
+                },
+            );
+
+            P.push(
+                {
+                    k: "prob", eye: "ধাপ ১৬", chip: "নতুন সমস্যা",
+                    h: 'টোকেনগুলোর একটা অংশ <em>মরা</em>',
+                    s: 'ছয় মাস চলার পর দেখা গেল — অনেক টোকেনে পাঠানোই যাচ্ছে না। অ্যাপ আনইনস্টল হয়েছে, ডেটা ক্লিয়ার হয়েছে। কিন্তু সেগুলো এখনো <b>প্রতিটা ক্যাম্পেইনে যাচ্ছে</b>।',
+                    sc: bx("w", 12, 50, "WORKER", "") + w(20, 50, 44)
+                        + bx("x", 76, 50, "FCM", "token-not-registered")
+                        + dot("", 22, 70, 20, "travel 3.2s linear infinite")
+                        + dot("x", 22, 70, 32, "travel 3.2s linear infinite .3s")
+                        + dot("", 22, 70, 44, "travel 3.2s linear infinite .6s")
+                        + dot("x", 22, 70, 56, "travel 3.2s linear infinite .9s")
+                        + dot("", 22, 70, 68, "travel 3.2s linear infinite 1.2s")
+                        + dot("x", 22, 70, 80, "travel 3.2s linear infinite 1.5s")
+                        + txt("b", 76, 84, "অযথা API কল · অযথা সময়"),
+                    p: ['অ্যাপ আনইনস্টল, ডেটা ক্লিয়ার, বা মাসের পর মাস অ্যাপ না খোলা',
+                        'প্রতিটা ক্যাম্পেইনে ওগুলোতে <b>অযথা কল</b> যায়',
+                        'ছয় মাস পর অর্ধেক টোকেনই মরা হতে পারে']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ১৭", chip: "সমাধান",
+                    h: 'মরা টোকেন <em>নিভিয়ে দিই</em> — ডিলিট করি না',
+                    s: 'FCM নিজেই বলে দেয় কোন টোকেনটা আর নেই। সেগুলো জমিয়ে <span class="mono">isValid = false</span> করে দিই। <b>পরের ক্যাম্পেইনে ওগুলো কোয়েরিতেই আসবে না।</b>',
+                    sc: bx("w", 12, 50, "WORKER", "") + w(20, 50, 26)
+                        + bx("g", 50, 50, "FCM", "প্রতিটার আলাদা রেজাল্ট") + w(58, 50, 16)
+                        + bx("p", 84, 50, "isValid = false", "ডিলিট না, নিভিয়ে দেওয়া")
+                        + dot("", 22, 45, 38, "travel 3.4s linear infinite")
+                        + dot("x", 22, 45, 62, "travel 3.4s linear infinite .4s")
+                        + dot("x", 60, 78, 62, "travel 3.4s linear infinite 1.6s")
+                        + dot("g", 60, 78, 38, "travel 3.4s linear infinite 1.2s")
+                        + txt("o", 50, 82, "প্রতিটা ক্যাম্পেইন টোকেন টেবিলকে একটু একটু করে সুস্থ করে"),
+                    p: ['দুইটা এরর কোড খুঁজি — <span class="mono">token-not-registered</span> আর <span class="mono">invalid-token</span>',
+                        'ডিলিট করি না, কারণ তাহলে <b>কতজন অ্যাপ ছেড়ে গেছে</b> সেই হিসাবটা হারাত',
+                        'এক <span class="mono">updateMany</span>-তে সবগুলো একসাথে']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ১৮", chip: "নতুন সমস্যা",
+                    h: 'পুশ তো গেল — এখন <em>৫ লাখ ইউজার অ্যাপ খুলল</em>',
+                    s: 'নোটিফিকেশন পেয়ে সবাই প্রায় একসাথে অ্যাপ খুলবে, নোটিফিকেশন লিস্ট দেখবে, বারবার রিফ্রেশ করবে। <b>ব্রডকাস্টের ঠিক পরের এক মিনিটই সবচেয়ে বড় ঢেউ।</b>',
+                    sc: field(6, 18, 5, 4, 3.6, 20, "q", 2.4) + txt("", 14, 94, "৫ লাখ ইউজার")
+                        + w(24, 50, 26, "bd") + bx("", 36, 50, "API", "অথ + পারমিশন + লিস্ট")
+                        + w(44, 50, 24, "bd")
+                        + bx("x", 80, 50, "POSTGRES", "প্রতিটায় ৩–৪টা কোয়েরি")
+                        + burst("", 26, 72, 22, 6, 11, 1.9, .04)
+                        + stm("", 62, 50, "OVERLOAD", "flash 1.9s linear infinite"),
+                    p: ['প্রতিটা প্রোটেক্টেড রিকোয়েস্টে <b>৩–৪টা কোয়েরি</b> — শুধু "তুমি কে, তোমার অ্যাক্সেস আছে কি" জানতেই',
+                        'নোটিফিকেশন পাঠানোর <b>ঠিক পরেই</b> সবচেয়ে বড় ট্রাফিক',
+                        'পাঠানোর সমস্যা মিটল, এবার <b>পড়ার সমস্যা</b>']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ১৯", chip: "সমাধান",
+                    h: 'উত্তরটা <em>Redis-এ</em> রেখে দিই',
+                    s: 'একবার ডাটাবেজ থেকে পড়ে উত্তরটা Redis-এ রাখি, একটা মেয়াদ সহ। পরের হাজারটা রিকোয়েস্ট <b>ডাটাবেজের ধারেকাছেও যায় না</b>।',
+                    sc: field(6, 18, 5, 4, 3.6, 20, "q", 2.4)
+                        + w(24, 50, 20) + bx("r", 44, 50, "REDIS", "freshUntil + TTL")
+                        + w(52, 50, 18, "d") + bx("p", 82, 50, "POSTGRES", "প্রায় বসে থাকে")
+                        + dot("", 26, 40, 26, "back 2.4s linear infinite")
+                        + dot("", 26, 40, 42, "back 2.4s linear infinite .4s")
+                        + dot("", 26, 40, 58, "back 2.4s linear infinite .8s")
+                        + dot("", 26, 40, 74, "back 2.4s linear infinite 1.2s")
+                        + dot("p", 54, 78, 50, "travel 14s linear infinite 4s")
+                        + txt("o", 44, 84, "অথ চেক এখন ০টা DB কোয়েরিতে"),
+                    p: ['TTL ঠিক করি <b>গুরুত্ব দিয়ে</b> — নোটিফিকেশন ফিড ২০s, অথ ৬০s, পারমিশন ২ মিনিট',
+                        'অথ চেক এখন <b>শূন্য ডাটাবেজ কোয়েরিতে</b> শেষ',
+                        'এটা এক এন্ডপয়েন্টের লাভ না — <b>সব এন্ডপয়েন্টের</b>']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ২০", chip: "নতুন সমস্যা",
+                    h: 'ক্যাশ <em>এক্সপায়ার হওয়ার মুহূর্তে</em>',
+                    s: 'TTL শেষ হলো। ঠিক সেই সেকেন্ডে হাজার হাজার রিকোয়েস্ট এলো — সবাই মিস পেল, আর <b>সবাই একসাথে ডাটাবেজে গেল</b>। একেই বলে cache stampede।',
+                    sc: bx("x", 12, 50, "CACHE", "এইমাত্র এক্সপায়ার") + w(20, 50, 58, "bd")
+                        + bx("x", 84, 50, "POSTGRES", "১০,০০০ একই কোয়েরি")
+                        + burst("", 22, 78, 16, 7, 10, 1.8, .03)
+                        + stm("", 50, 50, "STAMPEDE", "flash 1.8s linear infinite"),
+                    p: ['১০,০০০ রিকোয়েস্ট = <b>১০,০০০ হুবহু একই কোয়েরি</b>, এক সেকেন্ডে',
+                        'ক্যাশ যত ভালো কাজ করে, <b>ধাক্কাটা তত বড়</b> হয়',
+                        'ক্যাশ থাকা সত্ত্বেও ডাটাবেজ পড়ে যেতে পারে']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ২১", chip: "সমাধান",
+                    h: '<em>একজন</em> ডাটাবেজে যায়, বাকিরা অপেক্ষা করে',
+                    s: 'তিন স্তর একসাথে: এক প্রসেসে <span class="mono">singleFlight</span>, প্রসেসের বাইরে <b>Redis লক</b>, আর বাকিরা ৪০–১০০ms এলোমেলো গ্যাপে ক্যাশ চেক করতে থাকে।',
+                    sc: bx("x", 11, 50, "CACHE", "মিস") + w(18, 50, 18)
+                        + bx("r", 42, 50, "SET NX", "একজনই OK") + w(50, 50, 20)
+                        + bx("p", 80, 50, "POSTGRES", "১টা কোয়েরি")
+                        + dot("", 20, 38, 50, "keep 4s linear infinite")
+                        + dot("g", 52, 76, 50, "travel 4s linear infinite 1.3s")
+                        + hold("", 34, 20, .1, 4) + hold("", 39, 20, .3, 4) + hold("", 44, 20, .5, 4) + hold("", 49, 20, .7, 4)
+                        + hold("", 34, 80, .2, 4) + hold("", 39, 80, .4, 4) + hold("", 44, 80, .6, 4) + hold("", 49, 80, .8, 4)
+                        + txt("r", 42, 92, "বাকিরা ৪০–১০০ms পরপর চেক করছে"),
+                    p: ['<span class="mono">singleFlight</span> — এক প্রসেসের ভেতর সবাই <b>একটাই Promise</b> ভাগ করে',
+                        '<b>Redis লক</b> — ছয় ইনস্ট্যান্সের মধ্যে একজনই DB-তে যায়',
+                        'লোডার ধীর হলে <span class="mono">heartbeat</span> লকের মেয়াদ বাড়ায়, যাতে লক ছুটে না যায়']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ২২", chip: "নতুন সমস্যা",
+                    h: 'সব key <em>একই সেকেন্ডে</em> এক্সপায়ার করে',
+                    s: 'ব্রডকাস্টের পর সব ক্যাশ প্রায় একই মুহূর্তে ভরেছিল। TTL একই, তাই সেগুলো <b>একই মুহূর্তে মরেও যায়</b> — আর প্রতি ৩০ সেকেন্ডে একটা করে ঢেউ আসে।',
+                    sc: txt("b", 50, 14, "সব key একসাথে ভরেছে → একসাথেই এক্সপায়ার")
+                        + w(6, 90, 88) + col(RED, 12, 80, 0, 4) + col(RED, 20, 10, 0, 4) + col(RED, 28, 10, 0, 4)
+                        + col(RED, 36, 10, 0, 4) + col(RED, 44, 80, .1, 4) + col(RED, 52, 10, 0, 4) + col(RED, 60, 10, 0, 4)
+                        + col(RED, 68, 10, 0, 4) + col(RED, 76, 80, .2, 4) + col(RED, 84, 10, 0, 4)
+                        + txt("b", 50, 97, "প্রতি TTL-এ একটা করে স্পাইক"),
+                    p: ['একসাথে লেখা হাজারটা key-এর <b>TTL-ও একই</b>',
+                        'তাই ডাটাবেজের লোড <b>সমান না, ঢেউয়ের মতো</b>',
+                        'প্রতিটা ঢেউ আবার stampede-এর ঝুঁকি নিয়ে আসে']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ২৩", chip: "সমাধান",
+                    h: 'TTL-এ <em>±১০% এলোমেলো</em> মিশিয়ে দিই',
+                    s: '৩০ সেকেন্ড না দিয়ে ২৭ থেকে ৩৩ সেকেন্ডের মধ্যে যেকোনো একটা। ছোট পরিবর্তন — কিন্তু এতে <b>এক্সপায়ার ছড়িয়ে যায়</b>, আর ঢেউটা সমান স্রোত হয়ে যায়।',
+                    sc: txt("o", 50, 14, "applyJitter(ttl, 0.1)  →  ২৭s … ৩৩s")
+                        + w(6, 90, 88) + col(GRN, 12, 30, 0, 4) + col(GRN, 20, 26, 0, 4) + col(GRN, 28, 32, 0, 4)
+                        + col(GRN, 36, 28, 0, 4) + col(GRN, 44, 30, 0, 4) + col(GRN, 52, 27, 0, 4) + col(GRN, 60, 31, 0, 4)
+                        + col(GRN, 68, 28, 0, 4) + col(GRN, 76, 30, 0, 4) + col(GRN, 84, 27, 0, 4)
+                        + txt("o", 50, 97, "লোড সমান — আর কোনো স্পাইক নেই"),
+                    p: ['<span class="mono">freshTtl ± ১০%</span> — প্রতিটা key আলাদা সময়ে মরে',
+                        'ডাটাবেজের লোড <b>ঢেউ থেকে সমান স্রোতে</b> বদলে যায়',
+                        'তিন লাইনের কোড, কিন্তু প্রোডাকশনে পার্থক্যটা বিশাল']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ২৪", chip: "নতুন সমস্যা",
+                    h: 'কোর্স এডিট হলে ক্যাশ <em>কীভাবে</em> মুছব',
+                    s: 'অ্যাডমিন একটা কোর্সের নাম বদলাল। কিন্তু ওই কোর্স <b>কোন কোন ক্যাশ key-তে আছে</b> — সেটা তো জানা নেই। কোয়েরি, হোস্ট, পেজ মিলিয়ে হাজার হাজার key।',
+                    sc: bx("x", 50, 14, "REDIS", "SCAN চলছে — সব কমান্ড লাইনে")
+                        + field(8, 46, 12, 2, 7.2, 26, "r", 3.6)
+                        + `<div class="wire v" style="left:4%;top:36%;height:44%;background:var(--bad);animation:sweepx 4s linear infinite"></div>`
+                        + txt("b", 50, 92, "SCAN — Redis একটাই থ্রেডে চলে, তাই বাকি সব থেমে থাকে"),
+                    p: ['key-এর নাম <b>আগে থেকে জানা নেই</b>',
+                        '<span class="mono">SCAN</span> চলার সময় বাকি সব কমান্ড <b>অপেক্ষা করে</b>',
+                        'ইনভ্যালিডেট করতে গিয়ে <b>পুরো সাইট ধীর</b> হয়ে যেত']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ২৫", chip: "সমাধান",
+                    h: 'মুছি না — <em>ভার্সন বাড়াই</em>',
+                    s: 'ভার্সন নম্বরটা key-এর নামের <b>ভেতরেই</b> বসিয়ে রেখেছি। কোর্স এডিট হলে শুধু একটা <span class="mono">INCR</span> — পরের রিকোয়েস্ট আর পুরনো নামটা চাইবেই না।',
+                    sc: bx("r", 50, 14, "INCR …:version", "41 → 42")
+                        + bx("", 26, 44, "…:list:…:v41", "পুরনো") + bx("g", 70, 44, "…:list:…:v42", "নতুন")
+                        + `<div style="position:absolute;left:0;right:0;top:74%;animation:dimOut 5s linear infinite">`
+                        + field(10, 0, 11, 1, 7.4, 0, "r", 3) + `</div>`
+                        + txt("b", 50, 90, "পুরনো key অনাথ — TTL শেষে Redis নিজেই মুছে দেবে"),
+                    p: ['<b>একটা কমান্ড</b>, শূন্যটা SCAN',
+                        'পুরনো key কেউ আর চায় না — তাই <b>অনাথ হয়ে যায়</b>',
+                        'TTL শেষে Redis নিজেই পরিষ্কার করে — <b>আমাদের কিছু করতে হয় না</b>']
+                },
+
+                {
+                    k: "prob", eye: "ধাপ ২৬", chip: "শেষ সমস্যা",
+                    h: '<em>Redis নিজেই</em> ধীর হয়ে গেলে',
+                    s: 'পুরো সিস্টেমটা এখন Redis-এর ওপর দাঁড়িয়ে। কিন্তু Redis যদি ধীর হয়ে যায়? ডিফল্ট ক্লায়েন্ট <b>অসীমকাল চেষ্টা করতে থাকে</b> — আর প্রতিটা রিকোয়েস্ট ঝুলে যায়।',
+                    sc: bx("", 13, 50, "API", "") + w(21, 50, 32, "bd")
+                        + bx("x", 64, 50, "REDIS", "সাড়া দিচ্ছে না")
+                        + hold("", 34, 26, 0, 3.6) + hold("", 40, 34, .25, 3.6) + hold("", 46, 26, .5, 3.6)
+                        + hold("", 34, 74, .15, 3.6) + hold("", 40, 66, .4, 3.6) + hold("", 46, 74, .65, 3.6)
+                        + stm("", 40, 50, "সব ঝুলে আছে", "flash 3.6s linear infinite")
+                        + txt("b", 64, 80, "খালি কানেকশনই আর থাকে না"),
+                    p: ['ডিফল্ট <span class="mono">ioredis</span> <b>অসীমকাল</b> রিট্রাই করে',
+                        'প্রতিটা রিকোয়েস্ট আটকে থাকে — Node-এর হাতে <b>খালি কানেকশন থাকে না</b>',
+                        'ক্যাশ ধীর হওয়ার কারণে <b>পুরো সাইট কার্যত ডাউন</b>']
+                },
+
+                {
+                    k: "sol", eye: "ধাপ ২৭", chip: "সমাধান",
+                    h: '<em>১৫০০ms</em> এ হাল ছেড়ে সোজা ডাটাবেজে',
+                    s: 'ক্যাশের জন্য <b>আলাদা একটা কানেকশন</b> রাখি, যার টাইমআউট দেড় সেকেন্ড আর রিট্রাই মাত্র একবার। ফেল করলে <span class="mono">catch</span> ধরে সরাসরি ডাটাবেজ থেকে পড়ে।',
+                    sc: bx("", 12, 50, "API", "try / catch") + w(20, 26, 22, "d")
+                        + bx("x", 50, 26, "REDIS", "commandTimeout 1500ms")
+                        + w(20, 74, 38) + bx("p", 68, 74, "POSTGRES", "loader()")
+                        + w(76, 74, 10) + bx("g", 92, 74, "উত্তর", "")
+                        + dot("x", 22, 46, 26, "back 4.4s linear infinite")
+                        + dot("p", 22, 64, 74, "travel 4.4s linear infinite 1.7s")
+                        + dot("g", 70, 90, 74, "travel 4.4s linear infinite 3s")
+                        + txt("o", 50, 92, "সাইট ধীর হয় — বন্ধ হয় না"),
+                    p: ['ক্যাশ একটা <b>অপ্টিমাইজেশন, নির্ভরতা নয়</b>',
+                        'প্রতিটা <span class="mono">getCached…</span> ফাংশনে <span class="mono">try/catch</span>, catch-এ <span class="mono">loader()</span>',
+                        'তবে <b>কিউ আর স্ট্রিম</b> Redis ছাড়া চলবে না — ওখানে এটা আসল নির্ভরতা']
+                },
+
+                {
+                    k: "setup", eye: "শেষ", chip: "পুরো পথ",
+                    h: 'শুরুর সেই <em>এক ক্লিক</em> — শেষ পর্যন্ত',
+                    s: 'একটা সহজ কাজ ছিল: ৫ লাখ ইউজারকে একটা নোটিফিকেশন পাঠানো। প্রতিটা সমাধান একটা নতুন সমস্যা এনেছে, আর সেই চেইনটাই <b>পুরো আর্কিটেকচারটা</b> বানিয়ে দিয়েছে।',
+                    sc: bx("", 7, 50, "ADMIN", "") + w(12, 50, 7)
+                        + bx("", 23, 50, "API", "৪০ms") + w(29, 50, 7)
+                        + bx("r", 40, 50, "QUEUE", "") + w(46, 50, 7)
+                        + bx("w", 57, 50, "WORKER", "লক · পেজ · ব্যাচ · থ্রটল") + w(66, 50, 6)
+                        + bx("", 78, 50, "FCM", "") + w(83, 50, 6)
+                        + bx("g", 93, 50, "৫ লাখ", "~১০০s")
+                        + dot("", 13, 21, 50, "travel 3s linear infinite")
+                        + dot("r", 30, 38, 50, "travel 3s linear infinite .5s")
+                        + dot("w", 47, 55, 50, "travel 3s linear infinite 1s")
+                        + dot("", 67, 76, 50, "travel 3s linear infinite 1.5s")
+                        + dot("g", 84, 91, 50, "travel 3s linear infinite 2s")
+                        + txt("r", 50, 84, "আর ফিরতি পথে — ক্যাশ, লক, jitter, ভার্সন, fallback"),
+                    p: ['<b>কিউ</b> দেয় নিরাপত্তা · <b>ব্যাচ আর থ্রটল</b> দেয় গতি',
+                        '<b>লক</b> দেয় বিশ্বাস · <b>ক্যাশ আর ভার্সন</b> দেয় স্কেল',
+                        'কোনোটাই শুরুতে ছিল না — <b>প্রতিটা একটা সমস্যার উত্তর</b>']
+                },
+            );
+
+            /* ══════════════ render + page control ═════════════════════ */
+            const deck = document.getElementById("deck");
+            const rail = document.getElementById("rail");
+            const bn = (v) => String(v).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d]);
+
+            P.forEach((pg, n) => {
+                const el = document.createElement("section");
+                el.className = `page ${pg.k}`;
+                el.innerHTML =
+                    `<div class="eye"><span class="chip">${pg.chip}</span>` +
+                    `<span class="step">${pg.eye} · ${bn(n + 1)}/${bn(P.length)}</span></div>` +
+                    `<h2>${pg.h}</h2>` +
+                    `<p class="sub">${pg.s}</p>` +
+                    `<div class="scene">${pg.sc}</div>` +
+                    `<ul class="pts">${pg.p.map((t) => `<li>${t}</li>`).join("")}</ul>`;
+                deck.insertBefore(el, deck.querySelector(".nav"));
+
+                const d = document.createElement("button");
+                d.className = "pd"; d.type = "button"; d.dataset.k = pg.k;
+                d.setAttribute("aria-label", `${pg.chip} — ${pg.eye}`);
+                d.addEventListener("click", () => show(n));
+                rail.appendChild(d);
+            });
+
+            const pages = [...deck.querySelectorAll(".page")];
+            const pds = [...rail.children];
+            let i = 0;
+
+            function show(n) {
+                i = (n + pages.length) % pages.length;
+                pages.forEach((p, k) => p.classList.toggle("on", k === i));
+                pds.forEach((d, k) => d.classList.toggle("on", k === i));
+                deck.dataset.k = P[i].k;
+            }
+
+            document.getElementById("prevBtn").addEventListener("click", () => show(i - 1));
+            document.getElementById("nextBtn").addEventListener("click", () => show(i + 1));
+            document.addEventListener("keydown", (e) => {
+                const k = e.key;
+                if (k === "ArrowRight" || k === " " || k === "PageDown") { e.preventDefault(); show(i + 1); }
+                else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); show(i - 1); }
+                else if (k === "Home") show(0);
+                else if (k === "End") show(pages.length - 1);
+                else if (k === "f" || k === "F") {
+                    document.fullscreenElement ? document.exitFullscreen() : deck.requestFullscreen?.();
+                }
+            });
+
+            show(0);
+        })();
+    </script>
+
+</body>
+
+</html>

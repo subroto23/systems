@@ -8,6 +8,8 @@
   const statsEl = document.getElementById("stats");
   const themeToggle = document.getElementById("themeToggle");
   const yearEl = document.getElementById("year");
+  const navToggle = document.getElementById("navToggle");
+  const mainNav = document.getElementById("mainNav");
 
   const STATUS_LABEL = {
     live: "লাইভ",
@@ -200,10 +202,31 @@
     document.querySelectorAll(".reveal:not(.reveal-visible)").forEach(el => revealObserver.observe(el));
   }
 
+  // ---------- Mobile nav ----------
+  function initMobileNav() {
+    navToggle.addEventListener("click", () => {
+      const open = mainNav.classList.toggle("nav-open");
+      navToggle.setAttribute("aria-expanded", String(open));
+    });
+    mainNav.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", () => {
+        mainNav.classList.remove("nav-open");
+        navToggle.setAttribute("aria-expanded", "false");
+      });
+    });
+    document.addEventListener("click", e => {
+      if (!mainNav.classList.contains("nav-open")) return;
+      if (mainNav.contains(e.target) || navToggle.contains(e.target)) return;
+      mainNav.classList.remove("nav-open");
+      navToggle.setAttribute("aria-expanded", "false");
+    });
+  }
+
   // ---------- Init ----------
   function init() {
     initTheme();
     themeToggle.addEventListener("click", toggleTheme);
+    initMobileNav();
     yearEl.textContent = new Date().getFullYear();
 
     initRevealObserver();

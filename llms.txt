@@ -1,14 +1,12 @@
 # Systems Hub
 
-> প্রডাকশন-গ্রেড সিস্টেম ও প্রজেক্টসমূহের কেন্দ্রীয় ডিরেক্টরি। প্রতিটি লিংক একটি স্বতন্ত্র, ডিপ্লয়কৃত সিস্টেমের হোমপেজে যায়।
+> প্রডাকশন-গ্রেড সিস্টেম ও প্রজেক্টসমূহের কেন্দ্রীয় ডিরেক্টরি। প্রতিটি লিংক একটি স্বতন্ত্র সিস্টেমের বিস্তারিত পেজে যায় (কিছু বাহ্যিক সাবডোমেইনে, কিছু এই রিপোর ভেতরে projects/ ফোল্ডারে)।
 
 এই ফাইলটি AI/LLM-চালিত সার্চ ও ক্রলারদের জন্য — প্রতিটি সিস্টেমের নাম, কাজ, এবং লিংক এক জায়গায়।
 নতুন সিস্টেম অ্যাড করলে assets/js/projects.js এর পাশাপাশি এই ফাইলেও একটা লাইন যোগ করুন।
 
 ## Systems
 
-- [Inventory Management System](https://inventory.subromart.com): রিয়েল-টাইম মাল্টি-ওয়্যারহাউজ স্টক ট্র্যাকিং, লো-স্টক অ্যালার্ট, সাপ্লায়ার ও পারচেজ অর্ডার ম্যানেজমেন্ট।
-- [Billing & Invoicing System](https://billing.subromart.com): স্বয়ংক্রিয় কাস্টমার ইনভয়েস জেনারেশন, পেমেন্ট ট্র্যাকিং, ট্যাক্স ক্যালকুলেশন ও আর্থিক রিপোর্টিং।
-- [Auth Gateway](https://auth.subromart.com): সেন্ট্রালাইজড SSO লগইন, রোল-বেজড অ্যাক্সেস কন্ট্রোল ও সিকিউর টোকেন ম্যানেজমেন্ট।
-- [Customer CRM](https://crm.subromart.com): লিড ট্র্যাকিং, কাস্টমার হিস্ট্রি, ফলো-আপ রিমাইন্ডার ও সেলস পাইপলাইন।
-- [Analytics Dashboard](https://analytics.subromart.com): সব সিস্টেমের ডেটা একত্র করে রিয়েল-টাইম চার্ট, KPI ও ট্রেন্ড অ্যানালাইসিস।
+- [Push Notification System](https://systems.subromart.com/projects/notification/): queue-based (BullMQ) আর্কিটেকচারে ৫ লাখ+ ইউজারকে batch-এ স্কেলেবল পুশ নোটিফিকেশন — cursor pagination, throttling, dedup lock, retry, dead-token cleanup, cache-stampede প্রোটেকশনসহ।
+- [৫ লাখ ইউজারের গল্প](https://systems.subromart.com/projects/redis/): Redis দিয়ে স্কেল করার ইন্টারঅ্যাক্টিভ, অ্যানিমেটেড গল্প — cache, queue, distributed lock, rate-limiting সমস্যা ও সমাধান ধাপে ধাপে।
+- [প্রোডাকশনে Redis](https://systems.subromart.com/projects/how_to_use_redis/): Redis প্রোডাকশনে সেটআপ ও মেইনটেইন করার প্র্যাকটিক্যাল গাইড — persistence, memory eviction, connection pooling, কমন পিটফলসহ।
