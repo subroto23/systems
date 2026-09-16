@@ -1,0 +1,17 @@
+{
+  "name": "Systems Hub",
+  "short_name": "SystemsHub",
+  "description": "প্রডাকশন-গ্রেড সিস্টেম ও প্রজেক্টসমূহের কেন্দ্রীয় ডিরেক্টরি।",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0d14",
+  "theme_color": "#0b0f19",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
