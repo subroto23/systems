@@ -187,9 +187,13 @@ function injectSeo(projects) {
     // সেটা নির্ভুলভাবে চেক করা যায় (নাহলে আগের রানের ইনজেক্টেড title-কেও আসল title ভেবে বসবে)।
     const prevStart = html.indexOf(SEO_START);
     if (prevStart !== -1) {
-      const prevEnd = html.indexOf(SEO_END, prevStart);
+      let prevEnd = html.indexOf(SEO_END, prevStart);
       if (prevEnd !== -1) {
-        html = html.slice(0, prevStart) + html.slice(prevEnd + SEO_END.length);
+        prevEnd += SEO_END.length;
+        // আগের রানে ব্লকের ঠিক পরে যে "\n" জোড়া হয়েছিল, সেটাও সরিয়ে ফেলি —
+        // নাহলে প্রতি রানে একটা করে ফাঁকা লাইন জমতে থাকবে (idempotent নয়)।
+        if (html[prevEnd] === "\n") prevEnd += 1;
+        html = html.slice(0, prevStart) + html.slice(prevEnd);
       }
     }
 
@@ -203,6 +207,53 @@ function injectSeo(projects) {
     const block = seoBlock(p, !hasTitle);
     html = html.slice(0, headEnd) + `${block}\n` + html.slice(headEnd);
 
+    fs.writeFileSync(filePath, html, "utf8");
+  }
+}
+
+const BACKLINK_START = "<!-- AUTO-BACKLINK:START (scripts/generate-projects.js জেনারেট করে — সরাসরি এডিট করবেন না) -->";
+const BACKLINK_END = "<!-- AUTO-BACKLINK:END -->";
+
+function backLinkBlock() {
+  return `${BACKLINK_START}
+<a href="../../index.html" aria-label="Systems Hub-এ ফিরে যান" style="position:fixed;top:14px;left:14px;z-index:2147483647;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:rgba(11,13,20,.82);color:#eef0f6;font:600 13px/1.2 'Hind Siliguri',system-ui,-apple-system,sans-serif;text-decoration:none;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);box-shadow:0 4px 16px rgba(0,0,0,.35)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Systems Hub</a>
+${BACKLINK_END}`;
+}
+
+function injectBackLink(projects) {
+  for (const p of projects) {
+    const filePath = path.join(PROJECTS_DIR, p.id, "index.html");
+    if (!fs.existsSync(filePath)) continue;
+
+    let html = fs.readFileSync(filePath, "utf8");
+
+    let prevStart = html.indexOf(BACKLINK_START);
+    if (prevStart !== -1) {
+      const prevEnd = html.indexOf(BACKLINK_END, prevStart);
+      if (prevEnd !== -1) {
+        // ইনজেক্ট করার সময় ব্লকের ঠিক আগে একটা "\n" জোড়া হয়েছিল, সেটাও সরিয়ে
+        // ফেলি — নাহলে প্রতি রানে একটা করে ফাঁকা লাইন জমতে থাকবে।
+        if (html[prevStart - 1] === "\n") prevStart -= 1;
+        html = html.slice(0, prevStart) + html.slice(prevEnd + BACKLINK_END.length);
+      }
+    }
+
+    // পেজে আগে থেকেই কারো হাতে বানানো "← Systems Hub" ব্যাক লিংক থাকলে
+    // (যেমন notification/index.html-এ আছে) সেটাকেই রাখি, ডুপ্লিকেট বসাই না।
+    if (/href=["']\.\.\/\.\.\/index\.html["']/.test(html)) {
+      fs.writeFileSync(filePath, html, "utf8");
+      continue;
+    }
+
+    const bodyMatch = html.match(/<body[^>]*>/);
+    if (!bodyMatch) {
+      console.warn(`⚠️  projects/${p.id}/index.html-এ <body> পাওয়া যায়নি — ব্যাক লিংক যোগ করা গেল না।`);
+      fs.writeFileSync(filePath, html, "utf8");
+      continue;
+    }
+
+    const insertAt = bodyMatch.index + bodyMatch[0].length;
+    html = html.slice(0, insertAt) + "\n" + backLinkBlock() + html.slice(insertAt);
     fs.writeFileSync(filePath, html, "utf8");
   }
 }
@@ -241,7 +292,8 @@ function main() {
   fs.writeFileSync(SITEMAP_FILE, renderSitemap(projects), "utf8");
   fs.writeFileSync(LLMS_FILE, renderLlmsTxt(projects), "utf8");
   injectSeo(projects);
-  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো, এবং প্রতিটা প্রজেক্ট পেজে SEO/favicon ইনজেক্ট করা হলো।`);
+  injectBackLink(projects);
+  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো, এবং প্রতিটা প্রজেক্ট পেজে SEO/favicon/ব্যাক-লিংক ইনজেক্ট করা হলো।`);
 }
 
 main();
