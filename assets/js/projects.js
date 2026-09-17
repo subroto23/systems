@@ -96,12 +96,12 @@ const PROJECTS = [
   },
   {
     id: "project-auth-system",
-    title: "ASG Auth System",
-    tagline: "ASG-এর জন্য বানানো সেন্ট্রালাইজড Auth সিস্টেম",
+    title: "subrohub Auth System",
+    tagline: "subrohub-এর জন্য বানানো সেন্ট্রালাইজড Auth সিস্টেম",
     description: "মাল্টি-অ্যাপ এনভায়রনমেন্টে একটাই সেন্ট্রালাইজড Auth সিস্টেম দিয়ে লগইন, টোকেন ম্যানেজমেন্ট ও পারমিশন কন্ট্রোল কীভাবে হ্যান্ডেল করা হয়েছে তার প্র্যাকটিক্যাল ব্যাখ্যা।",
     url: "projects/project-auth-system/",
     category: "Security",
-    tags: ["auth","jwt","sso","security","asg"],
+    tags: ["auth","jwt","sso","security","subrohub"],
     status: "live",
     icon: "🛡️"
   },
