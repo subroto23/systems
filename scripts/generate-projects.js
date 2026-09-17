@@ -215,7 +215,23 @@ function injectSeo(projects) {
     }
 
     const headEnd = html.indexOf("</head>");
-    const hasTitle = /<title[\s>]/i.test(html.slice(0, headEnd));
+    const existingHead = html.slice(0, headEnd);
+    const hasTitle = /<title[\s>]/i.test(existingHead);
+
+    // পেজে আগে থেকেই হাতে-লেখা description/canonical/og ট্যাগ থাকলে সতর্ক করি —
+    // নাহলে AUTO-SEO ব্লকের সাথে ডুপ্লিকেট মেটা ট্যাগ তৈরি হয়ে যাবে (যেমনটা
+    // notification/index.html-এ আগে হয়েছিল)।
+    const dupeChecks = [
+      ['meta name="description"', /<meta\s+name=["']description["']/i],
+      ['link rel="canonical"', /<link\s+rel=["']canonical["']/i],
+      ['meta property="og:', /<meta\s+property=["']og:/i]
+    ];
+    for (const [label, re] of dupeChecks) {
+      if (re.test(existingHead)) {
+        console.warn(`⚠️  projects/${p.id}/index.html-এ আগে থেকেই হাতে-লেখা ${label} ট্যাগ আছে — AUTO-SEO ব্লক যোগ হলে ডুপ্লিকেট হতে পারে, ম্যানুয়ালি চেক করুন।`);
+      }
+    }
+
     const block = seoBlock(p, !hasTitle);
     html = html.slice(0, headEnd) + `${block}\n` + html.slice(headEnd);
 
