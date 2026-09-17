@@ -171,6 +171,7 @@ ${includeTitle ? `<title>${escapeHtml(p.title)}</title>\n` : ""}<meta name="desc
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${escapeAttr(p.title)}">
 <meta name="twitter:description" content="${escapeAttr(p.tagline)}">
+<meta name="twitter:image" content="${SITE_ORIGIN}/assets/og-cover.png">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 ${SEO_END}`;
 }
@@ -207,10 +208,11 @@ function injectSeo(projects) {
 }
 
 function renderSitemap(projects) {
+  const today = new Date().toISOString().slice(0, 10);
   const urls = [
-    `  <url>\n    <loc>${SITE_ORIGIN}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>`,
+    `  <url>\n    <loc>${SITE_ORIGIN}/</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>`,
     ...projects.map(
-      p => `  <url>\n    <loc>${SITE_ORIGIN}/${p.url}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`
+      p => `  <url>\n    <loc>${SITE_ORIGIN}/${p.url}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`
     )
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`;
