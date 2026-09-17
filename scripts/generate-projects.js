@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 /**
- * projects/<slug>/meta.json ফাইলগুলো স্ক্যান করে assets/js/projects.js
- * অটোমেটিক জেনারেট করে। নতুন প্রজেক্ট অ্যাড করতে শুধু একটা ফোল্ডার বানান:
+ * projects/<slug>/meta.json ফাইলগুলো স্ক্যান করে:
+ *   1. assets/js/projects.js, sitemap.xml, llms.txt অটোমেটিক জেনারেট করে
+ *   2. প্রতিটা projects/<slug>/index.html-এর <head>-এ SEO ব্লক (title,
+ *      description, keywords, canonical, favicon, Open Graph, Twitter
+ *      card, JSON-LD) ইনজেক্ট করে — যাতে মূল হাবের favicon প্রতিটা
+ *      প্রজেক্ট পেজেও দেখা যায় এবং সার্চ ইঞ্জিন/AI এজেন্ট সহজে প্রতিটা
+ *      পেজ বুঝতে ও ইনডেক্স করতে পারে
+ *
+ * নতুন প্রজেক্ট অ্যাড করতে শুধু একটা ফোল্ডার বানান:
  *
  *   projects/<slug>/index.html   → প্রজেক্টের নিজস্ব পেজ
  *   projects/<slug>/meta.json    → হাব কার্ডের তথ্য (নিচে ফরম্যাট দেখুন)
@@ -14,8 +21,9 @@
  * }
  *
  * এরপর push করলেই GitHub Actions (.github/workflows/sync-projects.yml)
- * এই স্ক্রিপ্ট চালিয়ে assets/js/projects.js অটোমেটিক আপডেট ও কমিট করে দেয়।
+ * এই স্ক্রিপ্ট চালিয়ে সব ফাইল অটোমেটিক আপডেট ও কমিট করে দেয়।
  * লোকালি ম্যানুয়ালি রান করতেও পারেন: node scripts/generate-projects.js
+ * (স্ক্রিপ্টটা idempotent — বারবার চালালেও ডুপ্লিকেট ব্লক তৈরি হয় না।)
  */
 
 const fs = require("fs");
@@ -121,6 +129,83 @@ ${entries}
 `;
 }
 
+function escapeHtml(str) {
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function escapeAttr(str) {
+  return escapeHtml(str).replace(/"/g, "&quot;");
+}
+
+const SEO_START = "<!-- AUTO-SEO:START (scripts/generate-projects.js জেনারেট করে — সরাসরি এডিট করবেন না) -->";
+const SEO_END = "<!-- AUTO-SEO:END -->";
+
+function seoBlock(p, includeTitle) {
+  const url = `${SITE_ORIGIN}/${p.url}`;
+  const keywords = (p.tags || []).join(", ");
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: p.title,
+    description: p.description,
+    url,
+    applicationCategory: p.category,
+    isPartOf: { "@type": "CollectionPage", name: "Systems Hub", url: `${SITE_ORIGIN}/` },
+    author: { "@type": "Person", name: "Subroto Das" }
+  };
+
+  return `${SEO_START}
+${includeTitle ? `<title>${escapeHtml(p.title)}</title>\n` : ""}<meta name="description" content="${escapeAttr(p.description)}">
+<meta name="keywords" content="${escapeAttr(keywords)}">
+<meta name="author" content="Subroto Das">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="${url}">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="../../manifest.json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="${escapeAttr(p.title)}">
+<meta property="og:description" content="${escapeAttr(p.tagline)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE_ORIGIN}/assets/og-cover.png">
+<meta property="og:locale" content="bn_BD">
+<meta property="og:site_name" content="Systems Hub">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escapeAttr(p.title)}">
+<meta name="twitter:description" content="${escapeAttr(p.tagline)}">
+<script type="application/ld+json">${JSON.stringify(ld)}</script>
+${SEO_END}`;
+}
+
+function injectSeo(projects) {
+  for (const p of projects) {
+    const filePath = path.join(PROJECTS_DIR, p.id, "index.html");
+    if (!fs.existsSync(filePath)) continue;
+
+    let html = fs.readFileSync(filePath, "utf8");
+
+    // আগের AUTO-SEO ব্লক (থাকলে) সরিয়ে ফেলি, যাতে "head-এ আগে থেকেই <title> আছে কিনা"
+    // সেটা নির্ভুলভাবে চেক করা যায় (নাহলে আগের রানের ইনজেক্টেড title-কেও আসল title ভেবে বসবে)।
+    const prevStart = html.indexOf(SEO_START);
+    if (prevStart !== -1) {
+      const prevEnd = html.indexOf(SEO_END, prevStart);
+      if (prevEnd !== -1) {
+        html = html.slice(0, prevStart) + html.slice(prevEnd + SEO_END.length);
+      }
+    }
+
+    if (!html.includes("</head>")) {
+      console.warn(`⚠️  projects/${p.id}/index.html-এ </head> পাওয়া যায়নি — SEO ব্লক যোগ করা গেল না।`);
+      continue;
+    }
+
+    const headEnd = html.indexOf("</head>");
+    const hasTitle = /<title[\s>]/i.test(html.slice(0, headEnd));
+    const block = seoBlock(p, !hasTitle);
+    html = html.slice(0, headEnd) + `${block}\n` + html.slice(headEnd);
+
+    fs.writeFileSync(filePath, html, "utf8");
+  }
+}
+
 function renderSitemap(projects) {
   const urls = [
     `  <url>\n    <loc>${SITE_ORIGIN}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>`,
@@ -153,7 +238,8 @@ function main() {
   fs.writeFileSync(OUTPUT_FILE, render(projects), "utf8");
   fs.writeFileSync(SITEMAP_FILE, renderSitemap(projects), "utf8");
   fs.writeFileSync(LLMS_FILE, renderLlmsTxt(projects), "utf8");
-  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো।`);
+  injectSeo(projects);
+  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো, এবং প্রতিটা প্রজেক্ট পেজে SEO/favicon ইনজেক্ট করা হলো।`);
 }
 
 main();

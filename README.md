@@ -46,18 +46,25 @@ projects/
 
 তারপর `git add`, `commit`, `push` করুন main ব্রাঞ্চে — GitHub Actions (`.github/workflows/sync-projects.yml`) নিজে থেকেই `projects/*/meta.json` স্ক্যান করে `assets/js/projects.js` রিজেনারেট করে কমিট করে দেবে। মূল হাব পেজে (`index.html`) নতুন কার্ড, ফিল্টার চিপ ও সার্চ — সব অটোমেটিক আপডেট হয়ে যাবে। `url` ফিল্ড, `id` — কোনোটাই হাতে বসাতে হবে না, ফোল্ডারের নাম থেকেই তৈরি হয়।
 
+`sitemap.xml` ও `llms.txt`-ও একই স্ক্রিপ্ট থেকে অটো-জেনারেট হয় — এগুলোতেও হাতে কিছু যোগ করার দরকার নেই।
+
+### প্রতিটা প্রজেক্ট পেজে SEO + favicon — এটাও অটোমেটিক
+
+স্ক্রিপ্টটা প্রতিটা `projects/<slug>/index.html`-এর `<head>`-এ (একটা মার্ক করা `AUTO-SEO` ব্লকে) নিজে থেকে বসিয়ে দেয়:
+
+- `<title>`, `<meta name="description">`, `<meta name="keywords">` (মেটা.json থেকে)
+- মূল হাবের favicon (`../../assets/favicon.svg`) ও PWA manifest লিংক
+- `<link rel="canonical">` — নিজের সঠিক URL
+- Open Graph + Twitter Card ট্যাগ (শেয়ার করলে প্রিভিউ সুন্দর দেখাবে)
+- JSON-LD (`SoftwareApplication`, হাবের সাথে `isPartOf` লিংক করা) — যাতে Google, Bing ও AI এজেন্ট (ChatGPT/Claude search ইত্যাদি) পেজটা সহজে বুঝতে ও ইনডেক্স করতে পারে
+
+এটা হাতে লেখা কিছুর দরকার নেই — `meta.json` ঠিকঠাক থাকলেই এই পুরো ব্লক অটো বসে যায়, এবং বারবার রান করলেও ব্লকটা রিপ্লেস হয় (ডুপ্লিকেট হয় না)।
+
 লোকালি টেস্ট করতে চাইলে push না করেও চালাতে পারেন:
 
 ```bash
 node scripts/generate-projects.js
 ```
-
-প্রতিটা প্রজেক্ট পেজে সুবিধার জন্য রাখুন:
-- `<title>` ও `<meta name="description">` — নিজের মতো করে
-- `<link rel="canonical" href="https://systems.subromart.com/projects/<slug>/">`
-- একটা "← Systems Hub" ব্যাক লিংক (`../../index.html`), `projects/notification/index.html`-এ যেভাবে আছে
-
-`sitemap.xml` ও `llms.txt`-ও একই স্ক্রিপ্ট থেকে অটো-জেনারেট হয় — এগুলোতেও হাতে কিছু যোগ করার দরকার নেই।
 
 ## লোকালি টেস্ট করা
 
@@ -89,6 +96,6 @@ git push -u origin main
 - ক্যাটাগরি ফিল্টার চিপ
 - Dark/Light থিম (সিস্টেম প্রেফারেন্স + ম্যানুয়াল টগল, লোকাল স্টোরেজে মনে রাখে)
 - Responsive — মোবাইল থেকে ডেস্কটপ
-- SEO: meta tags, Open Graph, Twitter Card, JSON-LD (`CollectionPage` + প্রতিটি প্রজেক্টের জন্য `SoftwareApplication` ItemList — dynamically injected)
+- SEO: meta tags, Open Graph, Twitter Card, JSON-LD — মূল হাব পেজে ও প্রতিটা প্রজেক্ট পেজে আলাদা আলাদাভাবে, অটো-জেনারেটেড
 - AI সার্চ: `llms.txt` কনভেনশন অনুসরণ করে
 - Accessible: skip-link, aria-labels, semantic HTML
