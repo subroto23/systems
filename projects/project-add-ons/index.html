@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AddOn Service System — Deep Dive</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07101f;
+            --surface: #0d1b2e;
+            --surface2: #112038;
+            --border: #1e3450;
+            --border2: #2a4a6e;
+            --accent: #3b82f6;
+            --accent2: #6366f1;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --purple: #8b5cf6;
+            --cyan: #06b6d4;
+            --pink: #ec4899;
+            --orange: #f97316;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Nav */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 32px;
+            background: rgba(7, 16, 31, 0.95);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .nav-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text2);
+        }
+
+        .nav-counter {
+            font-size: 12px;
+            color: var(--text3);
+            font-family: var(--mono);
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border2);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+            transform: scale(1.3);
+        }
+
+        /* Slides */
+        .slides {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 40px 40px;
+            opacity: 0;
+            transform: translateX(60px);
+            transition: all .6s cubic-bezier(.4, 0, .2, 1);
+            pointer-events: none;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+
+        .slide.exit {
+            opacity: 0;
+            transform: translateX(-60px);
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .tag-blue {
+            background: rgba(59, 130, 246, .15);
+            border: 1px solid rgba(59, 130, 246, .3);
+            color: #60a5fa;
+        }
+
+        .tag-green {
+            background: rgba(16, 185, 129, .15);
+            border: 1px solid rgba(16, 185, 129, .3);
+            color: #34d399;
+        }
+
+        .tag-purple {
+            background: rgba(139, 92, 246, .15);
+            border: 1px solid rgba(139, 92, 246, .3);
+            color: #a78bfa;
+        }
+
+        .tag-yellow {
+            background: rgba(245, 158, 11, .15);
+            border: 1px solid rgba(245, 158, 11, .3);
+            color: #fbbf24;
+        }
+
+        .tag-red {
+            background: rgba(239, 68, 68, .15);
+            border: 1px solid rgba(239, 68, 68, .3);
+            color: #f87171;
+        }
+
+        .tag-cyan {
+            background: rgba(6, 182, 212, .15);
+            border: 1px solid rgba(6, 182, 212, .3);
+            color: #22d3ee;
+        }
+
+        .tag-orange {
+            background: rgba(249, 115, 22, .15);
+            border: 1px solid rgba(249, 115, 22, .3);
+            color: #fb923c;
+        }
+
+        /* Typography */
+        .slide-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .slide-title {
+            font-size: clamp(26px, 4vw, 44px);
+            font-weight: 800;
+            line-height: 1.15;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .slide-sub {
+            font-size: clamp(14px, 1.8vw, 18px);
+            color: var(--text2);
+            text-align: center;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent), var(--purple), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-text-2 {
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-text-3 {
+            background: linear-gradient(135deg, var(--yellow), var(--orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .card-accent {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, .05);
+        }
+
+        .card-green {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, .05);
+        }
+
+        .card-purple {
+            border-color: var(--purple);
+            background: rgba(139, 92, 246, .05);
+        }
+
+        .card-yellow {
+            border-color: var(--yellow);
+            background: rgba(245, 158, 11, .05);
+        }
+
+        .card-red {
+            border-color: var(--red);
+            background: rgba(239, 68, 68, .05);
+        }
+
+        .card-orange {
+            border-color: var(--orange);
+            background: rgba(249, 115, 22, .05);
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 14px;
+            width: 100%;
+        }
+
+        /* Code */
+        .code-block {
+            background: #060e1b;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-family: var(--mono);
+            font-size: 12px;
+            line-height: 1.7;
+            color: #a8d8a8;
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .code-line {
+            display: block;
+        }
+
+        .code-key {
+            color: #79b8ff;
+        }
+
+        .code-str {
+            color: #f0a050;
+        }
+
+        .code-com {
+            color: #566272;
+            font-style: italic;
+        }
+
+        .code-kw {
+            color: #c678dd;
+        }
+
+        .code-fn {
+            color: #61afef;
+        }
+
+        .code-num {
+            color: #d19a66;
+        }
+
+        .code-tag {
+            color: #e06c75;
+        }
+
+        /* Flow arrows */
+        .flow-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .flow-box {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .flow-box.highlight {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, .08);
+            color: #60a5fa;
+        }
+
+        .flow-box.green {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, .08);
+            color: #34d399;
+        }
+
+        .flow-box.purple {
+            border-color: var(--purple);
+            background: rgba(139, 92, 246, .08);
+            color: #a78bfa;
+        }
+
+        .flow-box.yellow {
+            border-color: var(--yellow);
+            background: rgba(245, 158, 11, .08);
+            color: #fbbf24;
+        }
+
+        .flow-box.orange {
+            border-color: var(--orange);
+            background: rgba(249, 115, 22, .08);
+            color: #fb923c;
+        }
+
+        .flow-box.cyan {
+            border-color: var(--cyan);
+            background: rgba(6, 182, 212, .08);
+            color: #22d3ee;
+        }
+
+        /* Table */
+        .table-wrap {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .table-row {
+            display: grid;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-head {
+            background: var(--surface2);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text3);
+        }
+
+        .table-body {
+            background: var(--surface);
+            font-size: 13px;
+            transition: background .2s;
+        }
+
+        .table-body:hover {
+            background: var(--surface2);
+        }
+
+        /* Emoji icon */
+        .icon-lg {
+            font-size: 40px;
+            line-height: 1;
+        }
+
+        .icon-md {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        /* Big number */
+        .big-num {
+            font-size: clamp(48px, 6vw, 80px);
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, .2);
+            color: #34d399;
+        }
+
+        .badge-yellow {
+            background: rgba(245, 158, 11, .2);
+            color: #fbbf24;
+        }
+
+        .badge-blue {
+            background: rgba(59, 130, 246, .2);
+            color: #60a5fa;
+        }
+
+        .badge-purple {
+            background: rgba(139, 92, 246, .2);
+            color: #a78bfa;
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, .2);
+            color: #f87171;
+        }
+
+        /* Animate in */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .6;
+            }
+        }
+
+        @keyframes slideRight {
+            from {
+                transform: scaleX(0);
+            }
+
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+
+            50% {
+                box-shadow: 0 0 20px 4px rgba(59, 130, 246, .25);
+            }
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .slide.active .fade-1 {
+            animation: fadeUp .5s ease both .1s;
+        }
+
+        .slide.active .fade-2 {
+            animation: fadeUp .5s ease both .2s;
+        }
+
+        .slide.active .fade-3 {
+            animation: fadeUp .5s ease both .3s;
+        }
+
+        .slide.active .fade-4 {
+            animation: fadeUp .5s ease both .4s;
+        }
+
+        .slide.active .fade-5 {
+            animation: fadeUp .5s ease both .5s;
+        }
+
+        .slide.active .fade-6 {
+            animation: fadeUp .5s ease both .6s;
+        }
+
+        .slide.active .fade-7 {
+            animation: fadeUp .5s ease both .7s;
+        }
+
+        .slide.active .pop-1 {
+            animation: pop .4s ease both .15s;
+        }
+
+        .slide.active .pop-2 {
+            animation: pop .4s ease both .3s;
+        }
+
+        .slide.active .pop-3 {
+            animation: pop .4s ease both .45s;
+        }
+
+        .slide.active .pop-4 {
+            animation: pop .4s ease both .6s;
+        }
+
+        .slide.active .pop-5 {
+            animation: pop .4s ease both .75s;
+        }
+
+        /* Arrows */
+        .down-arrow {
+            text-align: center;
+            font-size: 20px;
+            color: var(--text3);
+            margin: 4px 0;
+        }
+
+        .right-arrow {
+            text-align: center;
+            font-size: 16px;
+            color: var(--text3);
+        }
+
+        /* Sticky scenario */
+        .scenario-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, .1), rgba(139, 92, 246, .1));
+            border: 1px solid rgba(59, 130, 246, .3);
+            border-radius: 16px;
+            padding: 24px 28px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scenario-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+        }
+
+        /* Steps */
+        .step-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Progress bar */
+        .bar-wrap {
+            background: var(--surface2);
+            border-radius: 8px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            transform-origin: left;
+            animation: slideRight .8s ease both;
+        }
+
+        /* Divider */
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Controls */
+        .controls {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .btn:disabled {
+            opacity: .3;
+            cursor: default;
+        }
+
+        .slide-info {
+            position: fixed;
+            bottom: 24px;
+            right: 32px;
+            font-size: 12px;
+            color: var(--text3);
+            font-family: var(--mono);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 4px;
+        }
+
+        .w100 {
+            width: 100%;
+        }
+
+        .mt8 {
+            margin-top: 8px;
+        }
+
+        .mt12 {
+            margin-top: 12px;
+        }
+
+        .mt16 {
+            margin-top: 16px;
+        }
+
+        .mt24 {
+            margin-top: 24px;
+        }
+
+        .gap8 {
+            gap: 8px;
+        }
+
+        .df {
+            display: flex;
+        }
+
+        .dfc {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .aic {
+            align-items: center;
+        }
+
+        .jcsb {
+            justify-content: space-between;
+        }
+
+        .jcc {
+            justify-content: center;
+        }
+
+        .fw6 {
+            font-weight: 600;
+        }
+
+        .fw7 {
+            font-weight: 700;
+        }
+
+        .fw8 {
+            font-weight: 800;
+        }
+
+        .fs11 {
+            font-size: 11px;
+        }
+
+        .fs12 {
+            font-size: 12px;
+        }
+
+        .fs13 {
+            font-size: 13px;
+        }
+
+        .fs14 {
+            font-size: 14px;
+        }
+
+        .fs15 {
+            font-size: 15px;
+        }
+
+        .fs16 {
+            font-size: 16px;
+        }
+
+        .c2 {
+            color: var(--text2);
+        }
+
+        .c3 {
+            color: var(--text3);
+        }
+
+        .ca {
+            color: var(--accent);
+        }
+
+        .cg {
+            color: var(--green);
+        }
+
+        .cp {
+            color: var(--purple);
+        }
+
+        .cy {
+            color: var(--yellow);
+        }
+
+        .cr {
+            color: var(--red);
+        }
+
+        .cc {
+            color: var(--cyan);
+        }
+
+        .co {
+            color: var(--orange);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <nav class="nav">
+        <div class="nav-left">
+            <div class="nav-logo">A+</div>
+            <span class="nav-title">AddOn Service System</span>
+        </div>
+        <div id="dotContainer" class="nav-right"></div>
+        <span class="nav-counter" id="navCounter">1 / 14</span>
+    </nav>
+
+    <!-- SLIDES CONTAINER -->
+    <div class="slides" id="slides">
+
+        <!-- ============ SLIDE 1: HOOK ============ -->
+        <div class="slide active" id="slide-0">
+            <div class="slide-label fade-1">শুরুর গল্প</div>
+            <h1 class="slide-title fade-2">আমার <span class="gradient-text">১০০ জন শিক্ষক</span> আছে<br>সবাইকে কি একই
+                সেবা দেবো?</h1>
+            <p class="slide-sub fade-3">শিক্ষক ১ একটু বড় কোর্স করেন — তাকে বেশি Storage দেওয়া উচিত।<br>শিক্ষক ২ ছোট
+                কোর্স — তাকে কম দাম দিতে চাই। কিভাবে করবো?</p>
+
+            <div class="w100 mt24 fade-4" style="max-width:860px;">
+                <div class="grid-3">
+                    <div class="scenario-box" style="text-align:center;">
+                        <div class="icon-lg">👨‍🏫</div>
+                        <div class="fs14 fw7 mt8">শিক্ষক রহিম</div>
+                        <div class="fs12 c2 mt8">Live Class + ৫০ GB Storage<br>মাসে <span class="cy fw7">৫,০০০
+                                টাকা</span></div>
+                    </div>
+                    <div class="scenario-box" style="text-align:center; border-color:rgba(139,92,246,.4);">
+                        <div class="icon-lg">👩‍🏫</div>
+                        <div class="fs14 fw7 mt8">শিক্ষিকা সাবিনা</div>
+                        <div class="fs12 c2 mt8">Live Class + ১০ GB Storage<br>মাসে <span class="cp fw7">২,৫০০
+                                টাকা</span></div>
+                    </div>
+                    <div class="scenario-box" style="text-align:center; border-color:rgba(16,185,129,.4);">
+                        <div class="icon-lg">👨‍💼</div>
+                        <div class="fs14 fw7 mt8">শিক্ষক করিম</div>
+                        <div class="fs12 c2 mt8">শুধু PDF Upload<br>মাসে <span class="cg fw7">৫০০ টাকা</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w100 mt16 fade-5" style="max-width:860px;">
+                <div class="card"
+                    style="text-align:center; border-color:var(--yellow); background:rgba(245,158,11,.05);">
+                    <div class="fs15 fw7 cy">❓ সমস্যা কি?</div>
+                    <div class="fs13 c2 mt8">প্রতিটা শিক্ষকের জন্য আলাদা কোড লিখলে → কোড হবে জগাখিচুড়ি, maintain করা
+                        অসম্ভব।<br>দরকার একটা <span class="ca fw7">flexible service management system</span> — এটাই
+                        AddOn Service!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 2: সবাই কোথায় ভুল করে ============ -->
+        <div class="slide" id="slide-1">
+            <div class="slide-label fade-1">Common Mistakes</div>
+            <h1 class="slide-title fade-2">সবাই যে <span class="gradient-text-3">৫টা ভুল</span> করে</h1>
+
+            <div class="w100 mt20 dfc gap8 fade-3" style="max-width:800px;">
+                <div class="card card-red step-row">
+                    <div class="step-num" style="background:rgba(239,68,68,.2); color:#f87171;">১</div>
+                    <div>
+                        <div class="fs14 fw7 cr">Hardcoded Pricing</div>
+                        <div class="fs13 c2 mt8">Teacher.price = 5000 সরাসরি কোডে লিখে রাখা। দাম বদলাতে হলে deploy করতে
+                            হয়! 😱</div>
+                    </div>
+                </div>
+                <div class="card card-red step-row">
+                    <div class="step-num" style="background:rgba(239,68,68,.2); color:#f87171;">২</div>
+                    <div>
+                        <div class="fs14 fw7 cr">একটাই Plan সবার জন্য</div>
+                        <div class="fs13 c2 mt8">"সবাইকে একই সেবা দেবো" — এটা scaling এর সাথে কাজ করে না। ১০০ শিক্ষক
+                            মানে ১০০ রকম চাহিদা।</div>
+                    </div>
+                </div>
+                <div class="card card-red step-row">
+                    <div class="step-num" style="background:rgba(239,68,68,.2); color:#f87171;">৩</div>
+                    <div>
+                        <div class="fs14 fw7 cr">No Offering Flow</div>
+                        <div class="fs13 c2 mt8">সরাসরি assign করা হয়, teacher এর consent নেওয়া হয় না। পরে billing
+                            নিয়ে ঝামেলা হয়।</div>
+                    </div>
+                </div>
+                <div class="card card-red step-row">
+                    <div class="step-num" style="background:rgba(239,68,68,.2); color:#f87171;">৪</div>
+                    <div>
+                        <div class="fs14 fw7 cr">Single Price Type</div>
+                        <div class="fs13 c2 mt8">শুধু MONTHLY রাখে। কিন্তু কেউ PER_CLASS চায়, কেউ PER_STUDENT —
+                            flexibility নেই।</div>
+                    </div>
+                </div>
+                <div class="card card-red step-row">
+                    <div class="step-num" style="background:rgba(239,68,68,.2); color:#f87171;">৫</div>
+                    <div>
+                        <div class="fs14 fw7 cr">No Default Fallback</div>
+                        <div class="fs13 c2 mt8">Custom offer না থাকলে কি হবে? কোনো fallback নেই → system crash বা wrong
+                            price দেখায়।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 3: AddOn Service কি? ============ -->
+        <div class="slide" id="slide-2">
+            <div class="slide-label fade-1">Core Concept</div>
+            <h1 class="slide-title fade-2"><span class="gradient-text">AddOn Service</span> আসলে কি?</h1>
+            <p class="slide-sub fade-3">ভাবুন এটাকে একটা <strong>Menu Card</strong> হিসেবে।<br>SuperAdmin menu তৈরি করে।
+                Teacher অর্ডার করে।</p>
+
+            <div class="w100 mt20 fade-4" style="max-width:860px;">
+                <div class="grid-3">
+                    <div class="card card-accent" style="text-align:center;">
+                        <div class="icon-md">📋</div>
+                        <div class="fs14 fw7 ca mt8">Service Catalog</div>
+                        <div class="fs12 c2 mt8">Live Class, Storage, AI Tools, Bandwidth — এগুলো হলো AddOnService।
+                            একবার বানাও, বারবার ব্যবহার করো।</div>
+                    </div>
+                    <div class="card card-purple" style="text-align:center;">
+                        <div class="icon-md">🎯</div>
+                        <div class="fs14 fw7 cp mt8">Targeted Offering</div>
+                        <div class="fs12 c2 mt8">শিক্ষক X-এর জন্য নির্দিষ্ট service নির্দিষ্ট price-এ offer করো। অন্যরা
+                            এটা দেখতেই পাবে না।</div>
+                    </div>
+                    <div class="card card-green" style="text-align:center;">
+                        <div class="icon-md">✅</div>
+                        <div class="fs14 fw7 cg mt8">Teacher Accepts</div>
+                        <div class="fs12 c2 mt8">Teacher offer দেখে নিজে price tier বেছে নেয় → ACCEPTED হয়। Mutual
+                            agreement!</div>
+                    </div>
+                </div>
+
+                <div class="mt16 scenario-box">
+                    <div class="fs13 c2">🍽️ <strong class="ca">Real-world analogy:</strong> একটা Restaurant এর menu আছে
+                        (AddOnService)। Customer (Teacher) order করে (Offering)। Waiter confirm করে (Selection)। Bill
+                        আসে selected price অনুযায়ী।</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 4: System Architecture ============ -->
+        <div class="slide" id="slide-3">
+            <div class="slide-label fade-1">Architecture</div>
+            <h1 class="slide-title fade-2">৪টা Table — <span class="gradient-text">কিভাবে সংযুক্ত?</span></h1>
+
+            <div class="w100 mt20 dfc gap8 fade-3" style="max-width:860px;">
+                <div class="flow-row">
+                    <div class="flow-box highlight" style="flex:1.5;">
+                        <div class="fs11 c3 fw7">TABLE 1</div>
+                        <div class="fs14 fw8 ca">AddOnService</div>
+                        <div class="fs11 c2 mt8">id, name, description, code, isActive<br><em>e.g. "Live Class",
+                                "Storage 50GB"</em></div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box green" style="flex:1.5;">
+                        <div class="fs11 c3 fw7">TABLE 2</div>
+                        <div class="fs14 fw8 cg">CourseDefaultService</div>
+                        <div class="fs11 c2 mt8">courseId + serviceId<br><em>Course-এর সব teacher-এর জন্য default</em>
+                        </div>
+                    </div>
+                </div>
+                <div class="df jcc">
+                    <div class="fs20 c3">↓</div>
+                </div>
+                <div class="flow-row">
+                    <div class="flow-box purple" style="flex:1.5;">
+                        <div class="fs11 c3 fw7">TABLE 3</div>
+                        <div class="fs14 fw8 cp">CourseAdminServiceOffering</div>
+                        <div class="fs11 c2 mt8">adminId + courseId + serviceId<br>status: OFFERED /
+                            ACCEPTED<br><em>নির্দিষ্ট teacher-এর custom offer</em></div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box yellow" style="flex:1.5;">
+                        <div class="fs11 c3 fw7">TABLE 4</div>
+                        <div class="fs14 fw8 cy">ServiceOfferingPrice</div>
+                        <div class="fs11 c2 mt8">MONTHLY / PER_CLASS / PER_STUDENT<br>amount, minQty, maxQty<br><em>একটা
+                                offer-এ অনেক price tier</em></div>
+                    </div>
+                </div>
+                <div class="df jcc">
+                    <div class="fs20 c3">↓</div>
+                </div>
+                <div class="flow-row jcc">
+                    <div class="flow-box cyan" style="max-width:400px;">
+                        <div class="fs11 c3 fw7">TABLE 5</div>
+                        <div class="fs14 fw8 cc">ServiceOfferingSelection</div>
+                        <div class="fs11 c2 mt8">offeringId + selectedPriceId + selectedAt<br><em>Teacher যে price tier
+                                বেছে নিলো</em></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 5: পুরো Flow ============ -->
+        <div class="slide" id="slide-4">
+            <div class="slide-label fade-1">Complete Flow</div>
+            <h1 class="slide-title fade-2">শুরু থেকে শেষ — <span class="gradient-text">Step by Step</span></h1>
+
+            <div class="w100 mt16 dfc gap8 fade-3" style="max-width:800px;">
+                <div class="card step-row pop-1">
+                    <div class="step-num" style="background:rgba(59,130,246,.2); color:#60a5fa;">১</div>
+                    <div class="df aic jcsb w100">
+                        <div>
+                            <div class="fs14 fw7 ca">SuperAdmin: Service বানাও</div>
+                            <div class="fs12 c2 mt8">POST /add-on-services → name="Live Class", code=101<br>Unique code
+                                দিয়ে identify করা যায়</div>
+                        </div>
+                        <div class="tag tag-blue">SuperAdmin Only</div>
+                    </div>
+                </div>
+                <div class="card step-row pop-2">
+                    <div class="step-num" style="background:rgba(16,185,129,.2); color:#34d399;">২</div>
+                    <div class="df aic jcsb w100">
+                        <div>
+                            <div class="fs14 fw7 cg">SuperAdmin: Default service set করো</div>
+                            <div class="fs12 c2 mt8">CourseDefaultService → courseId + serviceId<br>এই course-এর সব
+                                teacher automatically এই service পাবে</div>
+                        </div>
+                        <div class="tag tag-green">Auto Apply</div>
+                    </div>
+                </div>
+                <div class="card step-row pop-3">
+                    <div class="step-num" style="background:rgba(139,92,246,.2); color:#a78bfa;">৩</div>
+                    <div class="df aic jcsb w100">
+                        <div>
+                            <div class="fs14 fw7 cp">SuperAdmin: Custom offer করো</div>
+                            <div class="fs12 c2 mt8">CourseAdminServiceOffering → adminId + courseId +
+                                serviceId<br>Status: OFFERED (pending teacher response)</div>
+                        </div>
+                        <div class="tag tag-purple">Custom Deal</div>
+                    </div>
+                </div>
+                <div class="card step-row pop-4">
+                    <div class="step-num" style="background:rgba(245,158,11,.2); color:#fbbf24;">৪</div>
+                    <div class="df aic jcsb w100">
+                        <div>
+                            <div class="fs14 fw7 cy">SuperAdmin: Price tier যোগ করো</div>
+                            <div class="fs12 c2 mt8">একটা offer-এ multiple prices → MONTHLY ৫০০০, PER_CLASS
+                                ২০০<br>Teacher বেছে নেবে কোনটা চায়</div>
+                        </div>
+                        <div class="tag tag-yellow">Flexible</div>
+                    </div>
+                </div>
+                <div class="card step-row pop-5" style="border-color:var(--green);">
+                    <div class="step-num" style="background:rgba(16,185,129,.2); color:#34d399;">৫</div>
+                    <div class="df aic jcsb w100">
+                        <div>
+                            <div class="fs14 fw7 cg">Teacher: Accept করো, Price বেছে নাও</div>
+                            <div class="fs12 c2 mt8">Selection তৈরি হয় → status ACCEPTED → decidedAt
+                                recorded<br>Transaction-এ atomically হয়</div>
+                        </div>
+                        <div class="tag tag-green">✓ Done!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 6: Default vs Custom ============ -->
+        <div class="slide" id="slide-5">
+            <div class="slide-label fade-1">Smart Design</div>
+            <h1 class="slide-title fade-2">Default + Custom — <span class="gradient-text-2">দুটো Layer</span></h1>
+
+            <div class="w100 mt16 fade-3" style="max-width:860px;">
+                <div class="grid-2">
+                    <div class="card card-green">
+                        <div class="df aic gap8">
+                            <div class="icon-md">🏠</div>
+                            <div class="fs15 fw7 cg">Default Service</div>
+                        </div>
+                        <div class="fs12 c2 mt12 dfc gap8">
+                            <div>✅ Course-এর সব teacher automatically পায়</div>
+                            <div>✅ SuperAdmin একবার set করে, সবাই পায়</div>
+                            <div>✅ isDefault price — standard flat rate</div>
+                            <div>✅ Teacher কোনো action নিতে হয় না</div>
+                            <div class="mt8 divider"></div>
+                            <div class="fs11 c3">📌 Example: "Basic Live Class Access" → সব teacher-এই আছে</div>
+                        </div>
+                    </div>
+                    <div class="card card-purple">
+                        <div class="df aic gap8">
+                            <div class="icon-md">💎</div>
+                            <div class="fs15 fw7 cp">Custom Offering</div>
+                        </div>
+                        <div class="fs12 c2 mt12 dfc gap8">
+                            <div>🎯 নির্দিষ্ট teacher-এর জন্য</div>
+                            <div>🎯 Custom negotiated price</div>
+                            <div>🎯 Multiple price tier দেওয়া যায়</div>
+                            <div>🎯 Teacher নিজে accept করে</div>
+                            <div class="mt8 divider"></div>
+                            <div class="fs11 c3">📌 Example: রহিম ভাই-এর জন্য "50GB Storage" special rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt16 card" style="border-color:var(--cyan);">
+                    <div class="fs14 fw7 cc">🔀 Smart Merge Logic</div>
+                    <div class="code-block mt8">
+                        <span class="code-com">// Default service আছে, কিন্তু custom offer নেই?</span>
+                        <span class="code-line"><span class="code-kw">const</span> defaultOnlyOfferings =
+                            allDefaultServices</span>
+                        <span class="code-line"> ?.filter(d => !offerings.find(o =></span>
+                        <span class="code-line"> o.courseAdmin.courseId === d.courseId &&</span>
+                        <span class="code-line"> o.serviceId === d.serviceId <span class="code-com">// custom নেই, তাহলে
+                                default দেখাও</span></span>
+                        <span class="code-line"> ))</span>
+                        <span class="code-line"> ?.map(d => ({ id: <span class="code-num">null</span>, status: <span
+                                class="code-str">'DEFAULT'</span>, ...d }))</span>
+                        <span class="code-line"><span class="code-com">// merged offerings = custom + default
+                                fallback</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 7: Price Types ============ -->
+        <div class="slide" id="slide-6">
+            <div class="slide-label fade-1">Pricing System</div>
+            <h1 class="slide-title fade-2">১৫+ Price Type — <span class="gradient-text-3">Ultimate Flexibility</span>
+            </h1>
+            <p class="slide-sub fade-3">এটাই সিস্টেমের সবচেয়ে শক্তিশালী অংশ — যেকোনো business model support করে।</p>
+
+            <div class="w100 mt16 fade-4" style="max-width:860px;">
+                <div class="grid-3">
+                    <div class="card card-accent">
+                        <div class="tag tag-blue fs11">Time Based</div>
+                        <div class="mt8 dfc gap8 fs13">
+                            <div class="df aic gap8"><span class="ca">●</span> <span>MONTHLY — মাসে মাসে</span></div>
+                            <div class="df aic gap8"><span class="ca">●</span> <span>YEARLY — বার্ষিক</span></div>
+                            <div class="df aic gap8"><span class="ca">●</span> <span>PER_HOUR / PER_MINUTE</span></div>
+                        </div>
+                    </div>
+                    <div class="card card-green">
+                        <div class="tag tag-green fs11">Usage Based</div>
+                        <div class="mt8 dfc gap8 fs13">
+                            <div class="df aic gap8"><span class="cg">●</span> <span>PER_CLASS — ক্লাস প্রতি</span>
+                            </div>
+                            <div class="df aic gap8"><span class="cg">●</span> <span>PER_STUDENT — ছাত্র প্রতি</span>
+                            </div>
+                            <div class="df aic gap8"><span class="cg">●</span> <span>PER_API_CALL</span></div>
+                            <div class="df aic gap8"><span class="cg">●</span> <span>PER_USER</span></div>
+                        </div>
+                    </div>
+                    <div class="card card-purple">
+                        <div class="tag tag-purple fs11">Storage / Data</div>
+                        <div class="mt8 dfc gap8 fs13">
+                            <div class="df aic gap8"><span class="cp">●</span> <span>PER_MB / PER_GB / PER_TB</span>
+                            </div>
+                            <div class="df aic gap8"><span class="cp">●</span> <span>BANDWIDTH</span></div>
+                            <div class="df aic gap8"><span class="cp">●</span> <span>PER_COURSE</span></div>
+                            <div class="df aic gap8"><span class="cp">●</span> <span>ONE_TIME / FIXED</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt16 card" style="border-color:var(--yellow);">
+                    <div class="df aic jcsb">
+                        <div class="fs14 fw7 cy">💡 minQty / maxQty দিয়ে Volume Discount</div>
+                        <div class="tag tag-yellow">Pro Feature</div>
+                    </div>
+                    <div class="fs13 c2 mt8">একই service-এ ৩টা tier রাখা যায়:<br>
+                        <span class="cg fw6">1-50 student → ৳200/student</span> &nbsp;|&nbsp;
+                        <span class="ca fw6">51-200 student → ৳150/student</span> &nbsp;|&nbsp;
+                        <span class="cp fw6">200+ student → ৳100/student</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 8: Code — Service Create ============ -->
+        <div class="slide" id="slide-7">
+            <div class="slide-label fade-1">Code Deep Dive</div>
+            <h1 class="slide-title fade-2">Offering Offer করা — <span class="gradient-text">Validation Chain</span></h1>
+
+            <div class="w100 mt16 fade-3" style="max-width:860px;">
+                <div class="grid-2">
+                    <div>
+                        <div class="fs13 fw7 ca mb8">✅ 3-Step Validation before offer:</div>
+                        <div class="code-block">
+                            <span class="code-line"><span class="code-kw">const</span>
+                                createCourseAdminServiceOfferIntoDb</span>
+                            <span class="code-line"> = <span class="code-kw">async</span> (payload) => {</span>
+                            <span class="code-line"> <span class="code-kw">const</span> { courseId, adminId, serviceId }
+                                = payload</span>
+                            <span class="code-line"> </span>
+                            <span class="code-line"> <span class="code-com">// Check 1: Service exist করে?</span></span>
+                            <span class="code-line"> <span class="code-kw">const</span> service = <span
+                                    class="code-kw">await</span> prisma</span>
+                            <span class="code-line"> .addOnService.findFirst({</span>
+                            <span class="code-line"> where: { id: serviceId,</span>
+                            <span class="code-line"> isDeleted: false, isActive: true }</span>
+                            <span class="code-line"> })</span>
+                            <span class="code-line"> if (!service) throw AppErrors(<span class="code-num">404</span>,
+                                <span class="code-str">'Not found'</span>)</span>
+                            <span class="code-line"> </span>
+                            <span class="code-line"> <span class="code-com">// Check 2: Admin exist করে?</span></span>
+                            <span class="code-line"> <span class="code-com">// Check 3: Course exist করে?</span></span>
+                            <span class="code-line"> </span>
+                            <span class="code-line"> <span class="code-com">// সব ঠিক থাকলে offer create</span></span>
+                            <span class="code-line"> <span class="code-kw">return</span>
+                                prisma.courseAdminServiceOffering</span>
+                            <span class="code-line"> .create({ data: { courseId, adminId, serviceId } })</span>
+                            <span class="code-line">}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="fs13 fw7 cg mb8">🔒 Teacher Accept = Transaction:</div>
+                        <div class="code-block">
+                            <span class="code-line"><span class="code-kw">const</span> result = <span
+                                    class="code-kw">await</span> prisma.$transaction(</span>
+                            <span class="code-line"> <span class="code-kw">async</span> (tx) => {</span>
+                            <span class="code-line"></span>
+                            <span class="code-line"> <span class="code-com">// Step 1: Selection তৈরি করো</span></span>
+                            <span class="code-line"> <span class="code-kw">const</span> selection = <span
+                                    class="code-kw">await</span> tx</span>
+                            <span class="code-line"> .courseAdminServiceOfferingSelection</span>
+                            <span class="code-line"> .create({</span>
+                            <span class="code-line"> data: { offeringId, selectedPriceId }</span>
+                            <span class="code-line"> })</span>
+                            <span class="code-line"></span>
+                            <span class="code-line"> <span class="code-com">// Step 2: Offering status update
+                                    করো</span></span>
+                            <span class="code-line"> <span class="code-kw">await</span>
+                                tx.courseAdminServiceOffering.update({</span>
+                            <span class="code-line"> where: { id: offeringId },</span>
+                            <span class="code-line"> data: { status: <span class="code-str">'ACCEPTED'</span>,</span>
+                            <span class="code-line"> decidedAt: <span class="code-kw">new</span> Date() }</span>
+                            <span class="code-line"> })</span>
+                            <span class="code-line"> <span class="code-kw">return</span> selection</span>
+                            <span class="code-line">})</span>
+                        </div>
+                        <div class="card card-green mt8 fs12">
+                            💡 Transaction মানে — দুটো কাজ একসাথে হয়। একটা ব্যর্থ হলে দুটোই rollback। Data
+                            inconsistency শূন্য!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 9: Auto Code Generation ============ -->
+        <div class="slide" id="slide-8">
+            <div class="slide-label fade-1">Production Grade</div>
+            <h1 class="slide-title fade-2">Unique Code Auto-Generate — <span class="gradient-text">Race Condition
+                    Safe</span></h1>
+
+            <div class="w100 mt16 fade-3" style="max-width:860px;">
+                <div class="scenario-box mb16">
+                    <div class="fs14 fw7 ca">🤔 সমস্যা: একসাথে ২টা service create হলে কি হবে?</div>
+                    <div class="fs13 c2 mt8">দুইজন একই সময়ে last code=101 পড়ে → দুইজনই 102 দিয়ে চেষ্টা করে →
+                        Duplicate! System crash!</div>
+                </div>
+
+                <div class="code-block mt8 fade-4">
+                    <span class="code-com">// Retry loop দিয়ে race condition handle</span>
+                    <span class="code-line"><span class="code-kw">const</span> createAddOneServiceIntoDb = <span
+                            class="code-kw">async</span> (payload) => {</span>
+                    <span class="code-line"> <span class="code-kw">const</span> { name, description } = payload</span>
+                    <span class="code-line"> </span>
+                    <span class="code-line"> <span class="code-kw">for</span> (<span class="code-kw">let</span> attempt
+                        = <span class="code-num">0</span>; attempt < <span class="code-num">3</span>; attempt++)
+                    {</span>
+                    <span class="code-line"> <span class="code-kw">const</span> last = <span
+                            class="code-kw">await</span> prisma.addOnService.findFirst({</span>
+                    <span class="code-line"> orderBy: { createdAt: <span class="code-str">'desc'</span> },</span>
+                    <span class="code-line"> select: { code: true }</span>
+                    <span class="code-line"> })</span>
+                    <span class="code-line"> <span class="code-kw">const</span> nextCode = Number(last?.code ?? <span
+                            class="code-num">100</span>) + <span class="code-num">1</span></span>
+                    <span class="code-line"> </span>
+                    <span class="code-line"> <span class="code-kw">try</span> {</span>
+                    <span class="code-line"> <span class="code-kw">return</span> <span class="code-kw">await</span>
+                        prisma.addOnService.create({</span>
+                    <span class="code-line"> data: { name, description, code: `${nextCode}` }</span>
+                    <span class="code-line"> })</span>
+                    <span class="code-line"> } <span class="code-kw">catch</span> (e) {</span>
+                    <span class="code-line"> <span class="code-kw">if</span> (e?.code === <span
+                            class="code-str">'P2002'</span>) <span class="code-kw">continue</span> <span
+                            class="code-com">// Unique constraint → retry!</span></span>
+                    <span class="code-line"> }</span>
+                    <span class="code-line"> }</span>
+                    <span class="code-line">}</span>
+                </div>
+
+                <div class="mt12 grid-3 fade-5">
+                    <div class="card card-green" style="text-align:center;">
+                        <div class="fs12 fw7 cg">P2002 Error</div>
+                        <div class="fs12 c2 mt8">Prisma duplicate key error → retry loop</div>
+                    </div>
+                    <div class="card card-yellow" style="text-align:center;">
+                        <div class="fs12 fw7 cy">Max 3 Attempts</div>
+                        <div class="fs12 c2 mt8">3 বার চেষ্টার পরেও না হলে graceful fail</div>
+                    </div>
+                    <div class="card card-accent" style="text-align:center;">
+                        <div class="fs12 fw7 ca">DB Unique Index</div>
+                        <div class="fs12 c2 mt8">code field-এ unique constraint → last line of defense</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 10: formatTeacherServices ============ -->
+        <div class="slide" id="slide-9">
+            <div class="slide-label fade-1">Data Aggregation</div>
+            <h1 class="slide-title fade-2">formatTeacherServices — <span class="gradient-text">Cost Calculator</span>
+            </h1>
+            <p class="slide-sub fade-3">একটা function যা সব teacher-এর সব service-এর total monthly cost বের করে।</p>
+
+            <div class="w100 mt16 fade-3" style="max-width:860px;">
+                <div class="grid-2">
+                    <div class="card card-purple">
+                        <div class="fs13 fw7 cp">Price Type → Cost Bucket</div>
+                        <div class="code-block mt8" style="font-size:11px;">
+                            <span class="code-line"><span class="code-kw">switch</span> (price.type) {</span>
+                            <span class="code-line"> <span class="code-kw">case</span> <span
+                                    class="code-str">'MONTHLY'</span>:</span>
+                            <span class="code-line"> totalMonthlyCost += amount; break</span>
+                            <span class="code-line"> <span class="code-kw">case</span> <span
+                                    class="code-str">'YEARLY'</span>:</span>
+                            <span class="code-line"> totalYearlyCost += amount; break</span>
+                            <span class="code-line"> <span class="code-kw">case</span> <span
+                                    class="code-str">'ONE_TIME'</span>:</span>
+                            <span class="code-line"> totalOneTimeCost += amount; break</span>
+                            <span class="code-line"> <span class="code-kw">case</span> <span
+                                    class="code-str">'PER_CLASS'</span>: <span class="code-com">//
+                                    qty-based</span></span>
+                            <span class="code-line"> requiresCalculation = true; break</span>
+                            <span class="code-line">}</span>
+                        </div>
+                    </div>
+                    <div class="card card-green">
+                        <div class="fs13 fw7 cg">Normalized Monthly Cost:</div>
+                        <div class="code-block mt8" style="font-size:11px;">
+                            <span class="code-com">// সব কিছু monthly-তে convert করো</span>
+                            <span class="code-line"><span class="code-kw">const</span> totalMonthly =</span>
+                            <span class="code-line"> totalMonthlyCost <span class="code-com">// direct</span></span>
+                            <span class="code-line"> + totalYearlyCost / <span class="code-num">12</span> <span
+                                    class="code-com">// yearly ÷ 12</span></span>
+                            <span class="code-line"> + totalOneTimeCost / <span class="code-num">12</span> <span
+                                    class="code-com">// one-time ÷ 12</span></span>
+                        </div>
+                        <div class="mt8 fs12 c2">সব ধরনের price-কে apples-to-apples compare করা যায়!</div>
+                    </div>
+                </div>
+
+                <div class="mt16 card fade-4">
+                    <div class="fs13 fw7 ca">📊 Output Summary (per teacher):</div>
+                    <div class="mt8 grid-3" style="gap:8px;">
+                        <div style="text-align:center; padding:10px; background:var(--surface2); border-radius:8px;">
+                            <div class="fs20 fw8 ca">5</div>
+                            <div class="fs11 c2">Total Services</div>
+                        </div>
+                        <div style="text-align:center; padding:10px; background:var(--surface2); border-radius:8px;">
+                            <div class="fs20 fw8 cg">3</div>
+                            <div class="fs11 c2">Default Services</div>
+                        </div>
+                        <div style="text-align:center; padding:10px; background:var(--surface2); border-radius:8px;">
+                            <div class="fs20 fw8 cp">2</div>
+                            <div class="fs11 c2">Custom Offerings</div>
+                        </div>
+                        <div style="text-align:center; padding:10px; background:var(--surface2); border-radius:8px;">
+                            <div class="fs20 fw8 cy">৳8,500</div>
+                            <div class="fs11 c2">Monthly Cost</div>
+                        </div>
+                        <div style="text-align:center; padding:10px; background:var(--surface2); border-radius:8px;">
+                            <div class="fs20 fw8 cc">2</div>
+                            <div class="fs11 c2">Selected</div>
+                        </div>
+                        <div style="text-align:center; padding:10px; background:var(--surface2); border-radius:8px;">
+                            <div class="fs20 fw8 co">BDT</div>
+                            <div class="fs11 c2">Currency</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 11: Teacher Dashboard ============ -->
+        <div class="slide" id="slide-10">
+            <div class="slide-label fade-1">Teacher Experience</div>
+            <h1 class="slide-title fade-2">Teacher কি দেখে — <span class="gradient-text-2">Dashboard View</span></h1>
+
+            <div class="w100 mt16 fade-3" style="max-width:860px;">
+                <div class="card" style="border-color:var(--border2);">
+                    <div class="df aic jcsb">
+                        <div class="fs14 fw7">আমার Services Dashboard</div>
+                        <div class="df gap8">
+                            <div class="badge badge-green">3 Active</div>
+                            <div class="badge badge-yellow">1 Pending</div>
+                        </div>
+                    </div>
+                    <div class="mt12 dfc gap8">
+                        <div class="table-wrap">
+                            <div class="table-row table-head" style="grid-template-columns:2fr 1.5fr 1fr 1.2fr;">
+                                <span>Service</span><span>Price</span><span>Type</span><span>Status</span>
+                            </div>
+                            <div class="table-row table-body" style="grid-template-columns:2fr 1.5fr 1fr 1.2fr;">
+                                <span class="fw6">Live Class Access</span>
+                                <span class="cg fw6">৳2,500/মাস</span>
+                                <span><span class="badge badge-blue">DEFAULT</span></span>
+                                <span><span class="badge badge-green">● Active</span></span>
+                            </div>
+                            <div class="table-row table-body" style="grid-template-columns:2fr 1.5fr 1fr 1.2fr;">
+                                <span class="fw6">50GB Storage</span>
+                                <span class="cp fw6">৳500/মাস</span>
+                                <span><span class="badge badge-purple">CUSTOM</span></span>
+                                <span><span class="badge badge-green">● Accepted</span></span>
+                            </div>
+                            <div class="table-row table-body" style="grid-template-columns:2fr 1.5fr 1fr 1.2fr;">
+                                <span class="fw6">AI Tools Suite</span>
+                                <span class="cy fw6">৳200/ক্লাস</span>
+                                <span><span class="badge badge-purple">CUSTOM</span></span>
+                                <span><span class="badge badge-yellow">⏳ Offered</span></span>
+                            </div>
+                            <div class="table-row table-body" style="grid-template-columns:2fr 1.5fr 1fr 1.2fr;">
+                                <span class="fw6">Bandwidth Pack</span>
+                                <span class="cg fw6">৳1,000 (fixed)</span>
+                                <span><span class="badge badge-blue">DEFAULT</span></span>
+                                <span><span class="badge badge-green">● Active</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt16 grid-2 fade-4">
+                    <div class="card card-yellow">
+                        <div class="fs13 fw7 cy">⏳ "AI Tools Suite" — Offered অবস্থায়:</div>
+                        <div class="fs12 c2 mt8">Teacher দুটো option পাচ্ছে:<br>
+                            <span class="ca fw6">Option A:</span> ৳200/class (PER_CLASS)<br>
+                            <span class="cp fw6">Option B:</span> ৳3,000/month (MONTHLY)<br>
+                            Teacher decide করবে কোনটা তার জন্য সুবিধাজনক।
+                        </div>
+                    </div>
+                    <div class="card card-green">
+                        <div class="fs13 fw7 cg">✅ Accepted হলে:</div>
+                        <div class="fs12 c2 mt8">
+                            • selectedPriceId record হয়<br>
+                            • decidedAt timestamp save হয়<br>
+                            • status = ACCEPTED<br>
+                            • Billing system এই data দিয়ে invoice generate করে
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 12: Scalability ============ -->
+        <div class="slide" id="slide-11">
+            <div class="slide-label fade-1">Scalability</div>
+            <h1 class="slide-title fade-2">কিভাবে <span class="gradient-text">Scale</span> করে?</h1>
+            <p class="slide-sub fade-3">১০০ teacher থেকে ১০,০০০ teacher — same system, no rewrite।</p>
+
+            <div class="w100 mt16 fade-3" style="max-width:860px;">
+                <div class="grid-2">
+                    <div class="dfc gap8">
+                        <div class="card card-accent step-row">
+                            <div class="step-num" style="background:rgba(59,130,246,.2); color:#60a5fa;">🗂</div>
+                            <div>
+                                <div class="fs13 fw7 ca">Pagination সব জায়গায়</div>
+                                <div class="fs12 c2 mt8">buildQueryOptions → skip/take/orderBy। ১০,০০০ record-ও smooth।
+                                    limit max 1000 enforce করা আছে।</div>
+                            </div>
+                        </div>
+                        <div class="card card-green step-row">
+                            <div class="step-num" style="background:rgba(16,185,129,.2); color:#34d399;">⚡</div>
+                            <div>
+                                <div class="fs13 fw7 cg">2-Query Pattern</div>
+                                <div class="fs12 c2 mt8">আগে teacherIds বের করো, তারপর সব offerings একসাথে fetch। N+1
+                                    query problem নেই।</div>
+                            </div>
+                        </div>
+                        <div class="card card-purple step-row">
+                            <div class="step-num" style="background:rgba(139,92,246,.2); color:#a78bfa;">🗃</div>
+                            <div>
+                                <div class="fs13 fw7 cp">In-memory grouping</div>
+                                <div class="fs12 c2 mt8">offeringsByTeacherAndCourse Map তৈরি করো, DB-তে join না করে।
+                                    Fast O(n) lookup।</div>
+                            </div>
+                        </div>
+                        <div class="card card-yellow step-row">
+                            <div class="step-num" style="background:rgba(245,158,11,.2); color:#fbbf24;">🌐</div>
+                            <div>
+                                <div class="fs13 fw7 cy">Hostname-based filtering</div>
+                                <div class="fs12 c2 mt8">একই codebase দিয়ে multiple tenant। buildHostNameCondition()
+                                    দিয়ে auto-filter।</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dfc gap8">
+                        <div class="card" style="border-color:var(--cyan);">
+                            <div class="fs13 fw7 cc">📈 N+1 Problem বনাম এই System</div>
+                            <div class="divider mt8 mb8"></div>
+                            <div class="fs12 c2">
+                                <span class="cr fw6">❌ Wrong way:</span><br>
+                                teachers.forEach(t =&gt; DB.query(t.id)) → 100 DB calls!<br><br>
+                                <span class="cg fw6">✅ Right way:</span><br>
+                                1. Get teacherIds → 1 query<br>
+                                2. Get all offerings WHERE adminId IN [...teacherIds] → 1 query<br>
+                                3. Group in memory → 0 queries<br>
+                                <span class="ca fw6">Total: 2 queries for 100 teachers!</span>
+                            </div>
+                        </div>
+                        <div class="card card-green">
+                            <div class="fs13 fw7 cg">Soft Delete সব জায়গায়</div>
+                            <div class="fs12 c2 mt8">isDeleted: true — কোনো data সত্যিকার delete হয় না। Audit trail
+                                থাকে। কোনো FK violation নেই।</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 13: DB Schema Summary ============ -->
+        <div class="slide" id="slide-12">
+            <div class="slide-label fade-1">DB Schema</div>
+            <h1 class="slide-title fade-2">Database Schema — <span class="gradient-text">Visual Map</span></h1>
+
+            <div class="w100 mt16 fade-3" style="max-width:860px;">
+                <div class="grid-2">
+                    <div class="card card-accent">
+                        <div class="df aic gap8 mb8">
+                            <div class="tag tag-blue">AddOnService</div>
+                        </div>
+                        <div class="code-block" style="font-size:11px;">
+                            <span class="code-line">id String @id @default(cuid())</span>
+                            <span class="code-line">name String</span>
+                            <span class="code-line">description String?</span>
+                            <span class="code-line"><span class="code-key">code</span> String <span
+                                    class="code-kw">@unique</span></span>
+                            <span class="code-line">isActive Boolean @default(true)</span>
+                            <span class="code-line">isDeleted Boolean @default(false)</span>
+                        </div>
+                    </div>
+                    <div class="card card-green">
+                        <div class="df aic gap8 mb8">
+                            <div class="tag tag-green">CourseDefaultService</div>
+                        </div>
+                        <div class="code-block" style="font-size:11px;">
+                            <span class="code-line">id String</span>
+                            <span class="code-line"><span class="code-key">courseId</span> String <span
+                                    class="code-com">// FK → Course</span></span>
+                            <span class="code-line"><span class="code-key">serviceId</span> String <span
+                                    class="code-com">// FK → AddOnService</span></span>
+                            <span class="code-line">isActive Boolean @default(true)</span>
+                            <span class="code-line">isDeleted Boolean @default(false)</span>
+                            <span class="code-line"><span class="code-com">// prices →
+                                    DefaultServicePrice[]</span></span>
+                        </div>
+                    </div>
+                    <div class="card card-purple">
+                        <div class="df aic gap8 mb8">
+                            <div class="tag tag-purple">CourseAdminServiceOffering</div>
+                        </div>
+                        <div class="code-block" style="font-size:11px;">
+                            <span class="code-line">id String</span>
+                            <span class="code-line"><span class="code-key">adminId</span> String <span
+                                    class="code-com">// FK → Admin (Teacher)</span></span>
+                            <span class="code-line"><span class="code-key">courseId</span> String <span
+                                    class="code-com">// FK → Course</span></span>
+                            <span class="code-line"><span class="code-key">serviceId</span> String <span
+                                    class="code-com">// FK → AddOnService</span></span>
+                            <span class="code-line">status Enum <span class="code-com">// OFFERED |
+                                    ACCEPTED</span></span>
+                            <span class="code-line">expiresAt DateTime?</span>
+                            <span class="code-line">decidedAt DateTime?</span>
+                        </div>
+                    </div>
+                    <div class="card card-yellow">
+                        <div class="df aic gap8 mb8">
+                            <div class="tag tag-yellow">OfferingPrice + Selection</div>
+                        </div>
+                        <div class="code-block" style="font-size:11px;">
+                            <span class="code-line"><span class="code-com">// Price:</span></span>
+                            <span class="code-line"><span class="code-key">offeringId</span> String</span>
+                            <span class="code-line">type PriceType <span class="code-com">//
+                                    MONTHLY|PER_CLASS...</span></span>
+                            <span class="code-line">amount Decimal</span>
+                            <span class="code-line">minQty, maxQty Int?</span>
+                            <span class="code-line"><span class="code-com">// Selection:</span></span>
+                            <span class="code-line"><span class="code-key">offeringId</span> String @unique</span>
+                            <span class="code-line"><span class="code-key">selectedPriceId</span> String</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ SLIDE 14: Summary ============ -->
+        <div class="slide" id="slide-13">
+            <div class="slide-label fade-1">Recap</div>
+            <h1 class="slide-title fade-2">AddOn Service — <span class="gradient-text">সব কিছু এক নজরে</span></h1>
+
+            <div class="w100 mt16 fade-3" style="max-width:860px;">
+                <div class="grid-2">
+                    <div class="dfc gap8">
+                        <div class="card card-green step-row">
+                            <div style="font-size:22px;">📋</div>
+                            <div>
+                                <div class="fs13 fw7 cg">Service Catalog</div>
+                                <div class="fs12 c2">AddOnService = reusable menu items। একবার বানাও, বারবার ব্যবহার
+                                    করো।</div>
+                            </div>
+                        </div>
+                        <div class="card card-accent step-row">
+                            <div style="font-size:22px;">🎯</div>
+                            <div>
+                                <div class="fs13 fw7 ca">Targeted Offering</div>
+                                <div class="fs12 c2">প্রতিটা teacher-কে আলাদা deal অফার করা যায়। তারা accept করে নিজের
+                                    price বেছে নেয়।</div>
+                            </div>
+                        </div>
+                        <div class="card card-purple step-row">
+                            <div style="font-size:22px;">💰</div>
+                            <div>
+                                <div class="fs13 fw7 cp">15+ Price Types</div>
+                                <div class="fs12 c2">MONTHLY, PER_CLASS, PER_GB, PER_STUDENT — যেকোনো business model
+                                    support।</div>
+                            </div>
+                        </div>
+                        <div class="card card-yellow step-row">
+                            <div style="font-size:22px;">🏠</div>
+                            <div>
+                                <div class="fs13 fw7 cy">Default Fallback</div>
+                                <div class="fs12 c2">Custom offer না থাকলে CourseDefaultService থেকে auto-serve। কখনো
+                                    empty হয় না।</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dfc gap8">
+                        <div class="card" style="border-color:var(--cyan); background:rgba(6,182,212,.05);">
+                            <div class="fs13 fw7 cc">🏆 Production-Grade Features</div>
+                            <div class="mt8 dfc gap8 fs12 c2">
+                                <div>✅ Transaction দিয়ে atomic accept</div>
+                                <div>✅ Race condition safe code generation</div>
+                                <div>✅ N+1 query problem নেই (2 queries)</div>
+                                <div>✅ In-memory grouping for speed</div>
+                                <div>✅ Soft delete everywhere</div>
+                                <div>✅ Hostname-based multi-tenant</div>
+                                <div>✅ Pagination + max limit enforced</div>
+                                <div>✅ isRunning / expiresAt check</div>
+                            </div>
+                        </div>
+                        <div class="scenario-box" style="text-align:center;">
+                            <div class="fs14 fw7 ca">🎬 এই System দিয়ে কি করা যায়?</div>
+                            <div class="fs12 c2 mt8">১ লাখ teacher × ১০ service × ৫ price tier<br>= <span
+                                    class="cg fw7">৫০ লাখ combinations</span><br>সব একই codebase দিয়ে!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /slides -->
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="btn" id="prevBtn" onclick="changeSlide(-1)" disabled>← Prev</button>
+        <button class="btn" id="nextBtn" onclick="changeSlide(1)">Next →</button>
+    </div>
+    <div class="slide-info" id="slideInfo">1 / 14</div>
+
+    <script>
+        const TOTAL = 14;
+        let current = 0;
+
+        // Build nav dots
+        const dotContainer = document.getElementById('dotContainer');
+        for (let i = 0; i < TOTAL; i++) {
+            const d = document.createElement('div');
+            d.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            d.onclick = () => goTo(i);
+            dotContainer.appendChild(d);
+        }
+
+        function goTo(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides[current].classList.remove('active');
+            slides[current].classList.add('exit');
+            setTimeout(() => slides[current].classList.remove('exit'), 600);
+            current = n;
+            slides[current].classList.add('active');
+            document.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+            document.getElementById('navCounter').textContent = `${current + 1} / ${TOTAL}`;
+            document.getElementById('slideInfo').textContent = `${current + 1} / ${TOTAL}`;
+            document.getElementById('prevBtn').disabled = current === 0;
+            document.getElementById('nextBtn').disabled = current === TOTAL - 1;
+        }
+
+        function changeSlide(dir) {
+            const next = current + dir;
+            if (next >= 0 && next < TOTAL) goTo(next);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+        });
+
+        // Touch swipe
+        let startX = 0;
+        document.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        document.addEventListener('touchend', e => {
+            const diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1);
+        });
+    </script>
+</body>
+
+</html>

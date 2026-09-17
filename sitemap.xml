@@ -6,7 +6,62 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://systems.subromart.com/projects/acid/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/auth-system/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/how_to_use_redis/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://systems.subromart.com/projects/notification/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/oop/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/project-active-chat/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/project-add-ons/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/project-auth-system/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/project-comment/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/project-connection/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/project-postgresql/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/project-reusable-code/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -16,7 +71,32 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://systems.subromart.com/projects/how_to_use_redis/</loc>
+    <loc>https://systems.subromart.com/projects/system-active-chat/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/system-add-ons/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/system-pgbouncer/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/system-project/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/system-reusable-code/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://systems.subromart.com/projects/system-socket-connection/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL — ভেতরে কি হয়?</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07101f;
+            --surface: #0d1b2e;
+            --surface2: #112038;
+            --surface3: #0a1525;
+            --border: #1e3450;
+            --border2: #2a4a6e;
+            --accent: #3b82f6;
+            --accent2: #6366f1;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --purple: #8b5cf6;
+            --cyan: #06b6d4;
+            --pink: #ec4899;
+            --orange: #f97316;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            user-select: none
+        }
+
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            height: 50px;
+            background: rgba(7, 16, 31, .97);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px)
+        }
+
+        .tb-left {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .tb-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, #336791, var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+            color: #fff
+        }
+
+        .tb-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text2)
+        }
+
+        .tb-right {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .tb-hint {
+            font-size: 11px;
+            color: var(--text3)
+        }
+
+        .tb-counter {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text3)
+        }
+
+        .progress-track {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            height: 2px;
+            background: var(--border)
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #336791, var(--cyan));
+            transition: width .4s ease
+        }
+
+        .dot-row {
+            position: fixed;
+            top: 57px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 200
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--border2);
+            cursor: pointer;
+            transition: all .3s
+        }
+
+        .dot.active {
+            background: #336791;
+            transform: scale(1.6)
+        }
+
+        .dot.done {
+            background: var(--cyan);
+            opacity: .5
+        }
+
+        .stage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 76px 40px 65px;
+            opacity: 0;
+            transform: translateX(70px);
+            transition: opacity .5s cubic-bezier(.4, 0, .2, 1), transform .5s cubic-bezier(.4, 0, .2, 1);
+            pointer-events: none;
+            overflow-y: auto
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all
+        }
+
+        .slide.exit-left {
+            opacity: 0;
+            transform: translateX(-70px)
+        }
+
+        .r {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity .4s ease, transform .4s ease
+        }
+
+        .r.visible {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin-bottom: 10px
+        }
+
+        h1 {
+            font-size: clamp(24px, 4vw, 48px);
+            font-weight: 900;
+            line-height: 1.12;
+            text-align: center
+        }
+
+        h2 {
+            font-size: clamp(20px, 2.8vw, 36px);
+            font-weight: 800;
+            line-height: 1.2;
+            text-align: center
+        }
+
+        .sub {
+            font-size: clamp(13px, 1.6vw, 17px);
+            color: var(--text2);
+            text-align: center;
+            line-height: 1.65;
+            max-width: 680px
+        }
+
+        .gpg {
+            background: linear-gradient(135deg, #336791, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .g1 {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .g2 {
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .g3 {
+            background: linear-gradient(135deg, var(--yellow), var(--orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .g4 {
+            background: linear-gradient(135deg, var(--red), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .w100 {
+            width: 100%;
+            max-width: 940px
+        }
+
+        .w80 {
+            width: 100%;
+            max-width: 740px
+        }
+
+        .mt4 {
+            margin-top: 4px
+        }
+
+        .mt8 {
+            margin-top: 8px
+        }
+
+        .mt10 {
+            margin-top: 10px
+        }
+
+        .mt12 {
+            margin-top: 12px
+        }
+
+        .mt16 {
+            margin-top: 16px
+        }
+
+        .mt20 {
+            margin-top: 20px
+        }
+
+        .df {
+            display: flex
+        }
+
+        .dfc {
+            display: flex;
+            flex-direction: column
+        }
+
+        .aic {
+            align-items: center
+        }
+
+        .jcc {
+            justify-content: center
+        }
+
+        .jcsb {
+            justify-content: space-between
+        }
+
+        .g6 {
+            gap: 6px
+        }
+
+        .g8 {
+            gap: 8px
+        }
+
+        .g10 {
+            gap: 10px
+        }
+
+        .g12 {
+            gap: 12px
+        }
+
+        .g16 {
+            gap: 16px
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            width: 100%;
+            max-width: 940px
+        }
+
+        .grid3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            max-width: 940px
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px
+        }
+
+        .card.pg {
+            border-color: #336791;
+            background: rgba(51, 103, 145, .07)
+        }
+
+        .card.blue {
+            border-color: var(--accent);
+            background: rgba(59, 130, 246, .06)
+        }
+
+        .card.green {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, .06)
+        }
+
+        .card.purple {
+            border-color: var(--purple);
+            background: rgba(139, 92, 246, .06)
+        }
+
+        .card.yellow {
+            border-color: var(--yellow);
+            background: rgba(245, 158, 11, .06)
+        }
+
+        .card.red {
+            border-color: var(--red);
+            background: rgba(239, 68, 68, .06)
+        }
+
+        .card.cyan {
+            border-color: var(--cyan);
+            background: rgba(6, 182, 212, .06)
+        }
+
+        .card.orange {
+            border-color: var(--orange);
+            background: rgba(249, 115, 22, .06)
+        }
+
+        .scenario {
+            background: linear-gradient(135deg, rgba(51, 103, 145, .1), rgba(6, 182, 212, .07));
+            border: 1px solid rgba(51, 103, 145, .3);
+            border-radius: 14px;
+            padding: 18px 22px;
+            width: 100%;
+            max-width: 940px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .scenario::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #336791, var(--cyan))
+        }
+
+        .scenario.warn {
+            background: linear-gradient(135deg, rgba(239, 68, 68, .07), rgba(245, 158, 11, .07));
+            border-color: rgba(239, 68, 68, .25)
+        }
+
+        .scenario.warn::before {
+            background: linear-gradient(90deg, var(--red), var(--yellow))
+        }
+
+        .scenario.green-s {
+            background: linear-gradient(135deg, rgba(16, 185, 129, .07), rgba(6, 182, 212, .07));
+            border-color: rgba(16, 185, 129, .25)
+        }
+
+        .scenario.green-s::before {
+            background: linear-gradient(90deg, var(--green), var(--cyan))
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 10px;
+            border-radius: 18px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            text-transform: uppercase
+        }
+
+        .tag.pg {
+            background: rgba(51, 103, 145, .2);
+            border: 1px solid rgba(51, 103, 145, .4);
+            color: #7ab3d4
+        }
+
+        .tag.blue {
+            background: rgba(59, 130, 246, .15);
+            border: 1px solid rgba(59, 130, 246, .3);
+            color: #60a5fa
+        }
+
+        .tag.green {
+            background: rgba(16, 185, 129, .15);
+            border: 1px solid rgba(16, 185, 129, .3);
+            color: #34d399
+        }
+
+        .tag.purple {
+            background: rgba(139, 92, 246, .15);
+            border: 1px solid rgba(139, 92, 246, .3);
+            color: #a78bfa
+        }
+
+        .tag.yellow {
+            background: rgba(245, 158, 11, .15);
+            border: 1px solid rgba(245, 158, 11, .3);
+            color: #fbbf24
+        }
+
+        .tag.red {
+            background: rgba(239, 68, 68, .15);
+            border: 1px solid rgba(239, 68, 68, .3);
+            color: #f87171
+        }
+
+        .tag.cyan {
+            background: rgba(6, 182, 212, .15);
+            border: 1px solid rgba(6, 182, 212, .3);
+            color: #22d3ee
+        }
+
+        .tag.orange {
+            background: rgba(249, 115, 22, .15);
+            border: 1px solid rgba(249, 115, 22, .3);
+            color: #fb923c
+        }
+
+        .step-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px
+        }
+
+        .step-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+            margin-top: 1px
+        }
+
+        .divider {
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+            margin: 10px 0
+        }
+
+        /* Pipeline */
+        .pipeline {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            width: 100%;
+            max-width: 940px;
+            overflow-x: auto
+        }
+
+        .pipe-box {
+            flex: 1;
+            min-width: 80px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            position: relative
+        }
+
+        .pipe-box:first-child {
+            border-radius: 10px 0 0 10px
+        }
+
+        .pipe-box:last-child {
+            border-radius: 0 10px 10px 0
+        }
+
+        .pipe-arrow {
+            color: var(--text3);
+            font-size: 18px;
+            flex-shrink: 0;
+            padding: 0 2px
+        }
+
+        .pipe-box.active-pg {
+            border-color: #336791;
+            background: rgba(51, 103, 145, .15);
+            color: #7ab3d4
+        }
+
+        .pipe-box.active-green {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, .12);
+            color: #34d399
+        }
+
+        .pipe-box.active-yellow {
+            border-color: var(--yellow);
+            background: rgba(245, 158, 11, .12);
+            color: #fbbf24
+        }
+
+        .pipe-box.active-purple {
+            border-color: var(--purple);
+            background: rgba(139, 92, 246, .12);
+            color: #a78bfa
+        }
+
+        .pipe-box.active-cyan {
+            border-color: var(--cyan);
+            background: rgba(6, 182, 212, .12);
+            color: #22d3ee
+        }
+
+        .pipe-box.active-red {
+            border-color: var(--red);
+            background: rgba(239, 68, 68, .12);
+            color: #f87171
+        }
+
+        .pipe-box.active-orange {
+            border-color: var(--orange);
+            background: rgba(249, 115, 22, .12);
+            color: #fb923c
+        }
+
+        /* Code */
+        .code-block {
+            background: #040d18;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.75;
+            width: 100%;
+            overflow-x: auto
+        }
+
+        .ck {
+            color: #79b8ff
+        }
+
+        .cs {
+            color: #f0a050
+        }
+
+        .cc {
+            color: #566272;
+            font-style: italic
+        }
+
+        .cw {
+            color: #c678dd
+        }
+
+        .cf {
+            color: #61afef
+        }
+
+        .cn {
+            color: #d19a66
+        }
+
+        .cv {
+            color: #e06c75
+        }
+
+        .cg {
+            color: #98c379
+        }
+
+        /* Memory block visual */
+        .mem-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+            width: 100%
+        }
+
+        .mem-cell {
+            height: 28px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700;
+            font-family: var(--mono)
+        }
+
+        .mem-cell.clean {
+            background: rgba(16, 185, 129, .15);
+            border: 1px solid rgba(16, 185, 129, .3);
+            color: #34d399
+        }
+
+        .mem-cell.dirty {
+            background: rgba(245, 158, 11, .15);
+            border: 1px solid rgba(245, 158, 11, .3);
+            color: #fbbf24
+        }
+
+        .mem-cell.empty {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text3)
+        }
+
+        .mem-cell.pinned {
+            background: rgba(59, 130, 246, .15);
+            border: 1px solid rgba(59, 130, 246, .3);
+            color: #60a5fa
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 200
+        }
+
+        .btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 20px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all .2s
+        }
+
+        .btn:hover {
+            background: #336791;
+            border-color: #336791;
+            color: #fff
+        }
+
+        .btn:disabled {
+            opacity: .3;
+            cursor: default
+        }
+
+        .btn:disabled:hover {
+            background: var(--surface);
+            border-color: var(--border);
+            color: var(--text)
+        }
+
+        .btn.primary {
+            background: #336791;
+            border-color: #336791;
+            color: #fff
+        }
+
+        .btn.primary:hover {
+            background: #2a5478;
+            border-color: #2a5478
+        }
+
+        .step-indicator {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text3);
+            padding: 5px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            white-space: nowrap
+        }
+
+        @keyframes ripple {
+            from {
+                transform: scale(0);
+                opacity: .2
+            }
+
+            to {
+                transform: scale(4);
+                opacity: 0
+            }
+        }
+
+        .ripple-dot {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #336791;
+            pointer-events: none;
+            z-index: 999;
+            animation: ripple .5s ease-out forwards
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        .blink {
+            animation: blink 1.5s ease-in-out infinite
+        }
+
+        ::-webkit-scrollbar {
+            width: 3px
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 4px
+        }
+
+        .fs10 {
+            font-size: 10px
+        }
+
+        .fs11 {
+            font-size: 11px
+        }
+
+        .fs12 {
+            font-size: 12px
+        }
+
+        .fs13 {
+            font-size: 13px
+        }
+
+        .fs14 {
+            font-size: 14px
+        }
+
+        .fs15 {
+            font-size: 15px
+        }
+
+        .fw6 {
+            font-weight: 600
+        }
+
+        .fw7 {
+            font-weight: 700
+        }
+
+        .fw8 {
+            font-weight: 800
+        }
+
+        .c2 {
+            color: var(--text2)
+        }
+
+        .c3 {
+            color: var(--text3)
+        }
+
+        .ca {
+            color: var(--accent)
+        }
+
+        .cg {
+            color: var(--green)
+        }
+
+        .cp {
+            color: var(--purple)
+        }
+
+        .cy {
+            color: var(--yellow)
+        }
+
+        .cr {
+            color: var(--red)
+        }
+
+        .cc {
+            color: var(--cyan)
+        }
+
+        .co {
+            color: var(--orange)
+        }
+
+        .cpg {
+            color: #7ab3d4
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="topbar">
+        <div class="tb-left">
+            <div class="tb-logo">PG</div>
+            <span class="tb-title">PostgreSQL — ভেতরে কি হয়? সম্পূর্ণ প্রক্রিয়া</span>
+        </div>
+        <div class="tb-right">
+            <span class="tb-hint">Space / Click → পরের অংশ</span>
+            <span class="tb-counter" id="topCounter">1/13</span>
+        </div>
+    </nav>
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:7.7%"></div>
+    </div>
+    <div class="dot-row" id="dotRow"></div>
+
+    <div class="stage" id="stage">
+
+        <!-- ══ 0: HOOK ══ -->
+        <div class="slide active" data-slide="0">
+            <div class="label r" style="color:#7ab3d4">কেন জানবো?</div>
+            <h1 class="r mt8">তুমি <span class="gpg">INSERT INTO</span> লিখলে<br>ভেতরে আসলে কি ঘটে?</h1>
+            <p class="sub r mt12">একটা line code লেখো — PostgreSQL এর ভেতরে চলে ৭টা step। এগুলো না জানলে performance,
+                crash, data loss বুঝতে পারবে না।</p>
+
+            <div class="w100 mt16 dfc g8">
+                <div class="pipeline r">
+                    <div class="pipe-box active-pg">👤<br>Client</div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-box active-green">🔍<br>Parser</div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-box active-yellow">🗂<br>Buffer</div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-box active-purple">📝<br>WAL</div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-box active-cyan">👁<br>MVCC</div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-box active-orange">💾<br>Disk</div>
+                    <div class="pipe-arrow">→</div>
+                    <div class="pipe-box"
+                        style="border-color:var(--green);background:rgba(16,185,129,.1);color:#34d399;">✅<br>Done</div>
+                </div>
+
+                <div class="scenario r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        📌 <strong class="cpg">আজকে শিখবো:</strong><br>
+                        প্রতিটা ধাপ কি করে, কেন করে, এটা না থাকলে কি হতো — সব উদাহরণ সহ।<br>
+                        WAL কি? Shared Buffer কি? MVCC কি? Checkpoint কি? Snapshot কি? — সব এখানে।
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 1: CONNECTION + PARSER ══ -->
+        <div class="slide" data-slide="1">
+            <div class="label r" style="color:#7ab3d4">Step 1</div>
+            <h2 class="r mt8">Client <span class="gpg">Connect</span> করে — তারপর কি?</h2>
+            <p class="sub r mt8">তুমি query পাঠালে প্রথমে PostgreSQL সেটা "পড়ে" বোঝে।</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="grid2 r">
+                    <div class="card pg">
+                        <div class="fs13 fw7 cpg">🔌 Connection কিভাবে হয়</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.8">
+                            ① Client → TCP/IP দিয়ে connect<br>
+                            ② Postmaster process দেখে<br>
+                            ③ নতুন <strong class="cg">Backend Process</strong> fork করে<br>
+                            ④ শুধু সেই process তোমার সাথে কথা বলে<br>
+                            <span class="cc fs11">প্রতি connection = আলাদা OS process</span>
+                        </div>
+                    </div>
+                    <div class="card green">
+                        <div class="fs13 fw7 cg">🔍 Parser কি করে</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.8">
+                            তুমি লিখলে:<br>
+                            <span class="code-block" style="padding:6px 10px;margin:6px 0;display:block">SELECT * FROM
+                                users WHERE id=5</span>
+                            Parser এটাকে ভাঙে:<br>
+                            SELECT → Operation<br>
+                            users → Table<br>
+                            id=5 → Condition<br>
+                            <span class="cg fs11">→ Parse Tree বানায়</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scenario warn r">
+                    <div class="fs13 fw7 cr">❌ Parser না থাকলে?</div>
+                    <div class="fs12 c2 mt8">Database raw text বুঝতো না। "SELECT" মানে কি, "WHERE" মানে কি — কিছুই জানতো
+                        না। তুমি যা লিখতে তাই করতো — SQL Injection paradise! 😱</div>
+                </div>
+
+                <div class="card r" style="border-color:var(--purple)">
+                    <div class="fs13 fw7 cp">🗺 Planner/Optimizer — সবচেয়ে চালাক অংশ</div>
+                    <div class="fs12 c2 mt8" style="line-height:1.8">
+                        "১০ লাখ row-এর মধ্যে id=5 খুঁজবো কিভাবে?"<br>
+                        <strong class="cy">Option A:</strong> সব row scan করো (Seq Scan) — ধীর<br>
+                        <strong class="cg">Option B:</strong> Index ব্যবহার করো (Index Scan) — দ্রুত<br>
+                        Planner statistics দেখে best plan বেছে নেয় → <strong class="cp">Query Plan বানায়</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 2: SHARED BUFFER ══ -->
+        <div class="slide" data-slide="2">
+            <div class="label r" style="color:var(--yellow)">Step 2 — সবচেয়ে গুরুত্বপূর্ণ</div>
+            <h2 class="r mt8"><span class="g3">Shared Buffer</span> — PostgreSQL-এর RAM</h2>
+            <p class="sub r mt8">Disk অনেক ধীর। তাই PostgreSQL প্রথমে RAM-এ data রাখে। এটাই Shared Buffer।</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="scenario r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        📚 <strong class="cy">Library analogy:</strong> Library-তে লক্ষ বই আছে। তুমি একটা বই চাইলে
+                        Library Assistant shelf থেকে আনে (Disk read — ধীর)। কিন্তু আগে একবার আনা বই সে table-এ রেখে দেয়
+                        (Buffer — দ্রুত)। পরে কেউ চাইলে table থেকেই দেয়।
+                    </div>
+                </div>
+
+                <div class="r w100">
+                    <div class="fs12 fw7 cy mb8" style="margin-bottom:8px">Shared Buffer Pool — 8KB "Page" এ ভরা:</div>
+                    <div class="mem-grid">
+                        <div class="mem-cell clean">P.1<br>Clean</div>
+                        <div class="mem-cell dirty">P.2<br>Dirty</div>
+                        <div class="mem-cell clean">P.3<br>Clean</div>
+                        <div class="mem-cell pinned">P.4<br>Pinned</div>
+                        <div class="mem-cell dirty">P.5<br>Dirty</div>
+                        <div class="mem-cell empty">—<br>Empty</div>
+                        <div class="mem-cell clean">P.6<br>Clean</div>
+                        <div class="mem-cell empty">—<br>Empty</div>
+                    </div>
+                    <div class="df g12 mt8" style="font-size:10px">
+                        <span><span class="cg">■</span> Clean = Disk-এর মতোই</span>
+                        <span><span class="cy">■</span> Dirty = পালটানো হয়েছে, disk-এ যায়নি</span>
+                        <span><span class="ca">■</span> Pinned = এখন ব্যবহার হচ্ছে</span>
+                        <span><span class="c3">■</span> Empty = ফাঁকা</span>
+                    </div>
+                </div>
+
+                <div class="grid2 r">
+                    <div class="card red">
+                        <div class="fs13 fw7 cr">❌ Buffer ছাড়া (প্রতিটা query disk থেকে):</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            Disk read: ~10ms<br>
+                            Buffer read: ~0.01ms<br>
+                            <strong class="cr">পার্থক্য: ১০০০ গুণ ধীর!</strong><br>
+                            ১০০০ user একসাথে → disk-এ ১০০০ I/O → server dead 💀
+                        </div>
+                    </div>
+                    <div class="card green">
+                        <div class="fs13 fw7 cg">✅ Buffer সহ (Cache Hit):</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            Buffer hit rate 95%+ হলে<br>
+                            → ১০০ query তে ৯৫টা RAM থেকে<br>
+                            → শুধু ৫টা disk থেকে<br>
+                            <strong class="cg">→ ১০ লাখ user handle সম্ভব!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 3: WAL কি? ══ -->
+        <div class="slide" data-slide="3">
+            <div class="label r" style="color:var(--purple)">Step 3 — Crash Protection</div>
+            <h2 class="r mt8"><span class="g5"
+                    style="background:linear-gradient(135deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">WAL</span>
+                — Write-Ahead Log</h2>
+            <p class="sub r mt8">Database-এর সবচেয়ে গুরুত্বপূর্ণ নিরাপত্তা ব্যবস্থা।<br>"আগে Log লেখো, তারপর Data
+                পালটাও।"</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="scenario r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        📓 <strong class="cp">ডায়েরি analogy:</strong><br>
+                        একজন accountant সব কাজের আগে ডায়েরিতে লেখেন: "৩টায় রহিমের account থেকে ৳৫,০০০ কাটবো।"<br>
+                        তারপর আসল ledger-এ কাটেন।<br>
+                        বিদ্যুৎ গেলে? ডায়েরি দেখে সব recover করেন।<br>
+                        <strong class="cp">WAL = সেই ডায়েরি।</strong>
+                    </div>
+                </div>
+
+                <div class="r w100">
+                    <div class="fs12 fw7 cp" style="margin-bottom:8px">WAL File Structure:</div>
+                    <div class="code-block">
+                        <span style="color:var(--text3)">-- WAL Record এর মতো (simplified):</span><br>
+                        <span class="ck">LSN:</span> <span class="cn">0/1A2B3C4D</span> <span
+                            style="color:var(--text3)">← Log Sequence Number (address)</span><br>
+                        <span class="ck">xid:</span> <span class="cn">748392</span> <span style="color:var(--text3)">←
+                            কোন transaction এর কাজ</span><br>
+                        <span class="ck">type:</span> <span class="cs">'INSERT'</span> <span
+                            style="color:var(--text3)">← কি করা হলো</span><br>
+                        <span class="ck">relation:</span> <span class="cs">'users'</span> <span
+                            style="color:var(--text3)">← কোন table</span><br>
+                        <span class="ck">data:</span> { id:<span class="cn">5</span>, name:<span
+                            class="cs">'রহিম'</span> } <span style="color:var(--text3)">← কি data</span><br>
+                        <span class="ck">prev_lsn:</span> <span class="cn">0/1A2B3C40</span> <span
+                            style="color:var(--text3)">← আগের record এর link</span>
+                    </div>
+                </div>
+
+                <div class="grid2 r">
+                    <div class="card red">
+                        <div class="fs13 fw7 cr">❌ WAL ছাড়া crash হলে:</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            Buffer-এ data পালটানো হলো ✓<br>
+                            Disk-এ write হওয়ার আগে server crash 💥<br>
+                            Restart করলে — data গেছে ❌<br>
+                            <strong class="cr">→ বাংলাদেশ Bank থেকে সব transaction হারিয়ে গেলো!</strong>
+                        </div>
+                    </div>
+                    <div class="card purple">
+                        <div class="fs13 fw7 cp">✅ WAL সহ crash হলে:</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            WAL disk-এ আগেই লেখা ✓<br>
+                            Crash হলো 💥<br>
+                            Restart → WAL পড়ো → Replay করো ✓<br>
+                            <strong class="cp">→ কোনো data হারায়নি! দেশ বাঁচলো!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 4: LSN ══ -->
+        <div class="slide" data-slide="4">
+            <div class="label r" style="color:var(--purple)">WAL এর ভেতরে</div>
+            <h2 class="r mt8"><span class="g5"
+                    style="background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">LSN</span>
+                — WAL এর ঠিকানা ব্যবস্থা</h2>
+            <p class="sub r mt8">LSN = Log Sequence Number। WAL file-এর প্রতিটা record-এর unique address।</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="scenario r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        📮 <strong class="cp">Post Office analogy:</strong><br>
+                        চিঠি পাঠানো হলে Tracking Number দেওয়া হয়: TK-001, TK-002, TK-003...<br>
+                        হারিয়ে গেলে tracking দেখে বলা যায় "TK-004 এর পর যা যা আসেনি সব দাও।"<br>
+                        <strong class="cp">LSN = সেই Tracking Number।</strong>
+                    </div>
+                </div>
+
+                <div class="r w100">
+                    <div class="fs12 fw7 cp" style="margin-bottom:8px">WAL Sequence (Timeline):</div>
+                    <div style="display:flex;align-items:center;gap:0;width:100%;overflow-x:auto">
+                        <div
+                            style="background:rgba(139,92,246,.15);border:1px solid var(--purple);border-radius:8px 0 0 8px;padding:10px 14px;text-align:center;flex:1;min-width:80px">
+                            <div class="fs10 c3">LSN</div>
+                            <div class="fs11 fw7 cp" style="font-family:var(--mono)">0/1000</div>
+                            <div class="fs10 c2 mt4">BEGIN<br>xid:748</div>
+                        </div>
+                        <div style="color:var(--text3);padding:0 2px">→</div>
+                        <div
+                            style="background:rgba(139,92,246,.15);border:1px solid var(--purple);padding:10px 14px;text-align:center;flex:1;min-width:80px">
+                            <div class="fs10 c3">LSN</div>
+                            <div class="fs11 fw7 cp" style="font-family:var(--mono)">0/1020</div>
+                            <div class="fs10 c2 mt4">INSERT<br>users row</div>
+                        </div>
+                        <div style="color:var(--text3);padding:0 2px">→</div>
+                        <div
+                            style="background:rgba(16,185,129,.15);border:1px solid var(--green);padding:10px 14px;text-align:center;flex:1;min-width:80px">
+                            <div class="fs10 c3">LSN</div>
+                            <div class="fs11 fw7 cg" style="font-family:var(--mono)">0/1040</div>
+                            <div class="fs10 c2 mt4">COMMIT<br>✓ Done</div>
+                        </div>
+                        <div style="color:var(--text3);padding:0 2px">→</div>
+                        <div
+                            style="background:rgba(245,158,11,.15);border:1px solid var(--yellow);padding:10px 14px;text-align:center;flex:1;min-width:80px">
+                            <div class="fs10 c3">LSN</div>
+                            <div class="fs11 fw7 cy" style="font-family:var(--mono)">0/1060</div>
+                            <div class="fs10 c2 mt4">BEGIN<br>xid:749</div>
+                        </div>
+                        <div style="color:var(--text3);padding:0 2px">→</div>
+                        <div
+                            style="background:rgba(239,68,68,.15);border:1px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;text-align:center;flex:1;min-width:80px">
+                            <div class="fs10 c3">LSN</div>
+                            <div class="fs11 fw7 cr" style="font-family:var(--mono)">0/1080</div>
+                            <div class="fs10 c2 mt4">💥 CRASH<br>here</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scenario green-s r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        🔄 <strong class="cg">Crash Recovery কিভাবে কাজ করে:</strong><br>
+                        ① Restart → WAL পড়া শুরু<br>
+                        ② LSN 0/1040 পর্যন্ত COMMIT হয়েছে → Apply করো ✓<br>
+                        ③ LSN 0/1060 BEGIN হয়েছে কিন্তু COMMIT নেই → <strong class="cr">Rollback করো</strong><br>
+                        ④ Database ready — কোনো data হারায়নি!
+                    </div>
+                </div>
+
+                <div class="card r" style="border-color:var(--cyan)">
+                    <div class="fs13 fw7 cc">💡 Replication-এও LSN ব্যবহার হয়</div>
+                    <div class="fs12 c2 mt8">Primary server LSN 0/5000 পর্যন্ত। Replica LSN 0/4800 পর্যন্ত পেয়েছে।
+                        Replica বলবে "0/4800 থেকে বাকি দাও।" — Replication এভাবে কাজ করে!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 5: WRITE OPERATION FULL JOURNEY ══ -->
+        <div class="slide" data-slide="5">
+            <div class="label r" style="color:var(--green)">Write Operation</div>
+            <h2 class="r mt8">INSERT হলে <span class="g2">ভেতরে কি হয়?</span></h2>
+            <p class="sub r mt8"><code
+                    style="background:rgba(0,0,0,.3);padding:2px 8px;border-radius:5px;font-family:var(--mono);color:var(--green)">INSERT INTO users VALUES (5, 'রহিম')</code>
+                — সম্পূর্ণ যাত্রা।</p>
+
+            <div class="w100 mt14 dfc g8">
+                <div class="step-row card r">
+                    <div class="step-num" style="background:rgba(51,103,145,.2);color:#7ab3d4">①</div>
+                    <div>
+                        <div class="fs13 fw7 cpg">Transaction শুরু → xid পাও</div>
+                        <div class="fs12 c2 mt4">PostgreSQL একটা unique Transaction ID (xid) দেয়: xid=748392। এই ID
+                            দিয়ে সব track হবে।</div>
+                    </div>
+                </div>
+                <div class="step-row card r">
+                    <div class="step-num" style="background:rgba(139,92,246,.2);color:var(--purple)">②</div>
+                    <div>
+                        <div class="fs13 fw7 cp">WAL-এ আগে লেখো (Write-Ahead!)</div>
+                        <div class="fs12 c2 mt4">Disk-এ WAL file-এ record লেখা হয়: "xid 748392 INSERT করতে চায়।" এটা
+                            <strong class="cp">sequential write</strong> — অনেক দ্রুত।
+                        </div>
+                    </div>
+                </div>
+                <div class="step-row card r">
+                    <div class="step-num" style="background:rgba(245,158,11,.2);color:var(--yellow)">③</div>
+                    <div>
+                        <div class="fs13 fw7 cy">Shared Buffer-এ Page খোঁজো বা Load করো</div>
+                        <div class="fs12 c2 mt4">users table-এর Page Buffer-এ আছে? → সরাসরি। নেই? → Disk থেকে RAM-এ Load
+                            করো। তারপর সেই Page-এ নতুন row লেখো।</div>
+                    </div>
+                </div>
+                <div class="step-row card r">
+                    <div class="step-num" style="background:rgba(245,158,11,.2);color:var(--yellow)">④</div>
+                    <div>
+                        <div class="fs13 fw7 cy">Page "Dirty" হয়ে গেলো</div>
+                        <div class="fs12 c2 mt4">Buffer-এর Page পালটানো হয়েছে কিন্তু Disk-এ এখনো যায়নি → এটাকে বলে
+                            <strong class="cy">Dirty Page</strong>। এখনই disk-এ write করা হয় না।
+                        </div>
+                    </div>
+                </div>
+                <div class="step-row card r" style="border-color:var(--green)">
+                    <div class="step-num" style="background:rgba(16,185,129,.2);color:var(--green)">⑤</div>
+                    <div>
+                        <div class="fs13 fw7 cg">COMMIT → WAL-এ COMMIT record লেখো</div>
+                        <div class="fs12 c2 mt4">User `COMMIT` করলে WAL-এ COMMIT record লেখা হয়। এটা হলেই data
+                            "permanently saved" — disk-এ না গেলেও! কারণ WAL দিয়ে recover করা যাবে।</div>
+                    </div>
+                </div>
+
+                <div class="scenario warn r">
+                    <div class="fs12 c2" style="line-height:1.7">⚠️ <strong class="cy">কেন এখনই Disk-এ write করা হয়
+                            না?</strong><br>
+                        Disk write ধীর, random। WAL write দ্রুত কারণ sequential। Dirty pages পরে <strong
+                            class="cr">Checkpoint</strong>-এ batch করে write হয় — এটাই efficiency-র রহস্য!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 6: MVCC ══ -->
+        <div class="slide" data-slide="6">
+            <div class="label r" style="color:var(--cyan)">Concurrency Magic</div>
+            <h2 class="r mt8"><span
+                    style="background:linear-gradient(135deg,var(--cyan),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">MVCC</span>
+                — একসাথে লক্ষ user, কোনো fight নেই</h2>
+            <p class="sub r mt8">Multi-Version Concurrency Control — PostgreSQL-এর সবচেয়ে চালাক feature।</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="scenario r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        📸 <strong class="cc">Photo Album analogy:</strong><br>
+                        রহিম Album দেখছেন — পুরনো ছবি (version 1)।<br>
+                        একই সময় সাবিনা নতুন ছবি add করছেন (version 2)।<br>
+                        রহিম কি blocked? <strong class="cg">না!</strong> তিনি version 1 দেখতে থাকেন। সাবিনা version 2
+                        যোগ করেন।<br>
+                        <strong class="cc">MVCC = একই data-র multiple version রাখো।</strong>
+                    </div>
+                </div>
+
+                <div class="r w100">
+                    <div class="fs12 fw7 cc" style="margin-bottom:8px">একটা Row-এর Multiple Versions:</div>
+                    <div class="code-block">
+                        <span style="color:var(--text3)">-- users table ভেতরে আসলে এভাবে থাকে:</span><br>
+                        <span class="ck">xmin</span> <span class="ck">xmax</span> <span class="ck">name</span> <span
+                            class="ck">salary</span><br>
+                        <span style="color:var(--text3)">─────────────────────────────────────────</span><br>
+                        <span class="cn">748</span> <span class="cn">751</span> <span class="cs">'রহিম'</span> <span
+                            class="cn">30000</span> <span style="color:var(--text3)">← OLD version (xmax=751 মানে 751
+                            delete করেছে)</span><br>
+                        <span class="cn">751</span> <span class="cn">∞</span> <span class="cs">'রহিম'</span> <span
+                            class="cn">35000</span> <span style="color:var(--text3)">← NEW version (xmax=∞ মানে এখনো
+                            valid)</span>
+                    </div>
+                    <div class="fs11 c2 mt8">
+                        <span class="tag cyan">xmin = কে বানিয়েছে</span> &nbsp;
+                        <span class="tag purple">xmax = কে delete/update করেছে</span> &nbsp;
+                        <span class="tag green">xmax=∞ = এখনো জীবিত</span>
+                    </div>
+                </div>
+
+                <div class="grid2 r">
+                    <div class="card red">
+                        <div class="fs13 fw7 cr">❌ MVCC ছাড়া (Traditional Locking):</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            রহিম read করছেন → Row lock 🔒<br>
+                            করিম write করতে চায় → WAIT...<br>
+                            সাবিনাও read করতে চায় → WAIT...<br>
+                            <strong class="cr">→ সবাই queue-তে। Server অচল!</strong>
+                        </div>
+                    </div>
+                    <div class="card cyan">
+                        <div class="fs13 fw7 cc">✅ MVCC সহ:</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            রহিম পুরনো version read করেন ✓<br>
+                            করিম নতুন version লেখেন ✓<br>
+                            সাবিনাও পুরনো version read করেন ✓<br>
+                            <strong class="cc">→ সবাই একসাথে, কোনো block নেই!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 7: SNAPSHOT ══ -->
+        <div class="slide" data-slide="7">
+            <div class="label r" style="color:var(--cyan)">MVCC এর ভেতরে</div>
+            <h2 class="r mt8"><span
+                    style="background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Snapshot</span>
+                — "সেই মুহূর্তের ছবি"</h2>
+            <p class="sub r mt8">Transaction শুরু হওয়ার মুহূর্তে Database কোন অবস্থায় ছিল — সেটার snapshot নেওয়া হয়।
+            </p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="scenario r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        📸 <strong class="cc">Camera Snapshot analogy:</strong><br>
+                        সন্ধ্যা ৬টায় তুমি room-এর ছবি তুললে। ছবিতে ৩টা chair আছে।<br>
+                        রাতে কেউ আরেকটা chair রাখলো।<br>
+                        তোমার ছবিতে তবুও ৩টাই থাকবে।<br>
+                        <strong class="cc">Snapshot = সেই মুহূর্তের Database-এর ছবি।</strong>
+                    </div>
+                </div>
+
+                <div class="r w100">
+                    <div class="fs12 fw7 cc" style="margin-bottom:8px">Snapshot কি কি রাখে:</div>
+                    <div class="code-block">
+                        <span style="color:var(--text3)">-- Transaction T1 শুরুতে Snapshot:</span><br>
+                        <span class="ck">xmin:</span> <span class="cn">748</span> <span style="color:var(--text3)">← এর
+                            আগের সব committed transaction দেখতে পাবে</span><br>
+                        <span class="ck">xmax:</span> <span class="cn">752</span> <span style="color:var(--text3)">← এর
+                            পরের কোনো transaction দেখবে না</span><br>
+                        <span class="ck">xip_list:</span> [<span class="cn">749</span>, <span class="cn">750</span>]
+                        <span style="color:var(--text3)">← এগুলো চলছে, এদের data দেখবে না</span>
+                    </div>
+                </div>
+
+                <div class="card r" style="border-color:var(--cyan)">
+                    <div class="fs13 fw7 cc">🔍 কোন version দেখবে — Visibility Check:</div>
+                    <div class="fs12 c2 mt8" style="line-height:1.8">
+                        Row-এর xmin &lt; snapshot.xmin → <strong class="cg">দেখতে পাবে (committed)</strong><br>
+                        Row-এর xmin in xip_list → <strong class="cr">দেখবে না (এখনো চলছে)</strong><br>
+                        Row-এর xmax &lt; snapshot.xmin → <strong class="cr">deleted, দেখবে না</strong><br>
+                        Row-এর xmax = ∞ → <strong class="cg">দেখতে পাবে (live row)</strong>
+                    </div>
+                </div>
+
+                <div class="scenario warn r">
+                    <div class="fs12 c2" style="line-height:1.7">
+                        ⚠️ <strong class="cy">Snapshot ছাড়া কি হতো?</strong><br>
+                        তুমি report generate করছো। মাঝখানে কেউ data update করলো। তোমার report-এ আধা পুরনো আধা নতুন data
+                        যেতো — <strong class="cr">Inconsistent Read!</strong> Snapshot দিয়ে তুমি সবসময় সেই মুহূর্তের
+                        consistent data দেখো।
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 8: CHECKPOINT ══ -->
+        <div class="slide" data-slide="8">
+            <div class="label r" style="color:var(--orange)">Disk Flush</div>
+            <h2 class="r mt8"><span class="g3">Checkpoint</span> — Dirty Pages-কে Disk-এ পাঠানো</h2>
+            <p class="sub r mt8">Dirty pages RAM-এ থাকে। কিন্তু চিরকাল থাকে না — Checkpoint-এ Disk-এ যায়।</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="scenario r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        🏦 <strong class="co">Bank Ledger analogy:</strong><br>
+                        Bank teller সারাদিন scratch paper-এ হিসাব রাখেন (Buffer)।<br>
+                        সন্ধ্যায় সব হিসাব main ledger-এ লেখেন (Checkpoint)।<br>
+                        রাতে যদি scratch paper পুড়ে যায়? Main ledger আছে!<br>
+                        <strong class="co">Checkpoint = সেই সন্ধ্যার Ledger Transfer।</strong>
+                    </div>
+                </div>
+
+                <div class="r w100">
+                    <div class="fs12 fw7 co" style="margin-bottom:8px">Checkpoint Process:</div>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                        <div
+                            style="background:rgba(245,158,11,.1);border:1px solid var(--yellow);border-radius:10px;padding:12px 14px;text-align:center;flex:1;min-width:120px">
+                            <div class="fs12 fw7 cy">RAM Buffer</div>
+                            <div class="fs10 c2 mt4">Dirty Pages:<br>P.2, P.5, P.8...</div>
+                        </div>
+                        <div style="font-size:22px;color:var(--orange)">→</div>
+                        <div
+                            style="background:rgba(249,115,22,.1);border:1px solid var(--orange);border-radius:10px;padding:12px 14px;text-align:center;flex:1;min-width:120px">
+                            <div class="fs12 fw7 co">Background Writer</div>
+                            <div class="fs10 c2 mt4">Dirty pages<br>→ Disk লেখো</div>
+                        </div>
+                        <div style="font-size:22px;color:var(--orange)">→</div>
+                        <div
+                            style="background:rgba(16,185,129,.1);border:1px solid var(--green);border-radius:10px;padding:12px 14px;text-align:center;flex:1;min-width:120px">
+                            <div class="fs12 fw7 cg">WAL Checkpoint<br>Record</div>
+                            <div class="fs10 c2 mt4">LSN এখানে পর্যন্ত<br>সব disk-এ আছে</div>
+                        </div>
+                        <div style="font-size:22px;color:var(--orange)">→</div>
+                        <div
+                            style="background:rgba(6,182,212,.1);border:1px solid var(--cyan);border-radius:10px;padding:12px 14px;text-align:center;flex:1;min-width:120px">
+                            <div class="fs12 fw7 cc">Recovery<br>Fast!</div>
+                            <div class="fs10 c2 mt4">এর আগের WAL<br>আর দরকার নেই</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid2 r">
+                    <div class="card orange">
+                        <div class="fs13 fw7 co">🕐 কখন Checkpoint হয়?</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            • প্রতি ৫ মিনিটে (checkpoint_timeout)<br>
+                            • WAL ১৬MB পূর্ণ হলে<br>
+                            • Manual: <span
+                                style="font-family:var(--mono);color:var(--cyan);font-size:11px">CHECKPOINT;</span><br>
+                            • Database shutdown হলে
+                        </div>
+                    </div>
+                    <div class="card red">
+                        <div class="fs13 fw7 cr">❌ Checkpoint ছাড়া কি হতো?</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            Crash recovery-তে শুরু থেকে WAL replay করতে হতো।<br>
+                            ১ সপ্তাহের WAL = ১ সপ্তাহ restart সময়!<br>
+                            <strong class="cr">→ Database কখনো restart করা যেতো না!</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 9: READ OPERATION ══ -->
+        <div class="slide" data-slide="9">
+            <div class="label r" style="color:var(--green)">Read Operation</div>
+            <h2 class="r mt8">SELECT হলে <span class="g2">কিভাবে data আসে?</span></h2>
+            <p class="sub r mt8"><code
+                    style="background:rgba(0,0,0,.3);padding:2px 8px;border-radius:5px;font-family:var(--mono);color:var(--green)">SELECT * FROM users WHERE id=5</code>
+                — এর পুরো যাত্রা।</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="step-row card r">
+                    <div class="step-num" style="background:rgba(51,103,145,.2);color:#7ab3d4">①</div>
+                    <div>
+                        <div class="fs13 fw7 cpg">Snapshot নাও</div>
+                        <div class="fs12 c2 mt4">Transaction শুরুতে current snapshot নেওয়া হয়। এই snapshot-এর বাইরের
+                            কোনো data দেখাবে না।</div>
+                    </div>
+                </div>
+                <div class="step-row card r">
+                    <div class="step-num" style="background:rgba(245,158,11,.2);color:var(--yellow)">②</div>
+                    <div>
+                        <div class="fs13 fw7 cy">Buffer Check — Cache Hit?</div>
+                        <div class="fs12 c2 mt4">
+                            <strong class="cg">Cache Hit (95%+ ক্ষেত্রে):</strong> Page Buffer-এ আছে → RAM থেকে সরাসরি।
+                            দ্রুত! ⚡<br>
+                            <strong class="cr">Cache Miss (বাকি ক্ষেত্রে):</strong> Buffer-এ নেই → Disk থেকে Page load
+                            করো Buffer-এ, তারপর read।
+                        </div>
+                    </div>
+                </div>
+                <div class="step-row card r">
+                    <div class="step-num" style="background:rgba(6,182,212,.2);color:var(--cyan)">③</div>
+                    <div>
+                        <div class="fs13 fw7 cc">Visibility Check (MVCC)</div>
+                        <div class="fs12 c2 mt4">Page-এ অনেক row version থাকতে পারে (পুরনো, নতুন, deleted)। Snapshot
+                            দিয়ে check করো — কোনটা এই transaction-এর দেখার কথা।</div>
+                    </div>
+                </div>
+                <div class="step-row card r">
+                    <div class="step-num" style="background:rgba(16,185,129,.2);color:var(--green)">④</div>
+                    <div>
+                        <div class="fs13 fw7 cg">Result Return</div>
+                        <div class="fs12 c2 mt4">Visible row গুলো collect করে Client-এ পাঠানো হয়। Done!</div>
+                    </div>
+                </div>
+
+                <div class="grid2 r">
+                    <div class="card" style="border-color:#336791">
+                        <div class="fs13 fw7 cpg">📊 Index Scan vs Sequential Scan</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            <strong class="cg">Index Scan:</strong> ১০ লাখ row, B-Tree Index-এ যাও → সরাসরি id=5 row →
+                            <strong class="cg">৩টা page read</strong><br>
+                            <strong class="cr">Seq Scan:</strong> Index নেই → ১০ লাখ row সব পড়ো → <strong
+                                class="cr">১০,০০০ page read</strong><br>
+                            <span class="cy">EXPLAIN ANALYZE দিয়ে দেখা যায় কোনটা হচ্ছে!</span>
+                        </div>
+                    </div>
+                    <div class="card cyan">
+                        <div class="fs13 fw7 cc">🔢 8KB Page = Data এর ইউনিট</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            PostgreSQL data পড়ে page (block) হিসেবে, row হিসেবে না।<br>
+                            ১ page = 8,192 bytes<br>
+                            ১ page-এ ~100-200 টা row থাকে<br>
+                            Disk থেকে সবসময় পুরো page আসে।
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 10: DEAD TUPLES & VACUUM ══ -->
+        <div class="slide" data-slide="10">
+            <div class="label r" style="color:var(--red)">MVCC এর পার্শ্বপ্রতিক্রিয়া</div>
+            <h2 class="r mt8"><span class="g4">Dead Tuples</span> এবং <span class="g2">VACUUM</span></h2>
+            <p class="sub r mt8">MVCC পুরনো version রাখে — কিন্তু কেউ না দেখলে এগুলো "garbage"। VACUUM পরিষ্কার করে।</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="scenario warn r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        🗑️ <strong class="cr">Dead Tuple কিভাবে তৈরি হয়:</strong><br>
+                        রহিমের salary ছিল ৳৩০,০০০ (xmin=748, xmax=∞)<br>
+                        UPDATE করা হলো → পুরনো row (xmin=748, <strong class="cr">xmax=751</strong>) = Dead Tuple<br>
+                        নতুন row (xmin=751, xmax=∞) = Live Tuple<br>
+                        Dead Tuple তবুও table-এ জায়গা নিচ্ছে — bloat হচ্ছে!
+                    </div>
+                </div>
+
+                <div class="grid2 r">
+                    <div class="card red">
+                        <div class="fs13 fw7 cr">❌ VACUUM না চললে:</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            ১ মিলিয়ন UPDATE = ১ মিলিয়ন Dead Tuple<br>
+                            Table size: ১ GB → ১০ GB (bloat!)<br>
+                            Index-ও বড় হয় → Query ধীর<br>
+                            <strong class="cr">→ একসময় Transaction ID Wraparound! Database বন্ধ!</strong>
+                        </div>
+                    </div>
+                    <div class="card green">
+                        <div class="fs13 fw7 cg">✅ VACUUM চললে:</div>
+                        <div class="fs12 c2 mt8" style="line-height:1.7">
+                            Dead Tuples খুঁজে বের করে<br>
+                            কেউ দেখছে না confirm করে<br>
+                            সেই space reuse-এর জন্য mark করে<br>
+                            <strong class="cg">VACUUM FULL = ফাঁকা জায়গা OS-এ ফেরত দেয়</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card r" style="border-color:var(--green)">
+                    <div class="fs13 fw7 cg">🤖 AutoVACUUM — স্বয়ংক্রিয় পরিষ্কার</div>
+                    <div class="fs12 c2 mt8" style="line-height:1.7">
+                        PostgreSQL নিজেই background-এ AutoVACUUM চালায়।<br>
+                        Table-এর ২০% row dead হলে → automatically VACUUM শুরু।<br>
+                        তুমি সাধারণত manually চালাতে হয় না — কিন্তু জানতে হবে কেন চলছে!
+                    </div>
+                </div>
+
+                <div class="scenario r">
+                    <div class="fs12 c2" style="line-height:1.7">
+                        💡 <strong class="cpg">Transaction ID Wraparound (সবচেয়ে ভয়ের জিনিস):</strong><br>
+                        xid সর্বোচ্চ ~২ বিলিয়ন পর্যন্ত। তারপর আবার শুরু থেকে।<br>
+                        VACUUM না চললে পুরনো xid-এর row নতুন মনে করবে → <strong class="cr">সব data invisible! Database
+                            read-only mode-এ!</strong><br>
+                        বড় production crash এভাবে হয়।
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 11: FULL PIPELINE ══ -->
+        <div class="slide" data-slide="11">
+            <div class="label r" style="color:#7ab3d4">সম্পূর্ণ চিত্র</div>
+            <h2 class="r mt8">একটা <span class="gpg">INSERT</span> এর পুরো যাত্রা</h2>
+            <p class="sub r mt8">সব components একসাথে — কে কার পর কাজ করে।</p>
+
+            <div class="w100 mt14 dfc g10">
+                <div class="r w100">
+                    <div style="position:relative;width:100%">
+                        <!-- Timeline -->
+                        <div style="display:grid;grid-template-columns:1fr;gap:6px">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div
+                                    style="width:28px;height:28px;border-radius:50%;background:rgba(51,103,145,.3);border:1px solid #336791;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#7ab3d4;flex-shrink:0">
+                                    1</div>
+                                <div
+                                    style="flex:1;background:rgba(51,103,145,.1);border:1px solid rgba(51,103,145,.3);border-radius:8px;padding:8px 14px">
+                                    <div class="fs12 fw7 cpg">Client → Query পাঠায়</div>
+                                    <div class="fs11 c2">TCP connection → Postmaster → Backend Process fork</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div
+                                    style="width:28px;height:28px;border-radius:50%;background:rgba(16,185,129,.2);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0">
+                                    2</div>
+                                <div
+                                    style="flex:1;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:8px 14px">
+                                    <div class="fs12 fw7 cg">Parser + Planner</div>
+                                    <div class="fs11 c2">SQL parse → Parse Tree → Query Plan বানানো</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div
+                                    style="width:28px;height:28px;border-radius:50%;background:rgba(6,182,212,.2);border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--cyan);flex-shrink:0">
+                                    3</div>
+                                <div
+                                    style="flex:1;background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.25);border-radius:8px;padding:8px 14px">
+                                    <div class="fs12 fw7 cc">xid পাওয়া + Snapshot নেওয়া</div>
+                                    <div class="fs11 c2">Transaction শুরু → unique ID → database-এর এই মুহূর্তের ছবি
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div
+                                    style="width:28px;height:28px;border-radius:50%;background:rgba(139,92,246,.2);border:1px solid var(--purple);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--purple);flex-shrink:0">
+                                    4</div>
+                                <div
+                                    style="flex:1;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.25);border-radius:8px;padding:8px 14px">
+                                    <div class="fs12 fw7 cp">WAL-এ আগে লেখো (Sequential Disk Write)</div>
+                                    <div class="fs11 c2">Crash protection সবার আগে — data হারাবে না guarantee</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div
+                                    style="width:28px;height:28px;border-radius:50%;background:rgba(245,158,11,.2);border:1px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--yellow);flex-shrink:0">
+                                    5</div>
+                                <div
+                                    style="flex:1;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:8px 14px">
+                                    <div class="fs12 fw7 cy">Shared Buffer-এ Dirty Page তৈরি</div>
+                                    <div class="fs11 c2">RAM-এ data লেখা → দ্রুত → disk-এ এখনই না</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div
+                                    style="width:28px;height:28px;border-radius:50%;background:rgba(16,185,129,.2);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0">
+                                    6</div>
+                                <div
+                                    style="flex:1;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:8px 14px">
+                                    <div class="fs12 fw7 cg">COMMIT → WAL-এ COMMIT record → Client-কে "OK"</div>
+                                    <div class="fs11 c2">এই মুহূর্তে data "durably saved" — WAL disk-এ আছে</div>
+                                </div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <div
+                                    style="width:28px;height:28px;border-radius:50%;background:rgba(249,115,22,.2);border:1px solid var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--orange);flex-shrink:0">
+                                    7</div>
+                                <div
+                                    style="flex:1;background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.25);border-radius:8px;padding:8px 14px">
+                                    <div class="fs12 fw7 co">Background: Checkpoint → Dirty Pages → Disk</div>
+                                    <div class="fs11 c2">পরে background-এ Checkpoint হলে data actual disk file-এ যায়
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ 12: SUMMARY ══ -->
+        <div class="slide" data-slide="12">
+            <div class="label r" style="color:#7ab3d4">সব কিছু এক জায়গায়</div>
+            <h2 class="r mt8">PostgreSQL-এর <span class="gpg">৬টা Core Mechanism</span></h2>
+
+            <div class="w100 mt14 dfc g8">
+                <div class="grid3 r">
+                    <div class="card pg" style="padding:16px 14px">
+                        <div class="fs14 fw8 cpg">📦 Shared Buffer</div>
+                        <div class="fs11 c2 mt6" style="line-height:1.7">RAM-এর cache। Disk ১০০০গুণ ধীর — তাই আগে RAM-এ।
+                            8KB Page হিসেবে কাজ করে। Cache hit rate বেশি হলে database দ্রুত।</div>
+                        <div class="mt8"><span class="tag pg">RAM Cache</span></div>
+                    </div>
+                    <div class="card purple" style="padding:16px 14px">
+                        <div class="fs14 fw8 cp">📝 WAL</div>
+                        <div class="fs11 c2 mt6" style="line-height:1.7">Write-Ahead Log। Data পালটানোর আগে log লেখো।
+                            Crash হলে log থেকে recover। Sequential write = দ্রুত। LSN = প্রতিটা record-এর address।</div>
+                        <div class="mt8"><span class="tag purple">Crash Safety</span></div>
+                    </div>
+                    <div class="card cyan" style="padding:16px 14px">
+                        <div class="fs14 fw8 cc">👁 MVCC</div>
+                        <div class="fs11 c2 mt6" style="line-height:1.7">একই row-এর multiple version। Reader writer-কে
+                            block করে না। xmin/xmax দিয়ে version track। Snapshot দিয়ে consistent read।</div>
+                        <div class="mt8"><span class="tag cyan">Concurrency</span></div>
+                    </div>
+                    <div class="card orange" style="padding:16px 14px">
+                        <div class="fs14 fw8 co">💾 Checkpoint</div>
+                        <div class="fs11 c2 mt6" style="line-height:1.7">Dirty pages → Disk। নিয়মিত না হলে recovery
+                            সময় infinite। WAL-এ Checkpoint record রাখে। এর আগের WAL delete করা যায়।</div>
+                        <div class="mt8"><span class="tag orange">Disk Sync</span></div>
+                    </div>
+                    <div class="card green" style="padding:16px 14px">
+                        <div class="fs14 fw8 cg">📸 Snapshot</div>
+                        <div class="fs11 c2 mt6" style="line-height:1.7">Transaction শুরুতে database-এর ছবি। সেই
+                            মুহূর্তের data দেখায়। পরে কেউ পালটালেও তুমি পুরনোটা দেখো। Isolation guarantee।</div>
+                        <div class="mt8"><span class="tag green">Isolation</span></div>
+                    </div>
+                    <div class="card red" style="padding:16px 14px">
+                        <div class="fs14 fw8 cr">🧹 VACUUM</div>
+                        <div class="fs11 c2 mt6" style="line-height:1.7">MVCC Dead Tuples তৈরি করে। VACUUM পরিষ্কার করে।
+                            AutoVACUUM স্বয়ংক্রিয়। না চললে Table Bloat এবং xid Wraparound crash!</div>
+                        <div class="mt8"><span class="tag red">Cleanup</span></div>
+                    </div>
+                </div>
+
+                <div class="scenario r">
+                    <div class="fs13 c2" style="line-height:1.8">
+                        🎯 <strong class="cpg">এগুলো জানলে কি পারবে?</strong><br>
+                        Query ধীর কেন → <span class="cy">Buffer hit rate, Seq Scan check করতে পারবে</span><br>
+                        Disk full কেন → <span class="co">VACUUM না চলার কারণ বুঝবে</span><br>
+                        Data হারালো কেন → <span class="cp">WAL configuration বুঝবে</span><br>
+                        Concurrent users handle → <span class="cc">MVCC + Isolation level জানবে</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /stage -->
+
+    <div class="bottom-nav">
+        <button class="btn" id="prevBtn" onclick="prevSlide()" disabled>← Slide</button>
+        <div class="step-indicator" id="stepIndicator">Slide 1 · ধাপ 1/3</div>
+        <button class="btn primary" id="nextBtn" onclick="advance()">পরের অংশ →</button>
+    </div>
+
+    <script>
+        const TOTAL = 13;
+        let cur = 0, rev = 0, counts = [];
+
+        const dotRow = document.getElementById('dotRow');
+        for (let i = 0; i < TOTAL; i++) {
+            const d = document.createElement('div');
+            d.className = 'dot' + (i === 0 ? ' active' : '');
+            d.onclick = () => goTo(i);
+            dotRow.appendChild(d);
+        }
+
+        function initSlides() {
+            document.querySelectorAll('.slide').forEach((sl, idx) => {
+                counts[idx] = sl.querySelectorAll('.r').length;
+            });
+        }
+
+        function showReveals(idx, n) {
+            document.querySelectorAll('.slide')[idx].querySelectorAll('.r').forEach((el, i) => {
+                el.classList.toggle('visible', i < n);
+            });
+        }
+
+        function advance() {
+            if (rev < counts[cur]) { rev++; showReveals(cur, rev); updateUI(); }
+            else if (cur < TOTAL - 1) { goTo(cur + 1); }
+        }
+
+        function prevSlide() {
+            if (cur > 0) goTo(cur - 1);
+        }
+
+        function goTo(idx) {
+            const slides = document.querySelectorAll('.slide');
+            slides[cur].classList.remove('active');
+            slides[cur].classList.add('exit-left');
+            setTimeout(() => slides[cur].classList.remove('exit-left'), 600);
+            cur = idx; rev = 0;
+            slides[cur].classList.add('active');
+            showReveals(cur, 0);
+            setTimeout(() => { rev = 1; showReveals(cur, 1); updateUI(); }, 80);
+            updateUI();
+        }
+
+        function updateUI() {
+            const total = counts[cur];
+            document.getElementById('progressFill').style.width = (cur / (TOTAL - 1) * 100) + '%';
+            document.getElementById('topCounter').textContent = `${cur + 1}/${TOTAL}`;
+            document.getElementById('stepIndicator').textContent = `Slide ${cur + 1} · ধাপ ${Math.min(rev, total)}/${total}`;
+            const nb = document.getElementById('nextBtn');
+            if (rev >= total) { nb.textContent = cur === TOTAL - 1 ? '✓ শেষ' : 'পরের Slide →'; nb.disabled = cur === TOTAL - 1; }
+            else { nb.textContent = 'পরের অংশ →'; nb.disabled = false; }
+            document.getElementById('prevBtn').disabled = cur === 0;
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.remove('active', 'done');
+                if (i === cur) d.classList.add('active'); else if (i < cur) d.classList.add('done');
+            });
+        }
+
+        document.addEventListener('keydown', e => {
+            if ([' ', 'ArrowRight', 'ArrowDown'].includes(e.key)) { e.preventDefault(); advance(); }
+            if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); prevSlide(); }
+        });
+
+        document.getElementById('stage').addEventListener('click', e => {
+            advance();
+            const r = document.createElement('div');
+            r.className = 'ripple-dot';
+            r.style.cssText = `left:${e.clientX - 25}px;top:${e.clientY - 25}px`;
+            document.body.appendChild(r);
+            setTimeout(() => r.remove(), 600);
+        });
+
+        let sx = 0;
+        document.addEventListener('touchstart', e => sx = e.touches[0].clientX);
+        document.addEventListener('touchend', e => {
+            const d = sx - e.changedTouches[0].clientX;
+            if (d > 60) advance(); else if (d < -60) prevSlide(); else if (Math.abs(d) < 15) advance();
+        });
+
+        initSlides();
+        showReveals(0, 0);
+        setTimeout(() => { rev = 1; showReveals(0, 1); updateUI(); }, 200);
+    </script>
+</body>
+
+</html>

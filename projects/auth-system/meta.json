@@ -1,0 +1,9 @@
+{
+  "title": "Auth System — JWT, Redis, Permission",
+  "tagline": "পুরো Auth System এক নজরে — তুমি কে, তার প্রমাণ কীভাবে হয়?",
+  "description": "JWT টোকেন, Redis সেশন ও রোল-বেজড পারমিশন দিয়ে একটা সম্পূর্ণ Authentication ও Authorization সিস্টেম কীভাবে কাজ করে — লগইন থেকে শুরু করে টোকেন রিফ্রেশ, পারমিশন চেক পর্যন্ত পুরো ফ্লো ভিজ্যুয়ালি ব্যাখ্যা করা হয়েছে।",
+  "category": "Security",
+  "tags": ["auth", "jwt", "redis", "permission", "session", "security"],
+  "status": "live",
+  "icon": "🔑"
+}

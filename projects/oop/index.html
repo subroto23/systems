@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>OOP — Object Oriented Programming</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07101f;
+            --surface: #0d1b2e;
+            --card: #112240;
+            --border: #1e3a5f;
+            --accent: #4f8ef7;
+            --green: #43d49e;
+            --red: #ff5e5e;
+            --yellow: #ffc554;
+            --purple: #b06fff;
+            --text: #e8f0ff;
+            --muted: #7a8fac;
+            --dim: #3a5070;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            transition: width .4s;
+            z-index: 100;
+        }
+
+        #counter {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            font-size: 12px;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            z-index: 100;
+        }
+
+        #dots {
+            position: fixed;
+            bottom: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 7px;
+            z-index: 100;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--dim);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .dot.active {
+            background: var(--accent);
+            transform: scale(1.4);
+        }
+
+        #nav {
+            position: fixed;
+            bottom: 16px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            transition: all .2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--border);
+        }
+
+        #mode-bar {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 6px 18px;
+            z-index: 100;
+            font-size: 12px;
+        }
+
+        #mode-bar span {
+            color: var(--muted);
+        }
+
+        #mode-bar .active-label {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .tog {
+            position: relative;
+            width: 38px;
+            height: 22px;
+            cursor: pointer;
+        }
+
+        .tog input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .tog-track {
+            position: absolute;
+            inset: 0;
+            background: var(--dim);
+            border-radius: 100px;
+            transition: .3s;
+        }
+
+        .tog-thumb {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 3px;
+            left: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .3s;
+        }
+
+        .tog input:checked~.tog-track {
+            background: var(--accent);
+        }
+
+        .tog input:checked~.tog-thumb {
+            transform: translateX(16px);
+        }
+
+        #slides {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 56px 80px 100px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .5s;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .r {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity .4s, transform .4s;
+        }
+
+        .r.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-size: clamp(30px, 5vw, 52px);
+            font-weight: 900;
+            line-height: 1.1;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: clamp(22px, 3.5vw, 38px);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        h3 {
+            font-size: clamp(15px, 1.8vw, 21px);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: clamp(13px, 1.4vw, 17px);
+            line-height: 1.75;
+            color: var(--muted);
+            text-align: center;
+            max-width: 780px;
+        }
+
+        .accent {
+            color: var(--accent);
+        }
+
+        .green {
+            color: var(--green);
+        }
+
+        .red {
+            color: var(--red);
+        }
+
+        .yellow {
+            color: var(--yellow);
+        }
+
+        .purple {
+            color: var(--purple);
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+        }
+
+        .blist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .blist li {
+            display: flex;
+            gap: 10px;
+            font-size: clamp(13px, 1.3vw, 15px);
+            line-height: 1.65;
+        }
+
+        .blist li::before {
+            content: '▸';
+            color: var(--accent);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .code {
+            background: #050e1c;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.8;
+            text-align: left;
+            width: 100%;
+            max-width: 680px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progress"></div>
+    <div id="counter">01 / 13</div>
+    <div id="dots"></div>
+    <div id="mode-bar">
+        <span id="lbl-all" class="active-label">সব একসাথে</span>
+        <label class="tog"><input type="checkbox" id="tog-inp" onchange="setMode(this.checked)">
+            <div class="tog-track"></div>
+            <div class="tog-thumb"></div>
+        </label>
+        <span id="lbl-step">ধাপে ধাপে</span>
+    </div>
+    <div id="nav">
+        <button class="nav-btn" onclick="prevSlide()">← আগে</button>
+        <button class="nav-btn" onclick="advance()">পরে →</button>
+    </div>
+    <div id="slides">
+
+        <!-- 0: THUMBNAIL -->
+        <div class="slide active" data-slide="0">
+            <div style="font-size:72px;margin-bottom:16px;" class="r">🧱</div>
+            <h1 class="r">প্রতিবার কি নতুন করে<br><span class="red">সব লিখতে হবে?</span></h1>
+            <p class="r" style="font-size:clamp(15px,1.6vw,19px);margin-bottom:24px;">না! <span class="accent"
+                    style="font-weight:700;">OOP</span> শিখলে একবার লেখা code বারবার ব্যবহার হয়। রহিম-করিম-জাবের সবার
+                জন্য আলাদা code লিখতে হবে না — একটা blueprint বানাও, সব কাজে লাগাও।</p>
+            <div class="r" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;">
+                <span
+                    style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;font-size:12px;font-weight:700;border:1px solid var(--red);color:var(--red);">❌
+                    একই code বারবার</span>
+                <span
+                    style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:100px;font-size:12px;font-weight:700;border:1px solid var(--green);color:var(--green);">✅
+                    একবার লেখো, সবখানে চলে</span>
+            </div>
+            <p class="r" style="font-size:13px;color:var(--muted);text-align:center;max-width:600px;">এই slide-এ: OOP
+                কী, কেন দরকার, ৪টা pillar — Encapsulation, Inheritance, Polymorphism, Abstraction — বাস্তব উদাহরণে।</p>
+        </div>
+
+        <!-- 1: OOP কী -->
+        <div class="slide" data-slide="1">
+            <div class="label r">জিরো থেকে</div>
+            <h2 class="r">OOP কী? — <span class="accent">বাস্তব জীবনের মত</span> ভাবো</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card" style="border-color:var(--accent);">
+                    <div style="display:flex;gap:14px;align-items:flex-start;">
+                        <span style="font-size:36px;">🏭</span>
+                        <div>
+                            <h3 style="color:var(--accent);">Class = Blueprint (নকশা)</h3>
+                            <p style="text-align:left;font-size:15px;">যেমন একটা বাড়ির নকশা। নকশা নিজে বাড়ি না —
+                                কিন্তু নকশা দিয়ে অনেক বাড়ি বানানো যায়।</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="r" style="display:flex;gap:12px;">
+                    <div class="card" style="flex:1;">
+                        <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;">
+                            <span style="font-size:24px;">📝</span>
+                            <h3 style="font-size:15px;color:var(--yellow);">Class = নকশা</h3>
+                        </div>
+                        <div class="code" style="font-size:11px;padding:10px 14px;">
+                            <div><span style="color:var(--purple);">class</span> <span
+                                    style="color:var(--green);">মানুষ</span> {'{'}</div>
+                            <div>&nbsp;&nbsp;নাম: string</div>
+                            <div>&nbsp;&nbsp;বয়স: number</div>
+                            <div>&nbsp;&nbsp;কথাবলো() {'{'} ... {'}'}</div>
+                            <div>{'}'}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;font-size:30px;color:var(--muted);">→</div>
+                    <div class="card" style="flex:1;">
+                        <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;">
+                            <span style="font-size:24px;">👤</span>
+                            <h3 style="font-size:15px;color:var(--green);">Object = বাস্তব মানুষ</h3>
+                        </div>
+                        <div class="code" style="font-size:11px;padding:10px 14px;">
+                            <div><span style="color:var(--dim);">// ৩টা আলাদা মানুষ</span></div>
+                            <div><span style="color:var(--purple);">const</span> রহিম = <span
+                                    style="color:var(--purple);">new</span> মানুষ()</div>
+                            <div><span style="color:var(--purple);">const</span> করিম = <span
+                                    style="color:var(--purple);">new</span> মানুষ()</div>
+                            <div><span style="color:var(--purple);">const</span> জাবের = <span
+                                    style="color:var(--purple);">new</span> মানুষ()</div>
+                        </div>
+                    </div>
+                </div>
+                <p class="r" style="font-size:14px;color:var(--muted);">একটা Class থেকে হাজারো Object বানানো যায়।
+                    প্রতিটা Object-এর নিজের data থাকে, কিন্তু behavior (কাজ করার পদ্ধতি) একই।</p>
+            </div>
+        </div>
+
+        <!-- 2: কেন দরকার -->
+        <div class="slide" data-slide="2">
+            <div class="label r">সমস্যা → সমাধান</div>
+            <h2 class="r">OOP <span class="red">ছাড়া</span> কী সমস্যা?</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card" style="border-color:var(--red);">
+                    <h3 style="color:var(--red);margin-bottom:10px;">😱 OOP ছাড়া — রহিম, করিম, জাবেরের জন্য আলাদা code
+                    </h3>
+                    <div class="code" style="font-size:11px;">
+                        <div style="color:var(--dim);">// Procedural style — nightmare!</div>
+                        <div><span style="color:var(--purple);">let</span> রহিম_নাম = <span
+                                style="color:var(--green);">"রহিম"</span>; <span style="color:var(--purple);">let</span>
+                            রহিম_বেতন = <span style="color:var(--yellow);">50000</span>;</div>
+                        <div><span style="color:var(--purple);">let</span> করিম_নাম = <span
+                                style="color:var(--green);">"করিম"</span>; <span style="color:var(--purple);">let</span>
+                            করিম_বেতন = <span style="color:var(--yellow);">60000</span>;</div>
+                        <div><span style="color:var(--purple);">let</span> জাবের_নাম = <span
+                                style="color:var(--green);">"জাবের"</span>; <span
+                                style="color:var(--purple);">let</span> জাবের_বেতন = <span
+                                style="color:var(--yellow);">55000</span>;</div>
+                        <div style="color:var(--dim);">// ১০০০ কর্মচারী হলে? 😱</div>
+                    </div>
+                </div>
+                <div class="r card" style="border-color:var(--green);">
+                    <h3 style="color:var(--green);margin-bottom:10px;">✅ OOP সহ — একটা Class, সব কর্মচারী</h3>
+                    <div class="code" style="font-size:11px;">
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--green);">কর্মচারী</span> {'{'}</div>
+                        <div>&nbsp;&nbsp;<span style="color:var(--accent);">constructor</span>(নাম, বেতন) {'{'} <span
+                                style="color:var(--purple);">this</span>.নাম = নাম; <span
+                                style="color:var(--purple);">this</span>.বেতন = বেতন; {'}'}</div>
+                        <div>&nbsp;&nbsp;বেতনদেখাও() {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">`${'{'}this.নাম{'}'}: ${'{'}this.বেতন{'}'} টাকা`</span>;
+                            {'}'}</div>
+                        <div>{'}'}</div>
+                        <div><span style="color:var(--dim);">// এখন যতজন খুশি</span></div>
+                        <div><span style="color:var(--purple);">const</span> রহিম = <span
+                                style="color:var(--purple);">new</span> কর্মচারী(<span
+                                style="color:var(--green);">"রহিম"</span>, <span
+                                style="color:var(--yellow);">50000</span>);</div>
+                        <div><span style="color:var(--purple);">const</span> করিম = <span
+                                style="color:var(--purple);">new</span> কর্মচারী(<span
+                                style="color:var(--green);">"করিম"</span>, <span
+                                style="color:var(--yellow);">60000</span>);</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3: 4 Pillars Overview -->
+        <div class="slide" data-slide="3">
+            <div class="label r">৪টা স্তম্ভ</div>
+            <h2 class="r">OOP-এর <span class="accent">৪টা মূল নীতি</span></h2>
+            <div class="r"
+                style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:820px;width:100%;margin-top:8px;">
+                <div class="card" style="border-color:var(--accent);text-align:left;">
+                    <div style="font-size:32px;margin-bottom:8px;">🔒</div>
+                    <h3 style="color:var(--accent);margin-bottom:6px;">Encapsulation</h3>
+                    <p style="text-align:left;font-size:14px;">ভেতরের জিনিস লুকাও, বাইরে শুধু যা দরকার দাও।<br><span
+                            style="color:var(--muted);font-size:12px;">যেমন: ATM-এর ভেতরে কীভাবে কাজ করে জানো না, কিন্তু
+                            টাকা তুলতে পারো</span></p>
+                </div>
+                <div class="card" style="border-color:var(--green);text-align:left;">
+                    <div style="font-size:32px;margin-bottom:8px;">👨‍👦</div>
+                    <h3 style="color:var(--green);margin-bottom:6px;">Inheritance</h3>
+                    <p style="text-align:left;font-size:14px;">Parent class-এর সব গুণ child-এ আসে।<br><span
+                            style="color:var(--muted);font-size:12px;">যেমন: মানুষ → Student, Teacher — সবার নাম-বয়স
+                            আছে</span></p>
+                </div>
+                <div class="card" style="border-color:var(--yellow);text-align:left;">
+                    <div style="font-size:32px;margin-bottom:8px;">🎭</div>
+                    <h3 style="color:var(--yellow);margin-bottom:6px;">Polymorphism</h3>
+                    <p style="text-align:left;font-size:14px;">একই নাম, আলাদা কাজ।<br><span
+                            style="color:var(--muted);font-size:12px;">যেমন: কুকুর কামড়ায়, বিড়াল আঁচড়ায় — দুজনকেই
+                            বলা হয় "আক্রমণ করো"</span></p>
+                </div>
+                <div class="card" style="border-color:var(--purple);text-align:left;">
+                    <div style="font-size:32px;margin-bottom:8px;">🎭</div>
+                    <h3 style="color:var(--purple);margin-bottom:6px;">Abstraction</h3>
+                    <p style="text-align:left;font-size:14px;">জটিলটা লুকাও, সহজটা দেখাও।<br><span
+                            style="color:var(--muted);font-size:12px;">যেমন: গাড়ি চালাতে engine কীভাবে কাজ করে জানতে
+                            হয় না</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4: Encapsulation -->
+        <div class="slide" data-slide="4">
+            <div class="label r">প্রথম স্তম্ভ</div>
+            <h2 class="r"><span class="accent">Encapsulation</span> — ক্যাপসুলের মত</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card">
+                    <h3 style="color:var(--yellow);margin-bottom:10px;">💊 ওষুধের ক্যাপসুল</h3>
+                    <p style="text-align:left;font-size:15px;color:var(--muted);">ভেতরে কী আছে দেখা যায় না। কিন্তু কাজ
+                        করে। কেউ সরাসরি ভেতরে হাত দিতে পারে না।</p>
+                </div>
+                <div class="r card">
+                    <h3 style="color:var(--accent);margin-bottom:10px;">🏦 রহিমের bank account</h3>
+                    <div class="code" style="font-size:12px;">
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--green);">BankAccount</span> {'{'}</div>
+                        <div>&nbsp;&nbsp;<span style="color:var(--red);">#balance</span> = <span
+                                style="color:var(--yellow);">0</span>; <span style="color:var(--dim);">// private —
+                                বাইরে থেকে দেখা যাবে না</span></div>
+                        <div></div>
+                        <div>&nbsp;&nbsp;টাকাজমাও(amount) {'{'}</div>
+                        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--purple);">if</span> (amount &lt;= 0) <span
+                                style="color:var(--purple);">throw</span> <span
+                                style="color:var(--green);">"Invalid!"</span>;</div>
+                        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--purple);">this</span>.<span
+                                style="color:var(--red);">#balance</span> += amount;</div>
+                        <div>&nbsp;&nbsp;{'}'}</div>
+                        <div>&nbsp;&nbsp;balanceদেখো() {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--purple);">this</span>.<span
+                                style="color:var(--red);">#balance</span>; {'}'} <span style="color:var(--dim);">// শুধু
+                                দেখতে পারবে</span></div>
+                        <div>{'}'}</div>
+                        <div><span style="color:var(--purple);">const</span> রহিমAccount = <span
+                                style="color:var(--purple);">new</span> BankAccount();</div>
+                        <div>রহিমAccount.টাকাজমাও(<span style="color:var(--yellow);">5000</span>);</div>
+                        <div style="color:var(--dim);">// রহিমAccount.#balance = 999999; ← এটা কাজ করবে না! 🔒</div>
+                    </div>
+                </div>
+                <p class="r" style="font-size:14px;color:var(--muted);">Encapsulation মানে: validation, rules সব ভেতরে।
+                    বাইরে থেকে ভুল data দেওয়ার সুযোগ নেই।</p>
+            </div>
+        </div>
+
+        <!-- 5: Inheritance -->
+        <div class="slide" data-slide="5">
+            <div class="label r">দ্বিতীয় স্তম্ভ</div>
+            <h2 class="r"><span class="green">Inheritance</span> — বাপের গুণ ছেলেতে</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card">
+                    <h3 style="color:var(--green);margin-bottom:10px;">👨‍👩‍👧‍👦 স্কুলের উদাহরণ</h3>
+                    <div class="code" style="font-size:12px;">
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--green);">মানুষ</span> {'{'} <span style="color:var(--dim);">// Parent
+                                class</span></div>
+                        <div>&nbsp;&nbsp;<span style="color:var(--accent);">constructor</span>(নাম) {'{'} <span
+                                style="color:var(--purple);">this</span>.নাম = নাম; {'}'}</div>
+                        <div>&nbsp;&nbsp;পরিচয়() {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">`আমি ${'{'}this.নাম{'}'}`</span>; {'}'}</div>
+                        <div>{'}'}</div>
+                        <div></div>
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--accent);">ছাত্র</span> <span
+                                style="color:var(--yellow);">extends</span> <span
+                                style="color:var(--green);">মানুষ</span> {'{'} <span style="color:var(--dim);">//
+                                মানুষ-এর সব পাবে</span></div>
+                        <div>&nbsp;&nbsp;<span style="color:var(--accent);">constructor</span>(নাম, রোল) {'{'} <span
+                                style="color:var(--yellow);">super</span>(নাম); <span
+                                style="color:var(--purple);">this</span>.রোল = রোল; {'}'}</div>
+                        <div>&nbsp;&nbsp;পড়াশোনা() {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">`${'{'}this.নাম{'}'} পড়ছে`</span>; {'}'}</div>
+                        <div>{'}'}</div>
+                        <div></div>
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--purple);">শিক্ষক</span> <span
+                                style="color:var(--yellow);">extends</span> <span
+                                style="color:var(--green);">মানুষ</span> {'{'}</div>
+                        <div>&nbsp;&nbsp;পড়াও() {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">`${'{'}this.নাম{'}'} পড়াচ্ছে`</span>; {'}'}</div>
+                        <div>{'}'}</div>
+                    </div>
+                </div>
+                <div class="r" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+                    <div style="background:var(--surface);border-radius:10px;padding:12px 18px;text-align:center;">
+                        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">ছাত্র রহিম পাবে</div>
+                        <div class="mono" style="font-size:12px;color:var(--green);">পরিচয়() ✓</div>
+                        <div class="mono" style="font-size:12px;color:var(--accent);">পড়াশোনা() ✓</div>
+                    </div>
+                    <div style="background:var(--surface);border-radius:10px;padding:12px 18px;text-align:center;">
+                        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">শিক্ষক করিম পাবে</div>
+                        <div class="mono" style="font-size:12px;color:var(--green);">পরিচয়() ✓</div>
+                        <div class="mono" style="font-size:12px;color:var(--purple);">পড়াও() ✓</div>
+                    </div>
+                </div>
+                <p class="r" style="font-size:14px;color:var(--muted);">DRY Principle: Don't Repeat Yourself। মানুষ
+                    class একবার লেখলাম — ছাত্র-শিক্ষক দুটোই পেল।</p>
+            </div>
+        </div>
+
+        <!-- 6: Polymorphism -->
+        <div class="slide" data-slide="6">
+            <div class="label r">তৃতীয় স্তম্ভ</div>
+            <h2 class="r"><span class="yellow">Polymorphism</span> — একই কথা, আলাদা কাজ</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card">
+                    <h3 style="color:var(--yellow);margin-bottom:10px;">🐾 জাবেরের পোষা প্রাণী</h3>
+                    <div class="code" style="font-size:12px;">
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--green);">প্রাণী</span> {'{'} শব্দকরো() {'{'} <span
+                                style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">"..."</span>; {'}'} {'}'}</div>
+                        <div></div>
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--accent);">কুকুর</span> <span
+                                style="color:var(--yellow);">extends</span> <span
+                                style="color:var(--green);">প্রাণী</span> {'{'}</div>
+                        <div>&nbsp;&nbsp;শব্দকরো() {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">"ঘেউ ঘেউ! 🐕"</span>; {'}'}</div>
+                        <div>{'}'}</div>
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--purple);">বিড়াল</span> <span
+                                style="color:var(--yellow);">extends</span> <span
+                                style="color:var(--green);">প্রাণী</span> {'{'}</div>
+                        <div>&nbsp;&nbsp;শব্দকরো() {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">"মিঁয়াউ! 🐈"</span>; {'}'}</div>
+                        <div>{'}'}</div>
+                        <div></div>
+                        <div><span style="color:var(--dim);">// একই command — আলাদা ফলাফল</span></div>
+                        <div>[<span style="color:var(--purple);">new</span> কুকুর(), <span
+                                style="color:var(--purple);">new</span> বিড়াল()].forEach(p =>
+                            console.log(p.শব্দকরো()));</div>
+                        <div style="color:var(--green);">// "ঘেউ ঘেউ!" তারপর "মিঁয়াউ!"</div>
+                    </div>
+                </div>
+                <div class="r card" style="text-align:left;">
+                    <h3 style="font-size:14px;color:var(--accent);margin-bottom:8px;">বাস্তব code-এ উদাহরণ</h3>
+                    <div class="code" style="font-size:11px;">
+                        <div><span style="color:var(--dim);">// Payment — একই interface, আলাদা implementation</span>
+                        </div>
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--green);">Payment</span> {'{'} pay(amount) {'{'} <span
+                                style="color:var(--dim);">/* abstract */</span> {'}'} {'}'}</div>
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--accent);">বিকাশ</span> <span
+                                style="color:var(--yellow);">extends</span> <span
+                                style="color:var(--green);">Payment</span> {'{'} pay(a) {'{'} <span
+                                style="color:var(--purple);">return</span> <span style="color:var(--green);">`bKash:
+                                ${'{'}a{'}'}`</span>; {'}'} {'}'}</div>
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--purple);">নগদ</span> <span
+                                style="color:var(--yellow);">extends</span> <span
+                                style="color:var(--green);">Payment</span> {'{'} pay(a) {'{'} <span
+                                style="color:var(--purple);">return</span> <span style="color:var(--green);">`Nagad:
+                                ${'{'}a{'}'}`</span>; {'}'} {'}'}</div>
+                        <div><span style="color:var(--dim);">// রহিম বিকাশে, করিম নগদে — এক function call</span></div>
+                        <div>processPayment(payment, 5000) <span style="color:var(--dim);">// payment.pay(5000)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7: Abstraction -->
+        <div class="slide" data-slide="7">
+            <div class="label r">চতুর্থ স্তম্ভ</div>
+            <h2 class="r"><span class="purple">Abstraction</span> — জটিলটা লুকাও</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r" style="display:flex;gap:14px;flex-wrap:wrap;">
+                    <div class="card" style="flex:1;min-width:220px;">
+                        <div style="font-size:32px;margin-bottom:8px;">📸</div>
+                        <h3 style="color:var(--purple);font-size:15px;margin-bottom:8px;">Camera-র Abstraction</h3>
+                        <p style="text-align:left;font-size:13px;">তুমি শুধু শাটার চাপো। ভেতরে কী হয়? — ISO, aperture,
+                            sensor, image processing... কিছুই জানো না। তবুও ছবি ওঠে।</p>
+                    </div>
+                    <div class="card" style="flex:1;min-width:220px;">
+                        <div style="font-size:32px;margin-bottom:8px;">🚗</div>
+                        <h3 style="color:var(--purple);font-size:15px;margin-bottom:8px;">গাড়ির Abstraction</h3>
+                        <p style="text-align:left;font-size:13px;">হাচান গাড়ি চালায়। Engine cylinder কীভাবে কাজ করে?
+                            জানে না। স্টিয়ারিং, গ্যাস, ব্রেক — ব্যস। বাকিটা hidden।</p>
+                    </div>
+                </div>
+                <div class="r card">
+                    <h3 style="color:var(--accent);margin-bottom:10px;">Code-এ Abstraction</h3>
+                    <div class="code" style="font-size:12px;">
+                        <div><span style="color:var(--dim);">// রহিম শুধু এটুকু জানে</span></div>
+                        <div>sendEmail(to, subject, body);</div>
+                        <div></div>
+                        <div style="color:var(--dim);">// ভেতরে আসলে কী হয়? রহিম জানে না, জানার দরকারও নেই:</div>
+                        <div style="color:var(--dim);">// SMTP connection → auth → TLS → queue → retry → delivery...
+                        </div>
+                        <div></div>
+                        <div><span style="color:var(--dim);">// database save — করিম শুধু এটুকু</span></div>
+                        <div>prisma.user.create({'{'} data {'}'});</div>
+                        <div style="color:var(--dim);">// ভেতরে: SQL generate → connection pool → WAL → commit...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8: Real World Full Example -->
+        <div class="slide" data-slide="8">
+            <div class="label r">বাস্তব উদাহরণ</div>
+            <h2 class="r">সব একসাথে — <span class="accent">E-commerce System</span></h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:12px;">
+                <div class="r card" style="text-align:left;">
+                    <div class="code" style="font-size:11px;line-height:1.9;">
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--green);">User</span> {'{'} <span style="color:var(--dim);">//
+                                Abstraction: ভেতরের জটিলতা লুকানো</span></div>
+                        <div>&nbsp;&nbsp;<span style="color:var(--red);">#password</span>; <span
+                                style="color:var(--dim);">// Encapsulation: password private</span></div>
+                        <div>&nbsp;&nbsp;<span style="color:var(--accent);">constructor</span>(name, email) {'{'} <span
+                                style="color:var(--purple);">this</span>.name=name; <span
+                                style="color:var(--purple);">this</span>.email=email; {'}'}</div>
+                        <div>&nbsp;&nbsp;pay(amount) {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">`${'{'}this.name{'}'} paid ${'{'}amount{'}'}`</span>; {'}'}
+                            <span style="color:var(--dim);">// Polymorphism</span></div>
+                        <div>{'}'}</div>
+                        <div></div>
+                        <div><span style="color:var(--purple);">class</span> <span
+                                style="color:var(--accent);">PremiumUser</span> <span
+                                style="color:var(--yellow);">extends</span> <span
+                                style="color:var(--green);">User</span> {'{'} <span style="color:var(--dim);">//
+                                Inheritance</span></div>
+                        <div>&nbsp;&nbsp;pay(amount) {'{'} <span style="color:var(--purple);">return</span> <span
+                                style="color:var(--green);">`${'{'}this.name{'}'} paid ${'{'}amount*0.9{'}'} (10%
+                                off!)`</span>; {'}'}</div>
+                        <div>{'}'}</div>
+                    </div>
+                </div>
+                <div class="r" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                    <div
+                        style="background:rgba(79,142,247,.1);border:1px solid var(--accent);border-radius:10px;padding:12px 16px;text-align:center;flex:1;min-width:180px;">
+                        <div class="mono" style="font-size:11px;color:var(--accent);">রহিম = new User()</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px;">normal user<br>pays full price
+                        </div>
+                    </div>
+                    <div
+                        style="background:rgba(176,111,255,.1);border:1px solid var(--purple);border-radius:10px;padding:12px 16px;text-align:center;flex:1;min-width:180px;">
+                        <div class="mono" style="font-size:11px;color:var(--purple);">করিম = new PremiumUser()</div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:6px;">premium user<br>10% discount!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9: OOP ছাড়া vs সহ -->
+        <div class="slide" data-slide="9">
+            <div class="label r">তুলনা</div>
+            <h2 class="r"><span class="red">ছাড়া</span> বনাম <span class="green">সহ</span></h2>
+            <div class="r" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:840px;width:100%;">
+                <div class="card" style="border-color:var(--red);">
+                    <h3 style="color:var(--red);font-size:15px;margin-bottom:12px;">❌ OOP ছাড়া</h3>
+                    <ul class="blist">
+                        <li>একই code বারবার লেখা</li>
+                        <li>একটা change করলে ১০০ জায়গায় করতে হয়</li>
+                        <li>code বড় হলে বোঝা যায় না</li>
+                        <li>bug fix করতে nightmare</li>
+                        <li>team work করা কঠিন</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-color:var(--green);">
+                    <h3 style="color:var(--green);font-size:15px;margin-bottom:12px;">✅ OOP সহ</h3>
+                    <ul class="blist">
+                        <li>একবার লেখো, সবখানে চলে</li>
+                        <li>একটা class fix = সব ঠিক</li>
+                        <li>readable, organized code</li>
+                        <li>Test করা সহজ</li>
+                        <li>team কে আলাদা আলাদা কাজ দেওয়া যায়</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="r" style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+                <div
+                    style="background:var(--card);border-radius:10px;padding:12px 20px;text-align:center;min-width:150px;">
+                    <div class="mono" style="font-size:20px;font-weight:800;color:var(--green);">10x</div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:4px;">কম code লিখতে হয়</div>
+                </div>
+                <div
+                    style="background:var(--card);border-radius:10px;padding:12px 20px;text-align:center;min-width:150px;">
+                    <div class="mono" style="font-size:20px;font-weight:800;color:var(--green);">React, NestJS</div>
+                    <div style="font-size:12px;color:var(--muted);margin-top:4px;">সব OOP ব্যবহার করে</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10: Summary -->
+        <div class="slide" data-slide="10">
+            <div class="label r">সারসংক্ষেপ</div>
+            <h2 class="r">OOP — <span class="accent">৪ লাইনে</span></h2>
+            <div style="max-width:720px;width:100%;display:flex;flex-direction:column;gap:12px;margin-top:12px;">
+                <div class="r card" style="display:flex;gap:14px;align-items:center;border-color:var(--accent);">
+                    <div style="font-size:28px;min-width:40px;text-align:center;">🔒</div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:var(--accent);">Encapsulation
+                            — ক্যাপসুলে ঢাকো</div>
+                        <div style="font-size:13px;color:var(--muted);">রহিমের password বাইরে থেকে দেখা যাবে না</div>
+                    </div>
+                </div>
+                <div class="r card" style="display:flex;gap:14px;align-items:center;border-color:var(--green);">
+                    <div style="font-size:28px;min-width:40px;text-align:center;">👨‍👦</div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:var(--green);">Inheritance —
+                            বাপের থেকে পাও</div>
+                        <div style="font-size:13px;color:var(--muted);">Student, Teacher — দুজনেই মানুষের গুণ পায়</div>
+                    </div>
+                </div>
+                <div class="r card" style="display:flex;gap:14px;align-items:center;border-color:var(--yellow);">
+                    <div style="font-size:28px;min-width:40px;text-align:center;">🎭</div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:var(--yellow);">Polymorphism
+                            — একই নাম, আলাদা কাজ</div>
+                        <div style="font-size:13px;color:var(--muted);">করিম বিকাশে, জাবের নগদে — pay() একই</div>
+                    </div>
+                </div>
+                <div class="r card" style="display:flex;gap:14px;align-items:center;border-color:var(--purple);">
+                    <div style="font-size:28px;min-width:40px;text-align:center;">🎭</div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;margin-bottom:4px;color:var(--purple);">Abstraction —
+                            জটিলটা লুকাও</div>
+                        <div style="font-size:13px;color:var(--muted);">হাচান গাড়ি চালায়, engine বোঝার দরকার নেই</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11: CTA -->
+        <div class="slide" data-slide="11">
+            <div style="font-size:64px;margin-bottom:16px;" class="r">🚀</div>
+            <h2 class="r">এখন <span class="green">তুমি</span> শুরু করো</h2>
+            <div style="max-width:700px;width:100%;display:flex;flex-direction:column;gap:12px;margin-top:12px;">
+                <div class="r card" style="border-color:var(--green);">
+                    <ul class="blist">
+                        <li>একটা simple class লেখো — যেকোনো বাস্তব জিনিস নিয়ে</li>
+                        <li>extends দিয়ে দুটো child class তৈরি করো</li>
+                        <li>private field দিয়ে একটা Encapsulation করো</li>
+                        <li>NestJS বা TypeScript-এ OOP ব্যবহার দেখো</li>
+                    </ul>
+                </div>
+                <div class="r"
+                    style="background:rgba(79,142,247,.1);border:1px solid var(--accent);border-radius:12px;padding:16px;text-align:center;">
+                    <p style="font-size:15px;color:var(--text);">OOP হলো programming-এর ভাষা — বাস্তব জগতকে code-এ
+                        রূপান্তরের কৌশল। শিখলে সব বড় framework (React, Angular, NestJS, Spring) সহজ হয়ে যাবে।</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        const TOTAL = 12; let current = 0, revealIdx = 0, revealMode = false;
+        function buildDots() { const d = document.getElementById('dots'); for (let i = 0; i < TOTAL; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === 0 ? ' active' : ''); dot.onclick = () => goSlide(i); d.appendChild(dot); } }
+        function updateUI() { document.getElementById('progress').style.width = ((current + 1) / TOTAL * 100) + '%'; document.getElementById('counter').textContent = String(current + 1).padStart(2, '0') + ' / ' + String(TOTAL).padStart(2, '0'); document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current)); }
+        function getReveals(idx) { return document.querySelectorAll('.slide[data-slide="' + idx + '"] .r'); }
+        function showReveals(idx, n) { getReveals(idx).forEach((r, i) => r.classList.toggle('visible', i < n)); }
+        function setMode(on) { revealMode = on; const lA = document.getElementById('lbl-all'), lS = document.getElementById('lbl-step'); lA.className = on ? '' : 'active-label'; lS.className = on ? 'active-label' : ''; if (on) { showReveals(current, 0); revealIdx = 0; } else { showReveals(current, 999); revealIdx = 999; } }
+        function advance() { if (!revealMode) { nextSlide(); return; } const rs = getReveals(current); if (revealIdx < rs.length) { rs[revealIdx].classList.add('visible'); revealIdx++; } else { nextSlide(); } }
+        function nextSlide() { if (current < TOTAL - 1) goSlide(current + 1); }
+        function prevSlide() { if (current > 0) goSlide(current - 1); }
+        function goSlide(idx) { document.querySelectorAll('.slide').forEach(s => s.classList.remove('active')); document.querySelector('.slide[data-slide="' + idx + '"]').classList.add('active'); current = idx; revealIdx = 0; if (revealMode) { showReveals(idx, 0); } else { showReveals(idx, 999); revealIdx = 999; } updateUI(); }
+        document.addEventListener('keydown', e => { if (['Space', 'ArrowRight', 'ArrowDown'].includes(e.code)) { e.preventDefault(); advance(); } else if (['ArrowLeft', 'ArrowUp'].includes(e.code)) { e.preventDefault(); prevSlide(); } });
+        document.getElementById('slides').addEventListener('click', e => { const r = document.createElement('div'); r.style.cssText = `position:fixed;width:70px;height:70px;border-radius:50%;background:rgba(79,142,247,.15);left:${e.clientX - 35}px;top:${e.clientY - 35}px;animation:rpl .5s ease forwards;pointer-events:none;z-index:999;`; document.body.appendChild(r); setTimeout(() => r.remove(), 600); advance(); });
+        const s = document.createElement('style'); s.textContent = '@keyframes rpl{from{transform:scale(0);opacity:1}to{transform:scale(4);opacity:0}}'; document.head.appendChild(s);
+        buildDots(); updateUI(); showReveals(0, 999);
+    </script>
+</body>
+
+</html>

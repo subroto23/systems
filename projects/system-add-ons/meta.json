@@ -1,0 +1,9 @@
+{
+  "title": "AddOn Service System",
+  "tagline": "সমস্যাটা কী, আর ৫-Table Design দিয়ে সমাধান",
+  "description": "অ্যাড-অন সার্ভিস ম্যানেজ করার আসল সমস্যাটা কোথায় আর সেটা সমাধানে ব্যবহৃত ৫-টেবিলের সম্পূর্ণ স্কিমা ডিজাইন সহজভাবে ব্যাখ্যা করা হয়েছে।",
+  "category": "Architecture",
+  "tags": ["addon", "service", "schema-design", "database"],
+  "status": "live",
+  "icon": "🧱"
+}

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Socket.IO — Realtime System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #07101f;
+            --surf: #0d1b2e;
+            --card: #112240;
+            --bdr: #1e3a5f;
+            --acc: #4f8ef7;
+            --grn: #43d49e;
+            --red: #ff5e5e;
+            --yel: #ffc554;
+            --pur: #b06fff;
+            --txt: #e8eaf6;
+            --sub: #8899aa
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--txt);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center
+        }
+
+        .deck {
+            width: min(900px, 96vw);
+            height: min(560px, 94vh);
+            position: relative
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            background: var(--surf);
+            border-radius: 18px;
+            border: 1px solid var(--bdr);
+            padding: 40px 48px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden
+        }
+
+        .slide.active {
+            display: flex
+        }
+
+        .slide.thumb {
+            background: linear-gradient(135deg, #07101f, #0d1b2e 40%, #112240);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 36px
+        }
+
+        .thumb-shock {
+            font-size: clamp(20px, 3.8vw, 32px);
+            font-weight: 900;
+            line-height: 1.3;
+            margin-bottom: 16px
+        }
+
+        .thumb-shock span {
+            color: var(--grn)
+        }
+
+        .thumb-sub {
+            font-size: clamp(13px, 2vw, 16px);
+            color: var(--sub);
+            margin-bottom: 26px;
+            line-height: 1.6
+        }
+
+        .thumb-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 26px
+        }
+
+        .tpill {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 30px;
+            padding: 7px 18px;
+            font-size: 13px;
+            color: var(--acc)
+        }
+
+        .thumb-cta {
+            background: linear-gradient(90deg, var(--grn), var(--acc));
+            border-radius: 10px;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            display: inline-block
+        }
+
+        .sl-num {
+            font-size: 11px;
+            color: var(--sub);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px
+        }
+
+        h1 {
+            font-size: clamp(18px, 2.8vw, 25px);
+            font-weight: 800;
+            margin-bottom: 4px
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: var(--sub);
+            margin-bottom: 18px
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            flex: 1
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+            flex: 1
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 14px
+        }
+
+        .card h3 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 3px 11px;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .badge-acc {
+            background: #4f8ef720;
+            color: var(--acc);
+            border: 1px solid var(--acc)
+        }
+
+        .badge-grn {
+            background: #43d49e20;
+            color: var(--grn);
+            border: 1px solid var(--grn)
+        }
+
+        .badge-red {
+            background: #ff5e5e20;
+            color: var(--red);
+            border: 1px solid var(--red)
+        }
+
+        .badge-yel {
+            background: #ffc55420;
+            color: var(--yel);
+            border: 1px solid var(--yel)
+        }
+
+        .badge-pur {
+            background: #b06fff20;
+            color: var(--pur);
+            border: 1px solid var(--pur)
+        }
+
+        ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 7px
+        }
+
+        ul li {
+            font-size: 13px;
+            color: var(--sub);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5
+        }
+
+        ul li::before {
+            content: '▸';
+            color: var(--acc);
+            flex-shrink: 0;
+            margin-top: 1px
+        }
+
+        .code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            background: #060f1c;
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 14px;
+            color: #a8d8a8;
+            line-height: 1.7;
+            overflow-x: auto
+        }
+
+        .warn-box {
+            background: #ff5e5e18;
+            border: 1px solid var(--red);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--sub);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start
+        }
+
+        .good-box {
+            background: #43d49e18;
+            border: 1px solid var(--grn);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--sub);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 13px;
+            color: var(--sub);
+            padding: 8px 12px;
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            margin-bottom: 8px
+        }
+
+        .step-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--acc);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px
+        }
+
+        .fbox {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12px;
+            text-align: center
+        }
+
+        .farr {
+            color: var(--acc);
+            font-size: 16px
+        }
+
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            flex: 1
+        }
+
+        .r {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity .4s, transform .4s
+        }
+
+        .r.visible {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        #dots {
+            display: flex;
+            gap: 6px;
+            margin-top: 14px;
+            justify-content: center;
+            flex-wrap: wrap
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--bdr);
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .dot.on {
+            background: var(--acc)
+        }
+
+        #mode-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px
+        }
+
+        .active-label {
+            color: var(--acc);
+            font-weight: 700
+        }
+
+        #mode-bar span {
+            font-size: 13px;
+            color: var(--sub)
+        }
+
+        .tog {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+            display: inline-block
+        }
+
+        .tog input {
+            display: none
+        }
+
+        .tog-track {
+            position: absolute;
+            inset: 0;
+            background: var(--bdr);
+            border-radius: 30px;
+            transition: .3s
+        }
+
+        .tog-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .3s
+        }
+
+        .tog input:checked~.tog-track {
+            background: var(--acc)
+        }
+
+        .tog input:checked~.tog-thumb {
+            left: 23px
+        }
+
+        #nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px
+        }
+
+        button.nb {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            color: var(--txt);
+            border-radius: 8px;
+            padding: 7px 20px;
+            cursor: pointer;
+            font-size: 13px
+        }
+
+        button.nb:hover {
+            border-color: var(--acc)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="deck">
+        <!-- SLIDE 0: THUMBNAIL -->
+        <div class="slide thumb active" data-slide="0">
+            <div class="thumb-shock">রহিম message পাঠাল —<br>করিম <span>তাৎক্ষণিক দেখল!</span></div>
+            <div class="thumb-sub">HTTP-তে করিমকে বারবার জিজ্ঞেস করতে হতো "নতুন message এসেছে?"<br>Socket.IO-তে message
+                আসলে সরাসরি push হয় — poll করতে হয় না</div>
+            <div class="thumb-pills">
+                <span class="tpill">HTTP vs WebSocket</span>
+                <span class="tpill">4-Layer Security</span>
+                <span class="tpill">Viewer Count</span>
+                <span class="tpill">Token Bucket</span>
+                <span class="tpill">Redis Adapter</span>
+            </div>
+            <div class="thumb-cta">Realtime System বুঝব আজকে</div>
+        </div>
+
+        <!-- SLIDE 1: HTTP vs Socket -->
+        <div class="slide" data-slide="1">
+            <div class="sl-num">SLIDE 01</div>
+            <h1>কেন HTTP যথেষ্ট না?</h1>
+            <div class="tagline">Realtime-এর জন্য HTTP-র সমস্যা</div>
+            <div class="compare">
+                <div class="col">
+                    <div class="warn-box r"><span>❌</span>
+                        <div><strong>HTTP Polling</strong> — রহিম প্রতি ২ সেকেন্ডে জিজ্ঞেস করছে "নতুন message এসেছে?"
+                        </div>
+                    </div>
+                    <div class="card r">
+                        <h3>HTTP সমস্যা</h3>
+                        <ul>
+                            <li>প্রতিটা request নতুন connection</li>
+                            <li>Header বারবার পাঠাতে হয় (1KB+)</li>
+                            <li>১০০০ user = ৫০০ request/sec</li>
+                            <li>Server ক্লান্ত, delay বেশি</li>
+                        </ul>
+                    </div>
+                    <div class="code r" style="font-size:10.5px">// HTTP Polling — ভুল পদ্ধতি
+                        setInterval(async () => {
+                        const res = await fetch('/messages');
+                        // নতুন message নেই? waste।
+                        // আছে? তাহলে ঠিকাছে।
+                        // কিন্তু ২ সেকেন্ড delay!
+                        }, 2000);</div>
+                </div>
+                <div class="col">
+                    <div class="good-box r"><span>✅</span>
+                        <div><strong>WebSocket</strong> — একবার connect করো, সারাক্ষণ open থাকে। Server যখন চাইলে push
+                            করতে পারে।</div>
+                    </div>
+                    <div class="card r">
+                        <h3>WebSocket সুবিধা</h3>
+                        <ul>
+                            <li>একটাই persistent connection</li>
+                            <li>Header overhead নেই (শুধু data)</li>
+                            <li>Server → Client push (real realtime)</li>
+                            <li>Latency: ১০০ms → ১ms</li>
+                        </ul>
+                    </div>
+                    <div class="code r" style="font-size:10.5px">// Socket.IO — সঠিক পদ্ধতি
+                        socket.on('new-message', (msg) => {
+                        // Server push করলেই এসে যায়!
+                        // Polling নেই, delay নেই
+                        displayMessage(msg);
+                        });</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Architecture -->
+        <div class="slide" data-slide="2">
+            <div class="sl-num">SLIDE 02</div>
+            <h1>Socket System Architecture</h1>
+            <div class="tagline">পুরো system কীভাবে সাজানো</div>
+            <div class="flow r">
+                <div class="fbox">Client<br>Browser</div>
+                <div class="farr">⟷</div>
+                <div class="fbox">Load<br>Balancer</div>
+                <div class="farr">→</div>
+                <div class="fbox">Socket.IO<br>Server 1</div>
+                <div class="farr" style="color:var(--pur)">⟷</div>
+                <div class="fbox" style="border-color:var(--pur)">Redis<br>Adapter</div>
+                <div class="farr" style="color:var(--pur)">⟷</div>
+                <div class="fbox">Socket.IO<br>Server 2</div>
+            </div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="card r">
+                        <h3>Namespace & Room</h3>
+                        <ul>
+                            <li>Namespace: /live, /chat, /admin</li>
+                            <li>Room: লাইভ class-এর room = classId</li>
+                            <li>রহিম join করে room "class-101"</li>
+                            <li>করিম ও "class-101"-এ → দুজন দেখা যায়</li>
+                        </ul>
+                    </div>
+                    <div class="code r" style="font-size:10.5px">// Server side
+                        io.on('connection', (socket) => {
+                        socket.on('join-class', (classId) => {
+                        socket.join(`class:${classId}`);
+                        // ঐ room-এ broadcast
+                        io.to(`class:${classId}`).emit(
+                        'user-joined',
+                        { name: socket.user.name }
+                        );
+                        });
+                        });</div>
+                </div>
+                <div class="col">
+                    <div class="card r">
+                        <h3>Event Types</h3>
+                        <ul>
+                            <li>join-class: room-এ যোগ দাও</li>
+                            <li>leave-class: room ছাড়ো</li>
+                            <li>send-message: message পাঠাও</li>
+                            <li>viewer-count: কতজন দেখছে</li>
+                            <li>typing: টাইপ করছে indicator</li>
+                        </ul>
+                    </div>
+                    <div class="good-box r"><span>💡</span>
+                        <div>Room মানে গ্রুপ। "class-101" room-এ যা emit করবে শুধু সেই room-এর সবাই পাবে।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: 4-Layer Security -->
+        <div class="slide" data-slide="3">
+            <div class="sl-num">SLIDE 03</div>
+            <h1>Connection-এর আগে ৪ Layer Security</h1>
+            <div class="tagline">যে কেউ connect করতে পারবে না</div>
+            <div class="step r">
+                <div class="step-num">১</div>
+                <div>
+                    <p><strong>JWT Verify</strong> — Handshake-এ token পাঠাতে হবে। Invalid token → connection reject।
+                    </p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">২</div>
+                <div>
+                    <p><strong>Rate Limit</strong> — এক IP থেকে ৫ সেকেন্ডে ৩টার বেশি connect attempt → block করো।</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৩</div>
+                <div>
+                    <p><strong>Enrollment Check</strong> — রহিম কি এই class-এ enrolled? না হলে room join করতে পারবে না।
+                    </p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৪</div>
+                <div>
+                    <p><strong>Ban Check</strong> — Redis-এ রহিম ban আছে? তাহলে connection-এই reject।</p>
+                </div>
+            </div>
+            <div class="code r" style="font-size:10.5px">// Socket middleware (runs before connection)
+                io.use(async (socket, next) => {
+                // Layer 1: JWT
+                const token = socket.handshake.auth.token;
+                const user = jwt.verify(token, SECRET);
+
+                // Layer 2: Rate limit (Redis)
+                const key = `socket-connect:${socket.handshake.address}`;
+                const count = await redis.incr(key);
+                await redis.expire(key, 5);
+                if (count > 3) return next(new Error('Too many connections'));
+
+                // Layer 3: Enrollment (done in join-class event)
+                // Layer 4: Ban check
+                const banned = await redis.get(`banned:${user.id}`);
+                if (banned) return next(new Error('Banned'));
+
+                socket.user = user;
+                next();
+                });</div>
+        </div>
+
+        <!-- SLIDE 4: Viewer Count -->
+        <div class="slide" data-slide="4">
+            <div class="sl-num">SLIDE 04</div>
+            <h1>Viewer Count Architecture</h1>
+            <div class="tagline">Live class-এ কতজন আছে — realtime</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="card r">
+                        <h3>কীভাবে count রাখি?</h3>
+                        <ul>
+                            <li>Redis SET: viewers:class-101 = {রহিম, করিম, জাবের}</li>
+                            <li>Join → SADD, Leave/Disconnect → SREM</li>
+                            <li>Count = SCARD (set size)</li>
+                            <li>Multiple server-এও accurate</li>
+                        </ul>
+                    </div>
+                    <div class="code r" style="font-size:10.5px">socket.on('join-class', async (classId) => {
+                        const roomKey = `viewers:${classId}`;

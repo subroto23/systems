@@ -1,0 +1,9 @@
+{
+  "title": "ACID — Database Transactions",
+  "tagline": "রহিম ৫০০০ টাকা পাঠাল, করিম পেল না — কেন? ACID দিয়ে ব্যাখ্যা",
+  "description": "টাকা ট্রান্সফারের একটা বাস্তব উদাহরণ দিয়ে Atomicity, Consistency, Isolation, Durability — ACID-এর প্রতিটা প্রপার্টি ধাপে ধাপে ব্যাখ্যা করা হয়েছে। কোথায় transaction ফেইল করলে কী হয় আর database কীভাবে সেটা সামলায় — সব একটা অ্যানিমেটেড, ইন্টারঅ্যাক্টিভ স্টোরি আকারে।",
+  "category": "Database",
+  "tags": ["acid", "transaction", "database", "consistency", "atomicity", "isolation", "durability"],
+  "status": "live",
+  "icon": "💳"
+}

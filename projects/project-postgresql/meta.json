@@ -1,0 +1,9 @@
+{
+  "title": "PostgreSQL — ভেতরে কি হয়?",
+  "tagline": "তুমি INSERT INTO লিখলে ভেতরে আসলে কি ঘটে?",
+  "description": "একটা সাধারণ INSERT কোয়েরি লেখার পর PostgreSQL-এর ভেতরে ধাপে ধাপে কী ঘটে — WAL, buffer, index update, disk write — সব একটা ভিজ্যুয়াল, ইন্টারঅ্যাক্টিভ গল্প আকারে দেখানো হয়েছে।",
+  "category": "Database",
+  "tags": ["postgresql", "database", "internals", "wal", "insert"],
+  "status": "live",
+  "icon": "🐘"
+}

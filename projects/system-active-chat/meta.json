@@ -1,0 +1,9 @@
+{
+  "title": "Active Chat System",
+  "tagline": "Naive Approach কেন Fail করে? মেসেজ যাত্রার ৭টা Stage",
+  "description": "চ্যাট মেসেজ পাঠানোর naive পদ্ধতি কেন স্কেলে ফেইল করে, আর একটা মেসেজ পাঠানো থেকে ডেলিভার হওয়া পর্যন্ত ৭টা স্টেজে কী ঘটে — এই বেসিক কনসেপ্টগুলো সহজভাবে ব্যাখ্যা করা হয়েছে।",
+  "category": "Realtime",
+  "tags": ["chat", "realtime", "messaging", "basics"],
+  "status": "live",
+  "icon": "💬"
+}

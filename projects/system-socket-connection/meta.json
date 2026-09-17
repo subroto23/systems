@@ -1,0 +1,9 @@
+{
+  "title": "Socket.IO — Realtime System",
+  "tagline": "কেন HTTP যথেষ্ট না? — Socket System Architecture বেসিক",
+  "description": "রিকোয়েস্ট-রেসপন্স ভিত্তিক HTTP কেন রিয়েল-টাইম কমিউনিকেশনের জন্য যথেষ্ট নয়, আর Socket.IO দিয়ে বানানো একটা বেসিক রিয়েল-টাইম সিস্টেম আর্কিটেকচার কেমন দেখতে হয় তার সহজ ব্যাখ্যা।",
+  "category": "Realtime",
+  "tags": ["socket.io", "websocket", "realtime", "basics"],
+  "status": "live",
+  "icon": "🔌"
+}

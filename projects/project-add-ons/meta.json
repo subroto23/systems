@@ -1,0 +1,9 @@
+{
+  "title": "AddOn Service System — Deep Dive",
+  "tagline": "১০০ জন শিক্ষকের জন্য কি একই সার্ভিস? — AddOn সিস্টেম ডিজাইন",
+  "description": "প্রতিটা ইউজারের আলাদা আলাদা অ্যাড-অন সার্ভিস দরকার হলে সেটা কীভাবে ফ্লেক্সিবল স্কিমা দিয়ে ম্যানেজ করা যায় — কমন ভুল আর তার সমাধান সহ পুরো ডিজাইন প্রসেস গভীরভাবে ব্যাখ্যা করা হয়েছে।",
+  "category": "Architecture",
+  "tags": ["addon", "service", "schema-design", "deep-dive", "architecture"],
+  "status": "live",
+  "icon": "🧱"
+}

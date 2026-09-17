@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>AddOn Service System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #07101f;
+            --surf: #0d1b2e;
+            --card: #112240;
+            --bdr: #1e3a5f;
+            --acc: #4f8ef7;
+            --grn: #43d49e;
+            --red: #ff5e5e;
+            --yel: #ffc554;
+            --pur: #b06fff;
+            --txt: #e8eaf6;
+            --sub: #8899aa
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--txt);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center
+        }
+
+        .deck {
+            width: min(900px, 96vw);
+            height: min(560px, 94vh);
+            position: relative
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            background: var(--surf);
+            border-radius: 18px;
+            border: 1px solid var(--bdr);
+            padding: 38px 46px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden
+        }
+
+        .slide.active {
+            display: flex
+        }
+
+        .slide.thumb {
+            background: linear-gradient(135deg, #07101f, #0d1b2e 40%, #112240);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 36px
+        }
+
+        .thumb-shock {
+            font-size: clamp(20px, 3.8vw, 32px);
+            font-weight: 900;
+            line-height: 1.3;
+            margin-bottom: 16px
+        }
+
+        .thumb-shock span {
+            color: var(--pur)
+        }
+
+        .thumb-sub {
+            font-size: clamp(13px, 2vw, 16px);
+            color: var(--sub);
+            margin-bottom: 24px;
+            line-height: 1.6
+        }
+
+        .thumb-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px
+        }
+
+        .tpill {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 30px;
+            padding: 7px 18px;
+            font-size: 13px;
+            color: var(--acc)
+        }
+
+        .thumb-cta {
+            background: linear-gradient(90deg, var(--pur), var(--acc));
+            border-radius: 10px;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            display: inline-block
+        }
+
+        .sl-num {
+            font-size: 11px;
+            color: var(--sub);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px
+        }
+
+        h1 {
+            font-size: clamp(17px, 2.6vw, 24px);
+            font-weight: 800;
+            margin-bottom: 4px
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: var(--sub);
+            margin-bottom: 14px
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            flex: 1
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            flex: 1
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 13px
+        }
+
+        .card h3 {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 9px
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 3px 11px;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .badge-acc {
+            background: #4f8ef720;
+            color: var(--acc);
+            border: 1px solid var(--acc)
+        }
+
+        .badge-grn {
+            background: #43d49e20;
+            color: var(--grn);
+            border: 1px solid var(--grn)
+        }
+
+        .badge-red {
+            background: #ff5e5e20;
+            color: var(--red);
+            border: 1px solid var(--red)
+        }
+
+        .badge-yel {
+            background: #ffc55420;
+            color: var(--yel);
+            border: 1px solid var(--yel)
+        }
+
+        .badge-pur {
+            background: #b06fff20;
+            color: var(--pur);
+            border: 1px solid var(--pur)
+        }
+
+        ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        ul li {
+            font-size: 12.5px;
+            color: var(--sub);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5
+        }
+
+        ul li::before {
+            content: '▸';
+            color: var(--acc);
+            flex-shrink: 0;
+            margin-top: 1px
+        }
+
+        .code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            background: #060f1c;
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 12px;
+            color: #a8d8a8;
+            line-height: 1.7;
+            overflow-x: auto
+        }
+
+        .warn-box {
+            background: #ff5e5e18;
+            border: 1px solid var(--red);
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 12.5px;
+            color: var(--sub);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start
+        }
+
+        .good-box {
+            background: #43d49e18;
+            border: 1px solid var(--grn);
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 12.5px;
+            color: var(--sub);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            font-size: 12.5px;
+            color: var(--sub);
+            padding: 7px 11px;
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            margin-bottom: 7px
+        }
+
+        .step-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--pur);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11.5px
+        }
+
+        .table th {
+            background: var(--card);
+            padding: 7px 10px;
+            text-align: left;
+            color: var(--sub);
+            font-weight: 600;
+            border: 1px solid var(--bdr)
+        }
+
+        .table td {
+            padding: 7px 10px;
+            border: 1px solid var(--bdr);
+            color: var(--sub)
+        }
+
+        .table tr:nth-child(even) td {
+            background: #0a1626
+        }
+
+        .r {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity .4s, transform .4s
+        }
+
+        .r.visible {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        #dots {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+            justify-content: center;
+            flex-wrap: wrap
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--bdr);
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .dot.on {
+            background: var(--acc)
+        }
+
+        #mode-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px
+        }
+
+        .active-label {
+            color: var(--acc);
+            font-weight: 700
+        }
+
+        #mode-bar span {
+            font-size: 13px;
+            color: var(--sub)
+        }
+
+        .tog {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+            display: inline-block
+        }
+
+        .tog input {
+            display: none
+        }
+
+        .tog-track {
+            position: absolute;
+            inset: 0;
+            background: var(--bdr);
+            border-radius: 30px;
+            transition: .3s
+        }
+
+        .tog-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .3s
+        }
+
+        .tog input:checked~.tog-track {
+            background: var(--acc)
+        }
+
+        .tog input:checked~.tog-thumb {
+            left: 23px
+        }
+
+        #nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px
+        }
+
+        button.nb {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            color: var(--txt);
+            border-radius: 8px;
+            padding: 7px 20px;
+            cursor: pointer;
+            font-size: 13px
+        }
+
+        button.nb:hover {
+            border-color: var(--acc)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="deck">
+
+        <!-- SLIDE 0: THUMBNAIL -->
+        <div class="slide thumb active" data-slide="0">
+            <div class="thumb-shock">Teacher নিজের course-এ<br><span>Extra Service যোগ করবে কীভাবে?</span></div>
+            <div class="thumb-sub">রহিম teacher — সে চায় তার course-এ "Live Session" আর "PDF Notes" add করতে।<br>করিম
+                teacher — সে চায় শুধু "1-on-1 Call"।<br>এই flexible system-টা কীভাবে বানাব?</div>
+            <div class="thumb-pills">
+                <span class="tpill">5-Table Design</span>
+                <span class="tpill">Race Condition Safe</span>
+                <span class="tpill">N+1 Solution</span>
+                <span class="tpill">Smart Merge</span>
+                <span class="tpill">formatTeacherServices()</span>
+            </div>
+            <div class="thumb-cta">AddOn System Design বুঝব আজকে</div>
+        </div>
+
+        <!-- SLIDE 1: Problem Statement -->
+        <div class="slide" data-slide="1">
+            <div class="sl-num">SLIDE 01</div>
+            <h1>সমস্যাটা কী?</h1>
+            <div class="tagline">Simple করলে কেন কাজ করে না?</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="warn-box r"><span>❌</span>
+                        <div><strong>ভুল approach:</strong> Course table-এ services column array হিসেবে রাখো</div>
+                    </div>
+                    <div class="code r">// courses table-এ
+                        services: ['live-session', 'pdf-notes']
+
+                        // সমস্যা:
+                        // 1. Price কোথায় রাখব?
+                        // 2. Service কতজন কিনেছে?
+                        // 3. Admin কি service অফার করতে পারবে?
+                        // 4. Teacher নিজে service বাদ দিতে পারবে?
+                        // 5. Race condition — ২ জন একসাথে
+                        // update করলে?</div>
+                    <div class="warn-box r"><span>💥</span>
+                        <div>হাচান admin হয়ে service add করল, একই সাথে রহিম teacher নিজের service update করল → data
+                            corrupt!</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="good-box r"><span>✅</span>
+                        <div><strong>সঠিক approach:</strong> ৫টা আলাদা table — প্রতিটার আলাদা দায়িত্ব</div>
+                    </div>
+                    <div class="card r">
+                        <h3>৫ Table-এর কাজ</h3>
+                        <ul>
+                            <li><strong>AddOnService</strong> — master list (admin তৈরি করে)</li>
+                            <li><strong>CourseDefaultService</strong> — course-এ default কোনগুলো</li>
+                            <li><strong>CourseAdminServiceOffering</strong> — admin force-add করেছে</li>
+                            <li><strong>Price</strong> — প্রতিটার price আলাদা</li>
+                            <li><strong>Selection</strong> — student কোনটা কিনল</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: 5 Table Design -->
+        <div class="slide" data-slide="2">
+            <div class="sl-num">SLIDE 02</div>
+            <h1>৫-Table Design — সম্পূর্ণ Schema</h1>
+            <div class="tagline">প্রতিটা table একটাই কাজ করে</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="code r" style="font-size:9.5px">-- 1. Master service list (Admin manage করে)
+                        CREATE TABLE AddOnService (
+                        id UUID PRIMARY KEY,
+                        name VARCHAR(100), -- "Live Session"
+                        description TEXT,
+                        isActive BOOLEAN DEFAULT true
+                        );
+
+                        -- 2. Course-এর default services (Teacher set করে)
+                        CREATE TABLE CourseDefaultService (
+                        courseId UUID REFERENCES Course(id),
+                        serviceId UUID REFERENCES AddOnService(id),
+                        isEnabled BOOLEAN DEFAULT true,
+                        PRIMARY KEY (courseId, serviceId)
+                        );
+
+                        -- 3. Admin force-add (overrides teacher)
+                        CREATE TABLE CourseAdminServiceOffering (
+                        courseId UUID REFERENCES Course(id),
+                        serviceId UUID REFERENCES AddOnService(id),
+                        addedBy UUID REFERENCES User(id),
+                        PRIMARY KEY (courseId, serviceId)
+                        );
+
+                        -- 4. Prices (per course per service)
+                        CREATE TABLE ServicePrice (
+                        courseId UUID,
+                        serviceId UUID,
+                        price DECIMAL(10,2),
+                        currency VARCHAR(3) DEFAULT 'BDT',
+                        PRIMARY KEY (courseId, serviceId)
+                        );
+
+                        -- 5. Student selection
+                        CREATE TABLE StudentServiceSelection (
+                        studentId UUID REFERENCES User(id),
+                        courseId UUID,
+                        serviceId UUID,
+                        purchasedAt TIMESTAMP DEFAULT NOW(),
+                        PRIMARY KEY (studentId, courseId, serviceId)
+                        );</div>
+                </div>
+                <div class="col">
+                    <div class="card r">
+                        <h3>কে কী করতে পারে?</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Actor</th>
+                                    <th>কাজ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Admin</td>
+                                    <td>AddOnService তৈরি/বন্ধ</td>
+                                </tr>
+                                <tr>
+                                    <td>Admin</td>
+                                    <td>যেকোনো course-এ force-add</td>
+                                </tr>
+                                <tr>
+                                    <td>Teacher রহিম</td>
+                                    <td>নিজের course-এ enable/disable</td>
+                                </tr>
+                                <tr>
+                                    <td>Teacher রহিম</td>
+                                    <td>Price set করা</td>
+                                </tr>
+                                <tr>
+                                    <td>Student করিম</td>
+                                    <td>কিনে নেওয়া (Selection)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="good-box r"><span>💡</span>
+                        <div>রহিম "PDF Notes" disable করলেও Admin যদি force-add করে থাকে তাহলে সেটা দেখাবেই। Admin >
+                            Teacher।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Race Condition Safe -->
+        <div class="slide" data-slide="3">
+            <div class="sl-num">SLIDE 03</div>
+            <h1>Race Condition Safe — Upsert Pattern</h1>
+            <div class="tagline">২ জন একসাথে update করলে data নষ্ট হবে না</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="warn-box r"><span>❌</span>
+                        <div><strong>Race Condition:</strong> রহিম ও হাচান একসাথে "Live Session" enable করতে চাইল —
+                            দুজনেই check করল "নেই", দুজনেই INSERT → duplicate!</div>
+                    </div>
+                    <div class="code r">// ভুল — Race condition
+                        const exists = await prisma
+                        .courseDefaultService.findFirst({...});
+
+                        if (!exists) {
+                        // রহিম ও হাচান দুজনেই এখানে আসল!
+                        await prisma.courseDefaultService.create({
+                        data: { courseId, serviceId, isEnabled: true }
+                        });
+                        // Duplicate key error!
+                        }</div>
+                </div>
+                <div class="col">
+                    <div class="good-box r"><span>✅</span>
+                        <div><strong>Upsert Pattern:</strong> আছে → update, নেই → create — একটাই atomic operation</div>
+                    </div>
+                    <div class="code r">// সঠিক — Upsert (atomic)
+                        await prisma.courseDefaultService.upsert({
+                        where: {
+                        courseId_serviceId: { courseId, serviceId }
+                        },
+                        create: {
+                        courseId,
+                        serviceId,
+                        isEnabled: true
+                        },
+                        update: {
+                        isEnabled: true
+                        }
+                        // রহিম ও হাচান একসাথে করলেও
+                        // PostgreSQL একটাই চালাবে
+                        // দুটো duplicate হবে না
+                        });</div>
+                    <div class="good-box r"><span>🔒</span>
+                        <div>PostgreSQL-এর ON CONFLICT DO UPDATE — database level-এ atomic। Application code-এ race
+                            condition নেই।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: N+1 Solution -->
+        <div class="slide" data-slide="4">
+            <div class="sl-num">SLIDE 04</div>
+            <h1>N+1 Problem → Smart Merge দিয়ে Fix</h1>
+            <div class="tagline">৫টা table থেকে একটা query-তে সব আনো</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="warn-box r"><span>❌</span>
+                        <div>N+1: প্রতিটা service-এর জন্য আলাদা price query → ১০ service = ১০ DB query</div>
+                    </div>
+                    <div class="good-box r"><span>✅</span>
+                        <div>একটা query-তে সব — services + prices + admin overrides</div>
+                    </div>
+                    <div class="code r">async function getTeacherServices(
+                        courseId: string,
+                        teacherId: string
+                        ) {
+                        // সব কিছু একবারে load
+                        const [defaults, adminAdded, prices] =
+                        await Promise.all([
+
+                        // Teacher-এর default services
+                        prisma.courseDefaultService.findMany({
+                        where: { courseId },
+                        include: { service: true }
+                        }),
+
+                        // Admin force-added
+                        prisma.courseAdminServiceOffering.findMany({
+                        where: { courseId },
+                        include: { service: true }
+                        }),
+
+                        // সব prices
+                        prisma.servicePrice.findMany({
+                        where: { courseId }
+                        })
+                        ]);
+
+                        return formatTeacherServices(
+                        defaults, adminAdded, prices
+                        );
+                        }</div>
+                </div>
+                <div class="col">
+                    <div class="code r">function formatTeacherServices(
+                        defaults, adminAdded, prices
+                        ) {
+                        // Price lookup map তৈরি (O(1) access)
+                        const priceMap = new Map(
+                        prices.map(p => [p.serviceId, p.price])
+                        );
+
+                        // Admin-added services set
+                        const adminSet = new Set(
+                        adminAdded.map(a => a.serviceId)
+                        );
+
+                        // Smart merge
+                        const allServiceIds = new Set([
+                        ...defaults.map(d => d.serviceId),
+                        ...adminAdded.map(a => a.serviceId)
+                        ]);
+
+                        return [...allServiceIds].map(serviceId => {
+                        const def = defaults.find(
+                        d => d.serviceId === serviceId
+                        );
+                        const adm = adminAdded.find(
+                        a => a.serviceId === serviceId
+                        );
+                        const service = def?.service || adm?.service;
+
+                        return {
+                        serviceId,
+                        name: service.name,
+                        isEnabled: adminSet.has(serviceId)
+                        ? true // Admin override — always on
+                        : (def?.isEnabled ?? false),
+                        isAdminForced: adminSet.has(serviceId),
+                        price: priceMap.get(serviceId) ?? 0,
+                        canDisable: !adminSet.has(serviceId),
+                        };
+                        });
+                        }</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Student View -->
+        <div class="slide" data-slide="5">
+            <div class="sl-num">SLIDE 05</div>
+            <h1>Student কী দেখবে? কীভাবে কিনবে?</h1>
+            <div class="tagline">করিম রহিমের course-এ "Live Session" কিনতে চায়</div>
+            <div class="step r">
+                <div class="step-num">১</div>
+                <div>
+                    <p>করিম course page-এ যায় → getStudentServices(courseId) call হয়</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">২</div>
+                <div>
+                    <p>Available services দেখায়: "Live Session — ৫০০ টাকা", "PDF Notes — ২০০ টাকা"</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৩</div>
+                <div>
+                    <p>করিম "Live Session" select করে → Payment করে</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৪</div>
+                <div>
+                    <p>Payment success → StudentServiceSelection-এ insert করো (Upsert — duplicate নেই)</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৫</div>
+                <div>
+                    <p>করিম এখন "Live Session"-এ access পাবে — তার selection-এ আছে</p>
+                </div>
+            </div>
+            <div class="code r">// Student কোন services কিনেছে check
+                async function checkServiceAccess(
+                studentId, courseId, serviceId
+                ) {
+                const selection = await prisma
+                .studentServiceSelection.findUnique({
+                where: {
+                studentId_courseId_serviceId: {
+                studentId, courseId, serviceId
+                }
+                }
+                });
+                return !!selection;
+                }</div>
+        </div>
+
+        <!-- SLIDE 6: Summary -->
+        <div class="slide" data-slide="6">
+            <div class="sl-num">SLIDE 06</div>
+            <h1>যা শিখলাম — AddOn Service System</h1>
+            <div class="tagline">Complex feature, clean design</div>
+            <div class="three-col">
+                <div class="card r">
+                    <h3><span class="badge badge-acc">5-Table Design</span></h3>
+                    <ul>
+                        <li>প্রতিটা entity আলাদা table</li>
+                        <li>Admin, Teacher, Student — আলাদা দায়িত্ব</li>
+                        <li>Price flexible per course</li>
+                    </ul>
+                </div>
+                <div class="card r">
+                    <h3><span class="badge badge-pur">Safe Code</span></h3>
+                    <ul>
+                        <li>Upsert → race condition নেই</li>
+                        <li>Promise.all → N+1 নেই</li>
+                        <li>Admin override → always wins</li>
+                    </ul>
+                </div>
+                <div class="card r">
+                    <h3><span class="badge badge-grn">Smart Merge</span></h3>
+                    <ul>
+                        <li>formatTeacherServices() — একটা function</li>
+                        <li>Map/Set → O(1) lookup</li>
+                        <li>canDisable flag → UI জানে কী দেখাবে</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="good-box r" style="margin-top:14px"><span>🎯</span>
+                <div>রহিম teacher তার course-এ "Live Session" add করল। হাচান admin force করল "PDF Notes"। করিম student
+                    দুটোই দেখল — "PDF Notes" disable করতে পারল না (admin forced)। "Live Session" কিনল। সব কিছু সঠিক —
+                    race condition নেই, N+1 নেই।</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="dots"></div>
+    <div style="display:flex;align-items:center;gap:20px;margin-top:8px">
+        <div id="nav">
+            <button class="nb" onclick="prevSlide()">◀ আগে</button>
+            <button class="nb" onclick="nextSlide()">পরে ▶</button>
+        </div>
+        <div id="mode-bar">
+            <span id="lbl-all" class="active-label">সব একসাথে</span>
+            <label class="tog">
+                <input type="checkbox" id="tog-inp" onchange="setMode(this.checked)">
+                <div class="tog-track"></div>
+                <div class="tog-thumb"></div>
+            </label>
+            <span id="lbl-step">ধাপে ধাপে</span>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const total = slides.length;
+        let current = 0, revealMode = false, revealIdx = 0;
+        function getReveals(idx) { return [...slides[idx].querySelectorAll('.r')] }
+        function showReveals(idx, upTo) { getReveals(idx).forEach((el, i) => el.classList.toggle('visible', i < upTo)) }
+        function buildDots() { const c = document.getElementById('dots'); c.innerHTML = ''; for (let i = 0; i < total; i++) { const d = document.createElement('div'); d.className = 'dot' + (i === 0 ? ' on' : ''); d.onclick = () => goSlide(i); c.appendChild(d); } }
+        function updateUI() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === current)); }
+        function goSlide(idx) { slides[current].classList.remove('active'); current = idx; slides[current].classList.add('active'); if (revealMode) { showReveals(current, 0); revealIdx = 0; } else { showReveals(current, 999); } updateUI(); }
+        function nextSlide() { if (current < total - 1) goSlide(current + 1); }
+        function prevSlide() { if (current > 0) goSlide(current - 1); }
+        function advance() { if (!revealMode) { nextSlide(); return; } const rs = getReveals(current); if (revealIdx < rs.length) { rs[revealIdx].classList.add('visible'); revealIdx++; } else nextSlide(); }
+        function setMode(on) { revealMode = on; const lA = document.getElementById('lbl-all'), lS = document.getElementById('lbl-step'); lA.className = on ? '' : 'active-label'; lS.className = on ? 'active-label' : ''; if (on) { showReveals(current, 0); revealIdx = 0; } else { showReveals(current, 999); } }
+        document.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); advance(); } if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevSlide(); } });
+        document.querySelector('.deck').addEventListener('click', e => { if (!e.target.closest('button') && !e.target.closest('.tog') && !e.target.closest('.dot')) advance(); });
+        buildDots(); updateUI(); showReveals(0, 999);
+    </script>
+</body>
+
+</html>

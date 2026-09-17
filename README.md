@@ -11,11 +11,11 @@ assets/js/projects.js         → ⚠️ অটো-জেনারেটেড �
 assets/js/main.js             → রেন্ডারিং, সার্চ, ফিল্টার লজিক
 assets/favicon.svg            → লোগো/ফেভিকন
 manifest.json                 → PWA manifest
-robots.txt / sitemap.xml      → সার্চ ইঞ্জিন ক্রলিং
-llms.txt                      → AI/LLM ক্রলারদের জন্য সংক্ষিপ্ত সিস্টেম-তালিকা
+robots.txt                    → সার্চ ইঞ্জিন ক্রলিং
+sitemap.xml / llms.txt        → ⚠️ অটো-জেনারেটেড — হাতে এডিট করবেন না
 projects/<slug>/index.html    → প্রতিটা প্রজেক্টের নিজস্ব পেজ
 projects/<slug>/meta.json     → ★ হাব কার্ডের তথ্য — নতুন প্রজেক্ট অ্যাড করতে এখানেই লিখবেন
-scripts/generate-projects.js  → projects/*/meta.json থেকে assets/js/projects.js বানায়
+scripts/generate-projects.js  → projects/*/meta.json থেকে projects.js, sitemap.xml, llms.txt বানায়
 .github/workflows/sync-projects.yml → push করলে উপরের স্ক্রিপ্ট অটোমেটিক চালায়
 ```
 
@@ -57,7 +57,7 @@ node scripts/generate-projects.js
 - `<link rel="canonical" href="https://systems.subromart.com/projects/<slug>/">`
 - একটা "← Systems Hub" ব্যাক লিংক (`../../index.html`), `projects/notification/index.html`-এ যেভাবে আছে
 
-(ঐচ্ছিক) SEO/AI সার্চের জন্য `llms.txt` এবং `sitemap.xml` ফাইলেও নতুন প্রজেক্টের একটা লাইন/এন্ট্রি যোগ করে রাখতে পারেন — এগুলো এখনও ম্যানুয়াল।
+`sitemap.xml` ও `llms.txt`-ও একই স্ক্রিপ্ট থেকে অটো-জেনারেট হয় — এগুলোতেও হাতে কিছু যোগ করার দরকার নেই।
 
 ## লোকালি টেস্ট করা
 

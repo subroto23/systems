@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ASG Auth System</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800;900&display=swap">
+
+    <style>
+        :root {
+            --bg: #07101f;
+            --surf: #0f1e34;
+            --surf2: #162845;
+            --border: #1e3050;
+            --border2: #2a4470;
+            --blue: #2563eb;
+            --blue-l: #60a5fa;
+            --purple: #7c3aed;
+            --purple-l: #a78bfa;
+            --green: #059669;
+            --green-l: #34d399;
+            --amber: #d97706;
+            --amber-l: #fbbf24;
+            --red: #dc2626;
+            --red-l: #f87171;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --muted2: #94a3b8;
+            --code-bg: #060e1c;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        :root[data-theme="light"] {
+            --bg: #f0f4ff;
+            --surf: #fff;
+            --surf2: #e8eef8;
+            --border: #c7d6f0;
+            --border2: #a0b8e0;
+            --blue: #1d4ed8;
+            --blue-l: #2563eb;
+            --purple: #6d28d9;
+            --purple-l: #7c3aed;
+            --green: #047857;
+            --green-l: #059669;
+            --amber: #b45309;
+            --amber-l: #d97706;
+            --red: #b91c1c;
+            --red-l: #dc2626;
+            --text: #0f172a;
+            --muted: #475569;
+            --muted2: #64748b;
+            --code-bg: #1e293b;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            width: 100vw;
+            height: 100%;
+            user-select: none;
+        }
+
+        #deck {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 56px 48px 80px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .45s cubic-bezier(.4, 0, .2, 1);
+            overflow: hidden;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 200;
+            height: 2px;
+            width: 0;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+            transition: width .4s ease;
+            box-shadow: 0 0 8px var(--blue);
+        }
+
+        #nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 14px 24px;
+            background: color-mix(in srgb, var(--bg) 85%, transparent);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border);
+        }
+
+        .nav-btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 20px;
+            border-radius: 8px;
+            background: var(--surf2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--blue);
+            color: var(--blue-l);
+        }
+
+        .nav-btn:disabled {
+            opacity: .3;
+            pointer-events: none;
+        }
+
+        #counter {
+            font-size: 12px;
+            color: var(--muted2);
+            font-variant-numeric: tabular-nums;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        #dots {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border2);
+            cursor: pointer;
+            transition: all .25s;
+        }
+
+        .dot.on {
+            width: 20px;
+            border-radius: 3px;
+            background: var(--blue);
+            box-shadow: 0 0 6px var(--blue);
+        }
+
+        .eyebrow {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--blue-l);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .eyebrow::before {
+            content: '';
+            width: 16px;
+            height: 1px;
+            background: var(--blue);
+        }
+
+        h1 {
+            font-size: clamp(28px, 4vw, 52px);
+            font-weight: 900;
+            line-height: 1.05;
+            text-wrap: balance;
+        }
+
+        h2 {
+            font-size: clamp(22px, 3vw, 38px);
+            font-weight: 800;
+            line-height: 1.1;
+            text-wrap: balance;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .cols {
+            display: grid;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .cols-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .cols-3 {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .inner {
+            width: 100%;
+            max-width: 1040px;
+        }
+
+        .card {
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .card-accent-top {
+            border-top: 2px solid;
+        }
+
+        .ca-blue {
+            border-top-color: var(--blue);
+        }
+
+        .ca-purple {
+            border-top-color: var(--purple);
+        }
+
+        .ca-green {
+            border-top-color: var(--green);
+        }
+
+        .ca-red {
+            border-top-color: var(--red);
+        }
+
+        .ca-amber {
+            border-top-color: var(--amber);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .b-blue {
+            background: color-mix(in srgb, var(--blue) 15%, transparent);
+            color: var(--blue-l);
+            border: 1px solid color-mix(in srgb, var(--blue) 30%, transparent);
+        }
+
+        .b-purple {
+            background: color-mix(in srgb, var(--purple) 15%, transparent);
+            color: var(--purple-l);
+            border: 1px solid color-mix(in srgb, var(--purple) 30%, transparent);
+        }
+
+        .b-green {
+            background: color-mix(in srgb, var(--green) 15%, transparent);
+            color: var(--green-l);
+            border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
+        }
+
+        .b-amber {
+            background: color-mix(in srgb, var(--amber) 15%, transparent);
+            color: var(--amber-l);
+            border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
+        }
+
+        .b-red {
+            background: color-mix(in srgb, var(--red) 15%, transparent);
+            color: var(--red-l);
+            border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
+        }
+
+        .code {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.75;
+            overflow-x: auto;
+            color: #94a3b8;
+        }
+
+        .kw {
+            color: #f472b6;
+        }
+
+        .fn {
+            color: #c084fc;
+        }
+
+        .st {
+            color: #86efac;
+        }
+
+        .cm {
+            color: #475569;
+            font-style: italic;
+        }
+
+        .nm {
+            color: #fbbf24;
+        }
+
+        .vr {
+            color: #7dd3fc;
+        }
+
+        @keyframes pulse2 {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: .5;
+                transform: scale(1.3)
+            }
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 6px var(--blue)
+            }
+
+            50% {
+                box-shadow: 0 0 22px var(--blue)
+            }
+        }
+
+        @keyframes moveR {
+            0% {
+                left: 0%;
+                opacity: 0;
+                transform: translateY(-50%) scale(.5)
+            }
+
+            8% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1)
+            }
+
+            92% {
+                opacity: 1;
+                transform: translateY(-50%) scale(1)
+            }
+
+            100% {
+                left: 100%;
+                opacity: 0;
+                transform: translateY(-50%) scale(.5)
+            }
+        }
+
+        #s1 {
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, color-mix(in srgb, var(--blue) 18%, transparent), transparent 65%), var(--bg);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green-l);
+            animation: pulse2 2s infinite;
+            flex-shrink: 0;
+        }
+
+        .s1-stat {
+            padding: 16px 28px;
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .s1-num {
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--blue-l), var(--purple-l));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .s1-lbl {
+            font-size: 11px;
+            color: var(--muted2);
+            margin-top: 3px;
+        }
+
+        .flow-wrap {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 0;
+        }
+
+        .flow-node {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fbox {
+            width: 100%;
+            background: var(--surf);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+            transition: border-color .3s, box-shadow .3s;
+        }
+
+        .fbox.lit {
+            border-color: var(--blue);
+            animation: glow 2.5s ease-in-out infinite;
+        }
+
+        .fbox .ico {
+            font-size: 26px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .fbox .fn2 {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .fbox .fd {
+            font-size: 10px;
+            color: var(--muted2);
+            margin-top: 2px;
+        }
+
+        .arrow-seg {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 52px;
+            flex-shrink: 0;
+        }
+
+        .arrow-line {
+            width: 100%;
+            height: 1.5px;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+            position: relative;
+            overflow: visible;
+        }
+
+        .arrow-line::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: -4px;
+            border: 4.5px solid transparent;
+            border-left: 7px solid var(--purple);
+        }
+
+        .pkt {
+            position: absolute;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            background: var(--blue-l);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--blue-l);
+            animation: moveR 2.8s ease-in-out infinite;
+        }
+
+        .pkt2 {
+            animation-delay: .9s;
+        }
+
+        .pkt3 {
+            animation-delay: 1.8s;
+        }
+
+        .arrow-lbl {
+            font-size: 9px;
+            color: var(--muted);
+        }
+
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            opacity: 0;
+            transform: translateX(-16px);
+            transition: opacity .35s ease, transform .35s ease, border-color .3s;
+        }
+
+        .step.vis {
+            opacity: 1;
+            transform: none;
+        }
+
+        .step:hover {
+            border-color: var(--border2);
+        }
+
+        .snum {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+            border: 1px solid;
+        }
+
+        .s-b {
+            background: color-mix(in srgb, var(--blue) 15%, transparent);
+            color: var(--blue-l);
+            border-color: color-mix(in srgb, var(--blue) 35%, transparent);
+        }
+
+        .s-p {
+            background: color-mix(in srgb, var(--purple) 15%, transparent);
+            color: var(--purple-l);
+            border-color: color-mix(in srgb, var(--purple) 35%, transparent);
+        }
+
+        .s-g {
+            background: color-mix(in srgb, var(--green) 15%, transparent);
+            color: var(--green-l);
+            border-color: color-mix(in srgb, var(--green) 35%, transparent);
+        }
+
+        .s-a {
+            background: color-mix(in srgb, var(--amber) 15%, transparent);
+            color: var(--amber-l);
+            border-color: color-mix(in srgb, var(--amber) 35%, transparent);
+        }
+
+        .s-r {
+            background: color-mix(in srgb, var(--red) 15%, transparent);
+            color: var(--red-l);
+            border-color: color-mix(in srgb, var(--red) 35%, transparent);
+        }
+
+        .phone-wrap {
+            width: 150px;
+            margin: 0 auto;
+            background: var(--surf2);
+            border: 2px solid var(--border2);
+            border-radius: 26px;
+            padding: 14px 10px;
+        }
+
+        .phone-screen {
+            background: var(--bg);
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .inp {
+            background: var(--surf2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            padding: 8px 10px;
+            font-size: 11px;
+            color: var(--text);
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .pbtn {
+            background: linear-gradient(135deg, var(--blue), var(--purple));
+            border-radius: 7px;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .otp-row {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .otp-cell {
+            flex: 1;
+            height: 30px;
+            background: var(--surf2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--blue-l);
+            transition: all .2s;
+        }
+
+        .otp-cell.lit {
+            border-color: var(--blue);
+            background: color-mix(in srgb, var(--blue) 12%, transparent);
+        }
+
+        .token-pill {
+            background: var(--code-bg);
+            border: 1px solid color-mix(in srgb, var(--purple) 35%, transparent);
+            border-radius: 9px;
+            padding: 12px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1.7;
+            word-break: break-all;
+        }
+
+        .redis-wrap {
+            background: color-mix(in srgb, var(--red) 5%, var(--surf));
+            border: 1px solid color-mix(in srgb, var(--red) 20%, transparent);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .cache-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            background: color-mix(in srgb, var(--red) 5%, transparent);
+            border-radius: 7px;
+            margin-top: 6px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .ck {
+            color: var(--red-l);
+        }
+
+        .cv {
+            color: var(--green-l);
+        }
+
+        .ct {
+            color: var(--muted2);
+            margin-left: auto;
+        }
+
+        .rtable {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 5px;
+        }
+
+        .rtable th {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 6px 14px;
+            text-align: left;
+        }
+
+        .rtable td {
+            padding: 12px 14px;
+            background: var(--surf);
+            font-size: 12px;
+        }
+
+        .rtable td:first-child {
+            border-radius: 9px 0 0 9px;
+            border-left: 1px solid var(--border);
+        }
+
+        .rtable td:last-child {
+            border-radius: 0 9px 9px 0;
+            border-right: 1px solid var(--border);
+        }
+
+        .rtable td {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .bar-item {
+            margin-bottom: 14px;
+        }
+
+        .bar-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .bar-track {
+            background: var(--surf2);
+            border-radius: 8px;
+            height: 9px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            width: 0;
+            transition: width 1.4s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .sec-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--surf);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+        }
+
+        .fin-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .arr {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        @media(max-width:700px) {
+            .slide {
+                padding: 48px 16px 80px;
+            }
+
+            .cols-2,
+            .cols-3 {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            .flow-wrap {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .arrow-seg {
+                display: none;
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="progress"></div>
+    <div id="deck">
+
+        <!-- SLIDE 1 -->
+        <div class="slide active" id="s1">
+            <svg style="position:absolute;inset:0;pointer-events:none;" viewBox="0 0 1200 700"
+                preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <circle cx="600" cy="350" r="280" fill="none" stroke="#2563eb" stroke-opacity=".06" stroke-width="1" />
+                <circle cx="600" cy="350" r="180" fill="none" stroke="#7c3aed" stroke-opacity=".07" stroke-width="1" />
+                <circle cx="600" cy="350" r="420" fill="none" stroke="#2563eb" stroke-opacity=".04" stroke-width="1" />
+                <line x1="100" y1="100" x2="300" y2="280" stroke="#2563eb" stroke-opacity=".08" stroke-width="1" />
+                <line x1="900" y1="80" x2="720" y2="270" stroke="#7c3aed" stroke-opacity=".08" stroke-width="1" />
+                <circle cx="120" cy="100" r="3" fill="#2563eb" fill-opacity=".5" />
+                <circle cx="890" cy="90" r="3" fill="#7c3aed" fill-opacity=".5" />
+            </svg>
+            <div class="inner" style="position:relative;z-index:1;text-align:center;">
+                <div
+                    style="display:inline-flex;align-items:center;gap:8px;background:color-mix(in srgb,var(--blue) 10%,var(--surf));border:1px solid color-mix(in srgb,var(--blue) 30%,transparent);border-radius:24px;padding:5px 14px;font-size:12px;color:var(--blue-l);margin-bottom:22px;">
+                    <span class="live-dot"></span> Production System — ASG Backend
+                </div>
+                <h1
+                    style="background:linear-gradient(135deg,#e2e8f0 0%,var(--blue-l) 45%,var(--purple-l) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;">
+                    Authentication &<br>Authorization System</h1>
+                <p style="color:var(--muted2);font-size:16px;max-width:560px;margin:0 auto 32px;line-height:1.65;">Phone
+                    OTP থেকে শুরু করে Course Access পর্যন্ত — ১০-২০ লাখ User কিভাবে Serve হয়</p>
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                    <div class="s1-stat">
+                        <div class="s1-num">১০–২০ লাখ</div>
+                        <div class="s1-lbl">Active Users</div>
+                    </div>
+                    <div class="s1-stat">
+                        <div class="s1-num">OTP + JWT</div>
+                        <div class="s1-lbl">Auth Method</div>
+                    </div>
+                    <div class="s1-stat">
+                        <div class="s1-num">Redis</div>
+                        <div class="s1-lbl">Cache Layer</div>
+                    </div>
+                    <div class="s1-stat">
+                        <div class="s1-num">Role-Based</div>
+                        <div class="s1-lbl">Authorization</div>
+                    </div>
+                </div>
+                <p style="color:var(--muted);font-size:12px;margin-top:28px;">← → Arrow Keys • Space • বাটন দিয়ে
+                    নেভিগেট করুন</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 2 -->
+        <div class="slide" id="s2">
+            <div class="inner">
+                <div class="eyebrow">System Overview</div>
+                <h2 style="margin-bottom:24px;">পুরো সিস্টেম এক নজরে</h2>
+                <div class="flow-wrap" style="margin-bottom:22px;">
+                    <div class="flow-node">
+                        <div class="fbox lit"><span class="ico">📱</span>
+                            <div class="fn2">User / Client</div>
+                            <div class="fd">Phone দিয়ে Request</div>
+                        </div>
+                    </div>
+                    <div class="arrow-seg">
+                        <div class="arrow-line">
+                            <div class="pkt"></div>
+                        </div>
+                        <div class="arrow-lbl">HTTPS</div>
+                    </div>
+                    <div class="flow-node">
+                        <div class="fbox"><span class="ico">🛡️</span>
+                            <div class="fn2">Rate Limiter</div>
+                            <div class="fd">Spam Block</div>
+                        </div>
+                    </div>
+                    <div class="arrow-seg">
+                        <div class="arrow-line">
+                            <div class="pkt pkt2"></div>
+                        </div>
+                        <div class="arrow-lbl">Pass</div>
+                    </div>
+                    <div class="flow-node">
+                        <div class="fbox"><span class="ico">⚙️</span>
+                            <div class="fn2">Express Server</div>
+                            <div class="fd">Route + Middleware</div>
+                        </div>
+                    </div>
+                    <div class="arrow-seg">
+                        <div class="arrow-line">
+                            <div class="pkt pkt3"></div>
+                        </div>
+                        <div class="arrow-lbl">Check</div>
+                    </div>
+                    <div class="flow-node">
+                        <div class="fbox"><span class="ico">⚡</span>
+                            <div class="fn2">Redis Cache</div>
+                            <div class="fd">Fast Lookup</div>
+                        </div>
+                    </div>
+                    <div class="arrow-seg">
+                        <div class="arrow-line">
+                            <div class="pkt"></div>
+                        </div>
+                        <div class="arrow-lbl">Cache Miss</div>
+                    </div>
+                    <div class="flow-node">
+                        <div class="fbox"><span class="ico">🗄️</span>
+                            <div class="fn2">PostgreSQL</div>
+                            <div class="fd">Permanent Data</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cols cols-3">
+                    <div class="card card-accent-top ca-blue">
+                        <div style="font-size:22px;margin-bottom:8px;">🔐</div>
+                        <h3>Authentication</h3>
+                        <p style="font-size:12px;color:var(--muted2);margin-top:5px;line-height:1.6;">Phone OTP দিয়ে
+                            পরিচয় যাচাই → JWT Token তৈরি</p>
+                    </div>
+                    <div class="card card-accent-top ca-purple">
+                        <div style="font-size:22px;margin-bottom:8px;">🎫</div>
+                        <h3>Authorization</h3>
+                        <p style="font-size:12px;color:var(--muted2);margin-top:5px;line-height:1.6;">Token দেখে Role ও
+                            Course Access চেক করা হয়</p>
+                    </div>
+                    <div class="card card-accent-top ca-green">
+                        <div style="font-size:22px;margin-bottom:8px;">🚀</div>
+                        <h3>Scale করা</h3>
+                        <p style="font-size:12px;color:var(--muted2);margin-top:5px;line-height:1.6;">Redis Cache দিয়ে
+                            DB-তে চাপ না দিয়ে লাখো Request সামলানো</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3 -->
+        <div class="slide" id="s3">
+            <div class="inner">
+                <div class="eyebrow">Authentication — Phase 1</div>
+                <h2 style="margin-bottom:20px;">নতুন User Sign Up করলে কী হয়?</h2>
+                <div class="cols cols-2" style="align-items:start;">
+                    <div class="step-list" id="sl3">
+                        <div class="step">
+                            <div class="snum s-b">1</div>
+                            <div><strong>📱 Phone Number পাঠায়</strong>
+                                <p style="font-size:11px;color:var(--muted2);margin-top:3px;">User তার 01XXXXXXXXX নম্বর
+                                    POST করে /signup route-এ</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="snum s-p">2</div>
+                            <div><strong>🔍 DB Check — আছে নাকি নেই?</strong>
+                                <p style="font-size:11px;color:var(--muted2);margin-top:3px;">Prisma দিয়ে
+                                    grandCelebrationAuth table-এ খোঁজা হয়</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="snum s-g">3</div>
+                            <div><strong>📤 OTP পাঠানো হয়</strong>
+                                <p style="font-size:11px;color:var(--muted2);margin-top:3px;">OtpService SMS Gateway
+                                    দিয়ে 4-digit code পাঠায়</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="snum s-a">4</div>
+                            <div><strong>🔑 Temp Token দেওয়া হয়</strong>
+                                <p style="font-size:11px;color:var(--muted2);margin-top:3px;">authToken: null,
+                                    refreshToken: temp JWT</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="snum s-r">5</div>
+                            <div><strong>✅ OTP Verify → Real Token</strong>
+                                <p style="font-size:11px;color:var(--muted2);margin-top:3px;">সঠিক OTP → isVerifyPhone:
+                                    true → আসল authToken</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:14px;">
+                        <div class="phone-wrap">
+                            <div class="phone-screen">
+                                <div style="font-size:9px;color:var(--muted);margin-bottom:8px;">ASG App — Sign Up</div>
+                                <div class="inp mono">01XXXXXXXXX</div>
+                                <div class="pbtn" onclick="doOtp()">OTP পাঠান →</div>
+                                <div class="otp-row" id="otpRow" style="opacity:0;transition:opacity .4s;">
+                                    <div class="otp-cell" id="oc1"></div>
+                                    <div class="otp-cell" id="oc2"></div>
+                                    <div class="otp-cell" id="oc3"></div>
+                                    <div class="otp-cell" id="oc4"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card ca-red card-accent-top" style="font-size:12px;">
+                            <strong style="color:var(--red-l);">🚫 Rate Limit সুরক্ষা</strong>
+                            <p style="color:var(--muted2);margin-top:5px;line-height:1.65;">সর্বোচ্চ <strong
+                                    style="color:var(--red-l);">৪ বার</strong> OTP চাওয়া যাবে<br>প্রতিটির মাঝে <strong
+                                    style="color:var(--red-l);">২ মিনিট</strong> অপেক্ষা</p>
+                        </div>
+                        <div class="token-pill">
+                            <span style="color:var(--muted);">// Temp Refresh Token</span><br>
+                            <span style="color:var(--purple-l);">eyJhbGciOiJIUzI1NiJ9.</span><br>
+                            <span style="color:var(--amber-l);">{phone, role, isVerifyPhone: false}</span><br>
+                            <span style="color:var(--muted);">.TEMP_SECRET ← verify পর্যন্ত</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4 -->
+        <div class="slide" id="s4">
+            <div class="inner">
+                <div class="eyebrow">Authentication — Phase 2</div>
+                <h2 style="margin-bottom:20px;">Existing User Login করলে কী হয়?</h2>
+                <div
+                    style="display:flex;align-items:center;gap:10px;overflow-x:auto;padding:4px 0 16px;margin-bottom:16px;">
+                    <div style="text-align:center;min-width:100px;">
+                        <div style="font-size:28px;">📱</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">User</div>
+                        <div class="badge b-blue" style="margin-top:5px;">POST /request/login/otp</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:50px;height:1.5px;background:linear-gradient(90deg,var(--blue),var(--purple));position:relative;">
+                        <div class="pkt"></div>
+                    </div>
+                    <div style="text-align:center;min-width:100px;">
+                        <div style="font-size:28px;">🛡️</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">Rate Check</div>
+                        <div class="badge b-red" style="margin-top:5px;">max 4 tries</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:50px;height:1.5px;background:linear-gradient(90deg,var(--purple),var(--green));position:relative;">
+                        <div class="pkt pkt2" style="background:var(--purple-l);box-shadow:0 0 8px var(--purple-l);">
+                        </div>
+                    </div>
+                    <div style="text-align:center;min-width:100px;">
+                        <div style="font-size:28px;">🗄️</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">DB Lookup</div>
+                        <div class="badge b-purple" style="margin-top:5px;">Prisma findFirst</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:50px;height:1.5px;background:linear-gradient(90deg,var(--green),var(--amber));position:relative;">
+                        <div class="pkt pkt3" style="background:var(--green-l);box-shadow:0 0 8px var(--green-l);">
+                        </div>
+                    </div>
+                    <div style="text-align:center;min-width:100px;">
+                        <div style="font-size:28px;">📨</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">SMS OTP</div>
+                        <div class="badge b-green" style="margin-top:5px;">OtpService</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:50px;height:1.5px;background:linear-gradient(90deg,var(--amber),var(--blue));position:relative;">
+                        <div class="pkt" style="background:var(--amber-l);box-shadow:0 0 8px var(--amber-l);"></div>
+                    </div>
+                    <div style="text-align:center;min-width:100px;">
+                        <div style="font-size:28px;">🔐</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">JWT তৈরি</div>
+                        <div class="badge b-amber" style="margin-top:5px;">HS256 Sign</div>
+                    </div>
+                </div>
+                <div class="cols cols-2">
+                    <div class="card ca-blue card-accent-top">
+                        <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--blue-l);">🎟 Access
+                            Token (authToken)</div>
+                        <div class="code">{ <span class="vr">id</span>: <span class="st">"user_id"</span>, <span
+                                class="vr">phone</span>: <span class="st">"01XXX"</span>, <span class="vr">role</span>:
+                            <span class="st">"student"</span>, <span class="vr">isVerifyPhone</span>: <span
+                                class="nm">true</span> }
+                            <span class="cm">// Algorithm: HS256 | Short expiry</span>
+                            <span class="cm">// Header: x-access-token</span>
+                        </div>
+                    </div>
+                    <div class="card ca-purple card-accent-top">
+                        <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--purple-l);">🔄 Refresh
+                            Token</div>
+                        <div class="code">{ <span class="vr">id</span>: <span class="st">"user_id"</span>, <span
+                                class="vr">phone</span>: <span class="st">"01XXX"</span>, <span class="vr">role</span>:
+                            <span class="st">"student"</span> }
+                            <span class="cm">// Different secret key</span>
+                            <span class="cm">// Long expiry | HttpOnly Cookie-তে থাকে</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5 -->
+        <div class="slide" id="s5">
+            <div class="inner">
+                <div class="eyebrow">Authorization Middleware</div>
+                <h2 style="margin-bottom:20px;">Protected Route-এ Request আসলে কী হয়?</h2>
+                <div class="cols cols-2" style="align-items:start;">
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div
+                            style="padding:12px 16px;background:color-mix(in srgb,var(--blue) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);border-radius:11px;font-size:12px;">
+                            <strong>📨 Request আসে</strong>
+                            <div class="mono" style="font-size:10px;color:var(--blue-l);margin-top:4px;">x-access-token:
+                                eyJhbGciOiJIUzI1NiJ9...</div>
+                        </div>
+                        <div style="text-align:center;color:var(--muted);font-size:16px;">↓</div>
+                        <div
+                            style="padding:12px 16px;background:color-mix(in srgb,var(--amber) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--amber) 20%,transparent);border-radius:11px;font-size:12px;display:flex;justify-content:space-between;align-items:center;">
+                            <div><strong>🔍 JWT Verify</strong>
+                                <div style="font-size:11px;color:var(--muted2);margin-top:3px;">
+                                    verifyUserTokenWithSignature() HS256</div>
+                            </div><span class="badge b-red">Invalid→401</span>
+                        </div>
+                        <div style="text-align:center;color:var(--muted);font-size:16px;">↓</div>
+                        <div
+                            style="padding:12px 16px;background:color-mix(in srgb,var(--purple) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--purple) 20%,transparent);border-radius:11px;font-size:12px;display:flex;justify-content:space-between;align-items:center;">
+                            <div><strong>⚡ Redis Cache Check</strong>
+                                <div style="font-size:11px;color:var(--muted2);margin-top:3px;">getCachedAuthUser() —
+                                    DB-তে না গিয়ে</div>
+                            </div><span class="badge b-green">Hit → fast</span>
+                        </div>
+                        <div style="text-align:center;color:var(--muted);font-size:16px;">↓</div>
+                        <div
+                            style="padding:12px 16px;background:color-mix(in srgb,var(--green) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--green) 20%,transparent);border-radius:11px;font-size:12px;display:flex;justify-content:space-between;align-items:center;">
+                            <div><strong>📱 Single Device Check</strong>
+                                <div style="font-size:11px;color:var(--muted2);margin-top:3px;">
+                                    validateCachedStudentSession()</div>
+                            </div><span class="badge b-red">2 device→300</span>
+                        </div>
+                        <div style="text-align:center;color:var(--muted);font-size:16px;">↓</div>
+                        <div
+                            style="padding:12px 16px;background:color-mix(in srgb,var(--green) 12%,var(--surf));border:1.5px solid color-mix(in srgb,var(--green) 30%,transparent);border-radius:11px;font-size:12px;">
+                            <strong style="color:var(--green-l);">✅ req.user সেট → next()</strong>
+                            <div style="font-size:11px;color:var(--muted2);margin-top:3px;">Controller-এ পৌঁছায় —
+                                Resource Access মিলে</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase;">
+                            Response Codes</div>
+                        <div style="display:flex;flex-direction:column;gap:7px;">
+                            <div
+                                style="padding:10px 12px;background:color-mix(in srgb,var(--red) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--red) 20%,transparent);border-radius:9px;font-size:11px;">
+                                <div style="color:var(--red-l);font-weight:700;">401 Unauthorized</div>
+                                <div style="color:var(--muted2);margin-top:2px;">"Invalid or expired token."</div>
+                            </div>
+                            <div
+                                style="padding:10px 12px;background:color-mix(in srgb,var(--red) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--red) 20%,transparent);border-radius:9px;font-size:11px;">
+                                <div style="color:var(--red-l);font-weight:700;">403 Forbidden</div>
+                                <div style="color:var(--muted2);margin-top:2px;">"You are not authorized to access this
+                                    resource."</div>
+                            </div>
+                            <div
+                                style="padding:10px 12px;background:color-mix(in srgb,var(--amber) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--amber) 20%,transparent);border-radius:9px;font-size:11px;">
+                                <div style="color:var(--amber-l);font-weight:700;">300 Multiple Choices</div>
+                                <div style="color:var(--muted2);margin-top:2px;">"একটি অ্যাকাউন্ট থেকে এক সময়ে একটি
+                                    Device"</div>
+                            </div>
+                            <div
+                                style="padding:10px 12px;background:color-mix(in srgb,var(--green) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--green) 20%,transparent);border-radius:9px;font-size:11px;">
+                                <div style="color:var(--green-l);font-weight:700;">200 OK ✓</div>
+                                <div style="color:var(--muted2);margin-top:2px;">সব চেক পাস → Content পাঠানো হয়</div>
+                            </div>
+                            <div
+                                style="padding:10px 12px;background:color-mix(in srgb,var(--blue) 8%,var(--surf));border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);border-radius:9px;font-size:11px;">
+                                <div style="color:var(--blue-l);font-weight:700;">406 Not Acceptable</div>
+                                <div style="color:var(--muted2);margin-top:2px;">"Session expired. Please login again."
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6 -->
+        <div class="slide" id="s6">
+            <div class="inner">
+                <div class="eyebrow">Performance Layer</div>
+                <h2 style="margin-bottom:20px;">Redis Cache — লাখো Request সামলানো হয় কিভাবে?</h2>
+                <div class="cols cols-2" style="align-items:start;">
+                    <div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                            <div
+                                style="padding:14px;background:color-mix(in srgb,var(--green) 7%,var(--surf));border:1px solid color-mix(in srgb,var(--green) 20%,transparent);border-radius:11px;text-align:center;">
+                                <div style="font-size:22px;margin-bottom:5px;">⚡</div>
+                                <div style="font-size:11px;font-weight:700;">Cache HIT</div>
+                                <div style="font-size:11px;color:var(--muted2);margin-top:3px;">Redis-এ পাওয়া গেল</div>
+                                <div style="font-size:13px;color:var(--green-l);font-weight:800;margin-top:5px;">~1 ms
+                                </div>
+                            </div>
+                            <div
+                                style="padding:14px;background:color-mix(in srgb,var(--red) 7%,var(--surf));border:1px solid color-mix(in srgb,var(--red) 20%,transparent);border-radius:11px;text-align:center;">
+                                <div style="font-size:22px;margin-bottom:5px;">🐌</div>
+                                <div style="font-size:11px;font-weight:700;">Cache MISS</div>
+                                <div style="font-size:11px;color:var(--muted2);margin-top:3px;">DB-তে যেতে হলো</div>
+                                <div style="font-size:13px;color:var(--red-l);font-weight:800;margin-top:5px;">~100 ms
+                                </div>
+                            </div>
+                        </div>
+                        <div class="redis-wrap">
+                            <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;"><span
+                                    style="color:var(--red-l);font-size:14px;">●</span><span
+                                    style="font-size:12px;font-weight:700;color:var(--red-l);">Redis Cache Keys</span>
+                            </div>
+                            <div class="cache-row"><span class="ck">auth:user:{role}:{id}</span><span class="cv">→
+                                    {user}</span><span class="ct">TTL 2min</span></div>
+                            <div class="cache-row"><span class="ck">auth:session:{id}:{host}</span><span class="cv">→
+                                    {session}</span><span class="ct">TTL 5min</span></div>
+                            <div class="cache-row"><span class="ck">course:ctx:{entityId}</span><span class="cv">→
+                                    {course}</span><span class="ct">TTL 2min</span></div>
+                            <div class="cache-row"><span class="ck">course:access:{cId}:{uId}</span><span class="cv">→
+                                    bool</span><span class="ct">TTL 2min</span></div>
+                        </div>
+                        <div
+                            style="margin-top:12px;padding:12px 14px;background:color-mix(in srgb,var(--amber) 7%,var(--surf));border:1px solid color-mix(in srgb,var(--amber) 20%,transparent);border-radius:10px;font-size:12px;">
+                            <strong style="color:var(--amber-l);">💡 কেন লাখো User সামলানো যায়?</strong>
+                            <p style="color:var(--muted2);margin-top:5px;line-height:1.65;">১০ লাখ User একসাথে request
+                                করলে, প্রথমটি DB-তে যায়, বাকি সব <strong style="color:var(--amber-l);">Redis</strong>
+                                থেকে instant! DB চাপ ৯৯% কমে।</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase;">
+                            getOrLoadStrictCache Pattern</div>
+                        <div class="code"><span class="cm">// authorization.cache.js</span>
+                            <span class="kw">async function</span> <span class="fn">getCachedAuthUser</span>({ role,
+                            userId }) {
+                            <span class="kw">const</span> key = <span class="fn">CacheKeys</span>.user(role, userId);
+                            <span class="kw">return</span> <span class="fn">getOrLoadStrictCache</span>({
+                            key,
+                            <span class="fn">loader</span>: <span class="kw">async</span> () => {
+                            <span class="cm">// Miss হলে DB থেকে নাও</span>
+                            <span class="kw">return</span> <span class="kw">await</span> prisma.user
+                            .<span class="fn">findUnique</span>({ where: { id: userId } });
+                            },
+                            ttl: <span class="nm">2 * 60_000</span>
+                            });
+                            }
+                        </div>
+                        <div
+                            style="margin-top:14px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase;">
+                            Cache Invalidation</div>
+                        <div class="code"><span class="fn">invalidateCourseStudentAccess</span>(userId, courseId);
+                            <span class="fn">invalidateCourseStudentAccessMany</span>(userId, courseIds);
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7 -->
+        <div class="slide" id="s7">
+            <div class="inner">
+                <div class="eyebrow">Course Authorization</div>
+                <h2 style="margin-bottom:20px;">কোর্স Access কিভাবে Check হয়?</h2>
+                <div
+                    style="display:flex;align-items:center;gap:10px;overflow-x:auto;padding:4px 0 16px;margin-bottom:16px;">
+                    <div style="text-align:center;min-width:90px;">
+                        <div style="font-size:26px;">📱</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">Student</div>
+                        <div style="font-size:10px;color:var(--muted2);">Video দেখতে চায়</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:50px;height:1.5px;background:linear-gradient(90deg,var(--blue),var(--purple));position:relative;">
+                        <div class="pkt"></div>
+                        <div
+                            style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted2);white-space:nowrap;">
+                            GET /course/video/{id}</div>
+                    </div>
+                    <div style="text-align:center;min-width:90px;">
+                        <div style="font-size:26px;">🛡️</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">Middleware</div>
+                        <div style="font-size:10px;color:var(--muted2);">Token → User</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:50px;height:1.5px;background:linear-gradient(90deg,var(--purple),var(--green));position:relative;">
+                        <div class="pkt pkt2" style="background:var(--purple-l);box-shadow:0 0 8px var(--purple-l);">
+                        </div>
+                        <div
+                            style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted2);white-space:nowrap;">
+                            canUserAccessCourse()</div>
+                    </div>
+                    <div style="text-align:center;min-width:90px;">
+                        <div style="font-size:26px;">⚡</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">Redis → DB</div>
+                        <div style="font-size:10px;color:var(--muted2);">Access Check</div>
+                    </div>
+                    <div
+                        style="flex:1;min-width:50px;height:1.5px;background:linear-gradient(90deg,var(--green),var(--green-l));position:relative;">
+                        <div class="pkt pkt3" style="background:var(--green-l);box-shadow:0 0 8px var(--green-l);">
+                        </div>
+                    </div>
+                    <div style="text-align:center;min-width:90px;">
+                        <div style="font-size:26px;">✅</div>
+                        <div style="font-size:11px;font-weight:700;margin-top:5px;">Content</div>
+                        <div style="font-size:10px;color:var(--muted2);">Video / PDF</div>
+                    </div>
+                </div>
+                <div class="cols cols-2">
+                    <div>
+                        <div class="code"><span class="cm">// authorization.cache.js</span>
+                            <span class="kw">async function</span> <span class="fn">canUserAccessCourse</span>(userId,
+                            courseId) {
+                            <span class="cm">// ১. Course কি Free?</span>
+                            <span class="kw">const</span> ctx = <span class="kw">await</span> <span
+                                class="fn">getCachedCourseContext</span>(courseId);
+                            <span class="kw">if</span> (ctx.course.<span class="vr">isCourseFree</span>) <span
+                                class="kw">return true</span>;
+                            <span class="cm">// ২. Student কি Enrolled?</span>
+                            <span class="kw">return</span> <span class="kw">await</span> <span
+                                class="fn">hasCourseStudentAccess</span>(userId, courseId);
+                            }
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <div class="card card-accent-top ca-green">
+                            <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--green-l);">✅ Access
+                                পাবে যখন</div>
+                            <div style="font-size:12px;color:var(--muted2);line-height:2;">✓ Course Free হলে<br>✓ Paid
+                                Course কিনে Enrolled হলে<br>✓ Admin / SuperAdmin<br>✓ Membership Active</div>
+                        </div>
+                        <div class="card card-accent-top ca-red">
+                            <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--red-l);">❌ Access
+                                পাবে না যখন</div>
+                            <div style="font-size:12px;color:var(--muted2);line-height:2;">✗ Paid Course কেনা হয়নি<br>✗
+                                Course Archived<br>✗ Token নেই বা Expired<br>✗ অন্য Device-এ Login</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8 -->
+        <div class="slide" id="s8">
+            <div class="inner">
+                <div class="eyebrow">Role-Based Access Control</div>
+                <h2 style="margin-bottom:20px;">কে কী করতে পারবে?</h2>
+                <table class="rtable" style="margin-bottom:18px;">
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>কারা</th>
+                            <th>কী করতে পারে</th>
+                            <th>Token-এ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge b-red">superAdmin</span></td>
+                            <td>সর্বোচ্চ কর্তৃপক্ষ</td>
+                            <td>সব কিছু — User, Course, Settings, Analytics</td>
+                            <td style="color:var(--red-l);font-weight:700;">♾️ Full</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge b-amber">admin</span></td>
+                            <td>Content Team</td>
+                            <td>Course তৈরি, Video upload, Live Class manage</td>
+                            <td style="color:var(--amber-l);font-weight:700;">🔑 High</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge b-purple">solver</span></td>
+                            <td>প্রশ্ন সমাধানকারী</td>
+                            <td>Student প্রশ্নের উত্তর দেওয়া</td>
+                            <td style="color:var(--purple-l);font-weight:700;">📝 Limited</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge b-blue">student</span></td>
+                            <td>শিক্ষার্থী</td>
+                            <td>কেনা Course দেখা, Quiz দেওয়া</td>
+                            <td style="color:var(--blue-l);font-weight:700;">📚 Course Only</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="cols cols-2">
+                    <div class="card ca-blue card-accent-top">
+                        <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--blue-l);">🔍 Role
+                            Check Middleware</div>
+                        <div class="code"><span class="fn">authorize</span>([<span class="st">"student"</span>, <span
+                                class="st">"admin"</span>]);
+                            <span class="kw">const</span> tokenRole = decoded?.role;
+                            <span class="kw">if</span> (!allowedRoles.<span class="fn">includes</span>(tokenRole)) {
+                            <span class="kw">throw</span> <span class="nm">401</span>;
+                            }
+                        </div>
+                    </div>
+                    <div class="card ca-purple card-accent-top">
+                        <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--purple-l);">🔎 User
+                            Lookup Order</div>
+                        <div style="font-size:12px;color:var(--muted2);line-height:2.2;">1️⃣ Admin table চেক<br>2️⃣
+                            Student table চেক<br>3️⃣ Solver table চেক<br>4️⃣ SuperAdmin table চেক</div>
+                        <div
+                            style="margin-top:8px;padding:8px 10px;background:color-mix(in srgb,var(--purple) 10%,var(--surf));border-radius:7px;font-size:11px;color:var(--purple-l);font-family:'JetBrains Mono',monospace;">
+                            findUserWithRole(emailOrPhone)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9 -->
+        <div class="slide" id="s9">
+            <div class="inner">
+                <div class="eyebrow">Scalability & Security</div>
+                <h2 style="margin-bottom:20px;">১০–২০ লাখ User কিভাবে Handle হয়?</h2>
+                <div class="cols cols-2" style="align-items:start;">
+                    <div>
+                        <div
+                            style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:14px;letter-spacing:.08em;text-transform:uppercase;">
+                            Performance Numbers</div>
+                        <div class="bar-item">
+                            <div class="bar-head"><span>Redis Cache Hit Rate</span><span style="color:var(--green-l);"
+                                    id="p1">0%</span></div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="b1"
+                                    style="background:linear-gradient(90deg,var(--green),var(--green-l));"></div>
+                            </div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-head"><span>DB Load Reduction</span><span style="color:var(--blue-l);"
+                                    id="p2">0%</span></div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="b2"
+                                    style="background:linear-gradient(90deg,var(--blue),var(--blue-l));"></div>
+                            </div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-head"><span>Security Score</span><span style="color:var(--purple-l);"
+                                    id="p3">0%</span></div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="b3"
+                                    style="background:linear-gradient(90deg,var(--purple),var(--purple-l));"></div>
+                            </div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-head"><span>Uptime Target</span><span style="color:var(--amber-l);"
+                                    id="p4">0%</span></div>
+                            <div class="bar-track">
+                                <div class="bar-fill" id="b4"
+                                    style="background:linear-gradient(90deg,var(--amber),var(--amber-l));"></div>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
+                            <div
+                                style="padding:12px;background:var(--surf);border:1px solid var(--border);border-radius:10px;text-align:center;">
+                                <div style="font-size:20px;font-weight:900;color:var(--green-l);">~1ms</div>
+                                <div style="font-size:10px;color:var(--muted2);margin-top:3px;">Cache Response</div>
+                            </div>
+                            <div
+                                style="padding:12px;background:var(--surf);border:1px solid var(--border);border-radius:10px;text-align:center;">
+                                <div style="font-size:20px;font-weight:900;color:var(--blue-l);">4x max</div>
+                                <div style="font-size:10px;color:var(--muted2);margin-top:3px;">OTP Attempts</div>
+                            </div>
+                            <div
+                                style="padding:12px;background:var(--surf);border:1px solid var(--border);border-radius:10px;text-align:center;">
+                                <div style="font-size:20px;font-weight:900;color:var(--purple-l);">2 min</div>
+                                <div style="font-size:10px;color:var(--muted2);margin-top:3px;">OTP Cooldown</div>
+                            </div>
+                            <div
+                                style="padding:12px;background:var(--surf);border:1px solid var(--border);border-radius:10px;text-align:center;">
+                                <div style="font-size:20px;font-weight:900;color:var(--amber-l);">1 device</div>
+                                <div style="font-size:10px;color:var(--muted2);margin-top:3px;">Per Account</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase;">
+                            Security Layers</div>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <div class="sec-row">
+                                <div style="font-size:20px;">🛡️</div>
+                                <div>
+                                    <div style="font-size:12px;font-weight:700;">IP-based Rate Limiting</div>
+                                    <div style="font-size:11px;color:var(--muted2);margin-top:2px;">Brute force ও bot
+                                        attack রোধ করে</div>
+                                </div>
+                            </div>
+                            <div class="sec-row">
+                                <div style="font-size:20px;">⏱️</div>
+                                <div>
+                                    <div style="font-size:12px;font-weight:700;">OTP Expiry + Count Limit</div>
+                                    <div style="font-size:11px;color:var(--muted2);margin-top:2px;">Expired বা extra OTP
+                                        কাজ করে না</div>
+                                </div>
+                            </div>
+                            <div class="sec-row">
+                                <div style="font-size:20px;">🔏</div>
+                                <div>
+                                    <div style="font-size:12px;font-weight:700;">HS256 JWT Signature</div>
+                                    <div style="font-size:11px;color:var(--muted2);margin-top:2px;">Secret key ছাড়া
+                                        Token tamper অসম্ভব</div>
+                                </div>
+                            </div>
+                            <div class="sec-row">
+                                <div style="font-size:20px;">📱</div>
+                                <div>
+                                    <div style="font-size:12px;font-weight:700;">Single Device Session</div>
+                                    <div style="font-size:11px;color:var(--muted2);margin-top:2px;">Account sharing রোধ
+                                        করে</div>
+                                </div>
+                            </div>
+                            <div class="sec-row">
+                                <div style="font-size:20px;">🔄</div>
+                                <div>
+                                    <div style="font-size:12px;font-weight:700;">Access + Refresh Token Pair</div>
+                                    <div style="font-size:11px;color:var(--muted2);margin-top:2px;">Short-lived access →
+                                        secure rotation</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10 -->
+        <div class="slide" id="s10"
+            style="background:radial-gradient(ellipse 70% 50% at 50% 60%,color-mix(in srgb,var(--green) 10%,transparent),transparent),var(--bg);">
+            <div class="inner" style="text-align:center;">
+                <div class="eyebrow" style="justify-content:center;">সারসংক্ষেপ</div>
+                <h1
+                    style="background:linear-gradient(135deg,#e2e8f0,var(--green-l) 50%,var(--blue-l));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;">
+                    এক কথায় পুরো System</h1>
+                <p style="color:var(--muted2);font-size:15px;max-width:640px;margin:0 auto 28px;line-height:1.7;">Phone
+                    OTP → JWT Token → Redis Cache → Role Check → Course Access — এই ৫ ধাপে ১০-২০ লাখ User Serve হয়</p>
+                <div class="cols cols-3" style="text-align:left;margin-bottom:24px;">
+                    <div class="card card-accent-top ca-blue">
+                        <div style="font-size:24px;margin-bottom:10px;">🔐</div>
+                        <h3>Authentication</h3>
+                        <p style="font-size:12px;color:var(--muted2);margin-top:6px;line-height:1.7;">Phone OTP → Temp
+                            Token → Verify → Real JWT<br>Rate limit + OTP expiry দিয়ে সুরক্ষিত</p>
+                    </div>
+                    <div class="card card-accent-top ca-purple">
+                        <div style="font-size:24px;margin-bottom:10px;">🎫</div>
+                        <h3>Authorization</h3>
+                        <p style="font-size:12px;color:var(--muted2);margin-top:6px;line-height:1.7;">JWT → Role → Redis
+                            Cache → User Check<br>Course Access verify (Free বা Enrolled)</p>
+                    </div>
+                    <div class="card card-accent-top ca-green">
+                        <div style="font-size:24px;margin-bottom:10px;">🚀</div>
+                        <h3>Scale করা যায়</h3>
+                        <p style="font-size:12px;color:var(--muted2);margin-top:6px;line-height:1.7;">Redis cache → DB
+                            load কমানো<br>Single device + cache invalidation</p>
+                    </div>
+                </div>
+                <div
+                    style="padding:18px 22px;background:var(--surf);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;">
+                    <div
+                        style="font-size:11px;color:var(--muted);margin-bottom:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">
+                        Complete Request Lifecycle</div>
+                    <div class="fin-pill">
+                        <span class="badge b-blue">📱 User</span><span class="arr">→</span>
+                        <span class="badge b-red">🛡️ Rate Limit</span><span class="arr">→</span>
+                        <span class="badge b-amber">✅ Validation</span><span class="arr">→</span>
+                        <span class="badge b-purple">🔑 JWT Verify</span><span class="arr">→</span>
+                        <span class="badge b-blue">⚡ Redis Cache</span><span class="arr">→</span>
+                        <span class="badge b-purple">👤 Role Check</span><span class="arr">→</span>
+                        <span class="badge b-green">📚 Course Access</span><span class="arr">→</span>
+                        <span class="badge b-green">✅ 200 OK</span>
+                    </div>
+                </div>
+                <div style="font-size:12px;color:var(--muted);">Node.js · Express · Prisma ORM · PostgreSQL · Redis ·
+                    JWT HS256 · bcryptjs</div>
+            </div>
+        </div>
+
+    </div>
+
+    <nav id="nav">
+        <button class="nav-btn" id="btnP">← আগে</button>
+        <div id="dots"></div>
+        <span id="counter">1 / 10</span>
+        <button class="nav-btn" id="btnN">পরে →</button>
+    </nav>
+
+    <script>
+        const TOTAL = 10; let cur = 1;
+        function go(n) { if (n < 1 || n > TOTAL) return; document.querySelector('.slide.active')?.classList.remove('active'); document.getElementById('s' + n)?.classList.add('active'); cur = n; sync(); enter(n); }
+        function sync() { document.getElementById('progress').style.width = (cur / TOTAL * 100) + '%'; document.getElementById('counter').textContent = cur + ' / ' + TOTAL; document.getElementById('btnP').disabled = cur === 1; document.getElementById('btnN').disabled = cur === TOTAL; document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i + 1 === cur)); }
+        const dotsEl = document.getElementById('dots');
+        for (let i = 1; i <= TOTAL; i++) { const d = document.createElement('div'); d.className = 'dot' + (i === 1 ? ' on' : ''); d.onclick = () => go(i); d.title = 'Slide ' + i; dotsEl.appendChild(d); }
+        document.getElementById('btnP').onclick = () => go(cur - 1);
+        document.getElementById('btnN').onclick = () => go(cur + 1);
+        document.addEventListener('keydown', e => { if (['ArrowRight', 'ArrowDown', ' '].includes(e.key)) { e.preventDefault(); go(cur + 1); } if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); go(cur - 1); } if (e.key === 'Home') go(1); if (e.key === 'End') go(TOTAL); });
+        let otpDone = false;
+        window.doOtp = function () { if (otpDone) return; document.getElementById('otpRow').style.opacity = '1';['oc1', 'oc2', 'oc3', 'oc4'].forEach((id, i) => { setTimeout(() => { const el = document.getElementById(id); el.textContent = ['6', '2', '5', '1'][i]; el.classList.add('lit'); }, 250 + i * 220); }); otpDone = true; };
+        function revealSteps(listId) { const steps = document.querySelectorAll('#' + listId + ' .step'); steps.forEach(s => s.classList.remove('vis')); steps.forEach((s, i) => setTimeout(() => s.classList.add('vis'), 80 + i * 130)); }
+        function animBars() { [{ b: 'b1', p: 'p1', val: 95 }, { b: 'b2', p: 'p2', val: 90 }, { b: 'b3', p: 'p3', val: 92 }, { b: 'b4', p: 'p4', val: 99 }].forEach(({ b, p, val }) => { const bar = document.getElementById(b), pct = document.getElementById(p); if (!bar || !pct) return; bar.style.width = '0'; let v = 0; setTimeout(() => { bar.style.width = val + '%'; const t = setInterval(() => { v = Math.min(v + 2, val); pct.textContent = v + '%'; if (v >= val) clearInterval(t); }, 25); }, 200); }); }
+        function enter(n) { if (n === 3) { revealSteps('sl3'); otpDone = false; document.getElementById('otpRow').style.opacity = '0';['oc1', 'oc2', 'oc3', 'oc4'].forEach(id => { const el = document.getElementById(id); el.textContent = ''; el.classList.remove('lit'); }); } if (n === 9) animBars(); }
+        sync();
+    </script>
+</body>
+
+</html>

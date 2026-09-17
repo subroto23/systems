@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>ACID — Database Transactions</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07101f;
+            --surface: #0d1b2e;
+            --card: #112240;
+            --border: #1e3a5f;
+            --accent: #4f8ef7;
+            --green: #43d49e;
+            --red: #ff5e5e;
+            --yellow: #ffc554;
+            --purple: #b06fff;
+            --text: #e8f0ff;
+            --muted: #7a8fac;
+            --dim: #3a5070;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            transition: width .4s;
+            z-index: 100;
+        }
+
+        #counter {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            font-size: 12px;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            z-index: 100;
+        }
+
+        #dots {
+            position: fixed;
+            bottom: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--dim);
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .dot.active {
+            background: var(--accent);
+            transform: scale(1.4);
+        }
+
+        #nav {
+            position: fixed;
+            bottom: 16px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            transition: all .2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--border);
+        }
+
+        /* Mode toggle */
+        #mode-bar {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 6px 18px;
+            z-index: 100;
+            font-size: 12px;
+        }
+
+        #mode-bar span {
+            color: var(--muted);
+        }
+
+        #mode-bar .active-label {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .tog {
+            position: relative;
+            width: 38px;
+            height: 22px;
+            cursor: pointer;
+        }
+
+        .tog input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .tog-track {
+            position: absolute;
+            inset: 0;
+            background: var(--dim);
+            border-radius: 100px;
+            transition: .3s;
+        }
+
+        .tog-thumb {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 3px;
+            left: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .3s;
+        }
+
+        .tog input:checked~.tog-track {
+            background: var(--accent);
+        }
+
+        .tog input:checked~.tog-thumb {
+            transform: translateX(16px);
+        }
+
+        /* Slides */
+        #slides {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 56px 80px 100px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .5s;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Reveal */
+        .r {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity .4s, transform .4s;
+        }
+
+        .r.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Typography */
+        .label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+        }
+
+        h1 {
+            font-size: clamp(30px, 5vw, 54px);
+            font-weight: 900;
+            line-height: 1.1;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: clamp(22px, 3.5vw, 38px);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        h3 {
+            font-size: clamp(16px, 2vw, 22px);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: clamp(13px, 1.4vw, 17px);
+            line-height: 1.75;
+            color: var(--muted);
+            text-align: center;
+            max-width: 780px;
+        }
+
+        .accent {
+            color: var(--accent);
+        }
+
+        .green {
+            color: var(--green);
+        }
+
+        .red {
+            color: var(--red);
+        }
+
+        .yellow {
+            color: var(--yellow);
+        }
+
+        .purple {
+            color: var(--purple);
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px 26px;
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .grid3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .blist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .blist li {
+            display: flex;
+            gap: 10px;
+            font-size: clamp(13px, 1.3vw, 15px);
+            line-height: 1.65;
+        }
+
+        .blist li::before {
+            content: '▸';
+            color: var(--accent);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .code {
+            background: #050e1c;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            text-align: left;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        /* Thumb slide */
+        .thumb-hook {
+            font-size: clamp(11px, 1.2vw, 14px);
+            color: var(--muted);
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.7;
+        }
+
+        .thumb-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progress"></div>
+    <div id="counter">01 / 12</div>
+    <div id="dots"></div>
+    <div id="mode-bar">
+        <span id="lbl-all" class="active-label">সব একসাথে</span>
+        <label class="tog"><input type="checkbox" id="tog-inp" onchange="setMode(this.checked)">
+            <div class="tog-track"></div>
+            <div class="tog-thumb"></div>
+        </label>
+        <span id="lbl-step">ধাপে ধাপে</span>
+    </div>
+    <div id="nav">
+        <button class="nav-btn" onclick="prevSlide()">← আগে</button>
+        <button class="nav-btn" onclick="advance()">পরে →</button>
+    </div>
+    <div id="slides">
+
+        <!-- 0: THUMBNAIL -->
+        <div class="slide active" data-slide="0">
+            <div style="font-size:72px;margin-bottom:20px;" class="r">💸</div>
+            <h1 class="r">রহিম <span class="red">৫০০০ টাকা</span> পাঠাল<br><span class="yellow">করিম পেল না</span></h1>
+            <p class="r" style="font-size:clamp(15px,1.6vw,20px);margin-bottom:24px;">টাকা কোথায় গেল? এই ভয়ঙ্কর
+                সমস্যার সমাধান হলো <span class="accent" style="font-weight:700;">ACID</span> — প্রতিটা database ব্যবহার
+                করে, অথচ বেশিরভাগ developer জানে না কীভাবে।</p>
+            <div class="r" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;">
+                <span class="thumb-tag" style="border-color:var(--red);color:var(--red);">❌ টাকা হারিয়ে যাওয়া</span>
+                <span class="thumb-tag" style="border-color:var(--yellow);color:var(--yellow);">⚠️ ডেটা corrupted</span>
+                <span class="thumb-tag" style="border-color:var(--green);color:var(--green);">✅ ACID দিয়ে সমাধান</span>
+            </div>
+            <p class="r thumb-hook">এই slide শেষে তুমি বুঝবে কেন bank, বিকাশ, শপিং সাইট সব ACID ব্যবহার করে — এবং তোমার
+                code-এও কীভাবে ব্যবহার করবে।</p>
+        </div>
+
+        <!-- 1: ACID কী -->
+        <div class="slide" data-slide="1">
+            <div class="label r">সহজ ভাষায়</div>
+            <h2 class="r">ACID কী জিনিস?</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card" style="border-color:var(--accent);">
+                    <div style="display:flex;gap:14px;align-items:center;">
+                        <span style="font-size:32px;">🏦</span>
+                        <div>
+                            <h3 style="color:var(--accent);">ধরো বিকাশের মত একটা সিস্টেম</h3>
+                            <p style="text-align:left;font-size:15px;">রহিম ৫০০০ টাকা করিমকে পাঠাচ্ছে। এই কাজে
+                                database-এ দুটো কাজ হবে: রহিমের account থেকে কমাও, করিমের account-এ যোগ করো। এখন মাঝখানে
+                                যদি server crash করে?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="r" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+                    <div
+                        style="background:rgba(79,142,247,.1);border:2px solid var(--accent);border-radius:12px;padding:14px;text-align:center;">
+                        <div style="font-size:28px;font-weight:900;color:var(--accent);">A</div>
+                        <div style="font-weight:700;font-size:13px;margin-top:4px;">Atomicity</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:4px;">সব অথবা কিছুই না</div>
+                    </div>
+                    <div
+                        style="background:rgba(67,212,158,.1);border:2px solid var(--green);border-radius:12px;padding:14px;text-align:center;">
+                        <div style="font-size:28px;font-weight:900;color:var(--green);">C</div>
+                        <div style="font-weight:700;font-size:13px;margin-top:4px;">Consistency</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:4px;">নিয়ম সবসময় মানে</div>
+                    </div>
+                    <div
+                        style="background:rgba(255,197,84,.1);border:2px solid var(--yellow);border-radius:12px;padding:14px;text-align:center;">
+                        <div style="font-size:28px;font-weight:900;color:var(--yellow);">I</div>
+                        <div style="font-weight:700;font-size:13px;margin-top:4px;">Isolation</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:4px;">একে অপরকে দেখে না</div>
+                    </div>
+                    <div
+                        style="background:rgba(176,111,255,.1);border:2px solid var(--purple);border-radius:12px;padding:14px;text-align:center;">
+                        <div style="font-size:28px;font-weight:900;color:var(--purple);">D</div>
+                        <div style="font-weight:700;font-size:13px;margin-top:4px;">Durability</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:4px;">একবার save = সবসময়</div>
+                    </div>
+                </div>
+                <p class="r" style="font-size:14px;color:var(--muted);">PostgreSQL, MySQL — সব production database এই
+                    ৪টা নিয়ম মেনে চলে। এগুলো না থাকলে কোনো financial system চলত না।</p>
+            </div>
+        </div>
+
+        <!-- 2: Atomicity -->
+        <div class="slide" data-slide="2">
+            <div class="label r">A — প্রথম অক্ষর</div>
+            <h2 class="r"><span class="accent">Atomicity</span> — সব অথবা কিছুই না</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card">
+                    <h3 style="color:var(--yellow);margin-bottom:10px;">🎬 রহিম → করিম টাকা transfer</h3>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div
+                            style="display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:8px;padding:10px 14px;">
+                            <span style="color:var(--accent);font-weight:800;min-width:28px;">①</span>
+                            <span style="font-size:14px;">রহিমের balance: ১০,০০০ → <span class="red">৫,০০০</span>
+                                (কমাও)</span>
+                        </div>
+                        <div
+                            style="display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:8px;padding:10px 14px;">
+                            <span style="color:var(--red);font-weight:800;min-width:28px;">💥</span>
+                            <span style="font-size:14px;color:var(--red);">এখানে server crash! ② কখনো হলো না...</span>
+                        </div>
+                        <div
+                            style="display:flex;align-items:center;gap:10px;background:rgba(255,94,94,.08);border:1px solid var(--red);border-radius:8px;padding:10px 14px;opacity:.5;">
+                            <span style="color:var(--green);font-weight:800;min-width:28px;">②</span>
+                            <span style="font-size:14px;color:var(--muted);">করিমের balance: ১,০০০ → ৬,০০০ (এটা হলো
+                                না)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="r" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div class="card" style="border-color:var(--red);">
+                        <h3 style="color:var(--red);font-size:14px;margin-bottom:8px;">❌ Atomicity ছাড়া</h3>
+                        <ul class="blist">
+                            <li>রহিমের ৫০০০ চলে গেল</li>
+                            <li>করিম কিছু পেল না</li>
+                            <li>৫০০০ টাকা বাতাসে মিলিয়ে গেল!</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="border-color:var(--green);">
+                        <h3 style="color:var(--green);font-size:14px;margin-bottom:8px;">✅ Atomicity সহ</h3>
+                        <ul class="blist">
+                            <li>সব কাজ একটা package</li>
+                            <li>যেকোনো error → সব rollback</li>
+                            <li>রহিমের টাকা ফিরে আসে</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="r code" style="font-size:12px;">
+                    <div style="color:var(--muted);">// Prisma transaction — Atomicity নিশ্চিত করে</div>
+                    <div><span style="color:var(--purple);">await</span> prisma.<span
+                            style="color:var(--accent);">$transaction</span>(<span
+                            style="color:var(--yellow);">async</span> (tx) <span style="color:var(--yellow);">=></span>
+                        {{'{'}} </div>
+                    <div>&nbsp;&nbsp;<span style="color:var(--purple);">await</span> tx.account.<span
+                            style="color:var(--accent);">update</span>({'{'} where: {'{'} id: rahimId {'}'}, data: {'{'}
+                        balance: {'{'} <span style="color:var(--red);">decrement</span>: 5000 {'}'} {'}'} {'}'});</div>
+                    <div>&nbsp;&nbsp;<span style="color:var(--purple);">await</span> tx.account.<span
+                            style="color:var(--accent);">update</span>({'{'} where: {'{'} id: karimId {'}'}, data: {'{'}
+                        balance: {'{'} <span style="color:var(--green);">increment</span>: 5000 {'}'} {'}'} {'}'});
+                    </div>
+                    <div>{'}'});&nbsp;&nbsp;<span style="color:var(--dim);">// error হলে দুটোই rollback</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3: Consistency -->
+        <div class="slide" data-slide="3">
+            <div class="label r">C — দ্বিতীয় অক্ষর</div>
+            <h2 class="r"><span class="green">Consistency</span> — নিয়ম সবসময় মানতে হবে</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card" style="text-align:left;">
+                    <h3 style="color:var(--green);margin-bottom:10px;">🏪 জাবেরের দোকানের উদাহরণ</h3>
+                    <p style="text-align:left;font-size:15px;color:var(--muted);">জাবেরের account-এ আছে ১০০ টাকা। সে ১৫০
+                        টাকার জিনিস কিনতে চায়। নিয়ম হলো: balance কখনো শূন্যের নিচে যেতে পারবে না।</p>
+                </div>
+                <div class="r" style="display:flex;gap:12px;align-items:flex-start;">
+                    <div class="card" style="flex:1;border-color:var(--red);">
+                        <h3 style="color:var(--red);font-size:14px;margin-bottom:8px;">❌ Consistency ছাড়া</h3>
+                        <ul class="blist">
+                            <li>balance: ১০০ - ১৫০ = <span class="red">-৫০</span></li>
+                            <li>database এটা allow করে</li>
+                            <li>জাবের ঋণগ্রস্ত, দোকানদার ক্ষতিগ্রস্ত</li>
+                            <li>পুরো financial system ভেঙে পড়ে</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="flex:1;border-color:var(--green);">
+                        <h3 style="color:var(--green);font-size:14px;margin-bottom:8px;">✅ Consistency সহ</h3>
+                        <ul class="blist">
+                            <li>constraint: <span class="mono green">CHECK (balance >= 0)</span></li>
+                            <li>১৫০ টাকার কেনাকাটা reject</li>
+                            <li>error message: "insufficient funds"</li>
+                            <li>নিয়ম ভাঙার উপায় নেই</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="r" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+                    <div
+                        style="background:var(--card);border-radius:10px;padding:12px 18px;text-align:center;min-width:160px;">
+                        <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">Consistency নিশ্চিত করে</div>
+                        <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px;">
+                            <span class="mono" style="font-size:12px;color:var(--accent);">CHECK constraints</span>
+                            <span class="mono" style="font-size:12px;color:var(--green);">Foreign keys</span>
+                            <span class="mono" style="font-size:12px;color:var(--yellow);">UNIQUE constraints</span>
+                            <span class="mono" style="font-size:12px;color:var(--purple);">NOT NULL rules</span>
+                        </div>
+                    </div>
+                    <div class="card" style="flex:1;max-width:400px;">
+                        <p style="text-align:left;font-size:14px;color:var(--muted);">Database নিজেই নিয়মের রক্ষক।
+                            Developer ভুল করলেও, database নিয়ম মানাবে। এটাই Consistency-র শক্তি।</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4: Isolation -->
+        <div class="slide" data-slide="4">
+            <div class="label r">I — তৃতীয় অক্ষর</div>
+            <h2 class="r"><span class="yellow">Isolation</span> — একজন আরেকজনকে দেখে না</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card">
+                    <h3 style="color:var(--yellow);margin-bottom:10px;">🛒 একই সময়ে দুটো কাজ</h3>
+                    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:200px;background:var(--surface);border-radius:10px;padding:14px;">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                <div
+                                    style="width:30px;height:30px;border-radius:50%;background:#4f8ef7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--bg);">
+                                    র</div>
+                                <span style="font-weight:700;">রহিম</span>
+                            </div>
+                            <p style="text-align:left;font-size:13px;color:var(--muted);">শেষ ১টা আইফোন কিনছে — টাকা
+                                কাটা শুরু হয়েছে, কিন্তু এখনো commit হয়নি</p>
+                        </div>
+                        <div style="font-size:22px;color:var(--muted);">⚡</div>
+                        <div style="flex:1;min-width:200px;background:var(--surface);border-radius:10px;padding:14px;">
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                                <div
+                                    style="width:30px;height:30px;border-radius:50%;background:#43d49e;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--bg);">
+                                    ক</div>
+                                <span style="font-weight:700;">করিম</span>
+                            </div>
+                            <p style="text-align:left;font-size:13px;color:var(--muted);">একই সময়ে সেই আইফোনটা দেখছে —
+                                এখনো আছে কিনা?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="r" style="display:flex;gap:12px;">
+                    <div class="card" style="flex:1;border-color:var(--red);">
+                        <h3 style="color:var(--red);font-size:14px;margin-bottom:8px;">❌ Isolation ছাড়া</h3>
+                        <ul class="blist">
+                            <li>করিম দেখে: আইফোন আছে ✓</li>
+                            <li>করিমও কিনে ফেলে</li>
+                            <li>একটা phone দুজন পায়!</li>
+                            <li>দোকান: লোকসান 😱</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="flex:1;border-color:var(--green);">
+                        <h3 style="color:var(--green);font-size:14px;margin-bottom:8px;">✅ Isolation সহ</h3>
+                        <ul class="blist">
+                            <li>রহিম কিনছে → row lock</li>
+                            <li>করিম: "out of stock"</li>
+                            <li>দুজন একটা পাবে না</li>
+                            <li>MVCC দিয়ে handle</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="r card" style="text-align:left;">
+                    <h3 style="font-size:14px;color:var(--accent);margin-bottom:8px;">Isolation এর ৪টা Level</h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <span class="mono"
+                            style="background:var(--surface);padding:4px 10px;border-radius:6px;font-size:12px;">Read
+                            Uncommitted</span>
+                        <span class="mono"
+                            style="background:var(--surface);padding:4px 10px;border-radius:6px;font-size:12px;">Read
+                            Committed</span>
+                        <span class="mono"
+                            style="background:rgba(67,212,158,.1);border:1px solid var(--green);padding:4px 10px;border-radius:6px;font-size:12px;color:var(--green);">Repeatable
+                            Read ★</span>
+                        <span class="mono"
+                            style="background:var(--surface);padding:4px 10px;border-radius:6px;font-size:12px;">Serializable</span>
+                    </div>
+                    <p style="text-align:left;font-size:13px;color:var(--muted);margin-top:8px;">PostgreSQL default:
+                        Read Committed। বেশিরভাগ ক্ষেত্রে এটাই যথেষ্ট। Payment-এ Repeatable Read ব্যবহার করো।</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5: Durability -->
+        <div class="slide" data-slide="5">
+            <div class="label r">D — চতুর্থ অক্ষর</div>
+            <h2 class="r"><span class="purple">Durability</span> — একবার save মানে সবসময়</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r card" style="text-align:left;">
+                    <h3 style="color:var(--purple);margin-bottom:10px;">💡 হাচানের উদাহরণ</h3>
+                    <p style="text-align:left;font-size:15px;color:var(--muted);">হাচান রাত ১১টায় order দিল। Database
+                        বলল "success" — "Transaction committed!" এর ৩ সেকেন্ড পরে server crash হলো। সকালে server চালু
+                        হলে — হাচানের order কি থাকবে?</p>
+                </div>
+                <div class="r" style="display:flex;gap:12px;">
+                    <div class="card" style="flex:1;border-color:var(--red);">
+                        <h3 style="color:var(--red);font-size:14px;margin-bottom:8px;">❌ Durability ছাড়া</h3>
+                        <ul class="blist">
+                            <li>RAM-এ ছিল, crash-এ গেল</li>
+                            <li>হাচানের order নেই</li>
+                            <li>টাকা কেটেছে, মাল আসবে না</li>
+                            <li>user রাগী, business ক্ষতিগ্রস্ত</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="flex:1;border-color:var(--green);">
+                        <h3 style="color:var(--green);font-size:14px;margin-bottom:8px;">✅ Durability সহ (WAL)</h3>
+                        <ul class="blist">
+                            <li>commit-এর আগে disk-এ লেখা</li>
+                            <li>WAL log সবসময় থাকে</li>
+                            <li>crash recovery → data পুনরুদ্ধার</li>
+                            <li>হাচানের order safe!</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="r card" style="text-align:left;border-color:var(--purple);">
+                    <h3 style="font-size:14px;color:var(--purple);margin-bottom:8px;">WAL — Write-Ahead Log</h3>
+                    <p style="text-align:left;font-size:14px;color:var(--muted);">PostgreSQL প্রতিটা change disk-এ WAL
+                        file-এ লেখে <strong style="color:var(--text)">commit করার আগেই</strong>। Server crash হলে WAL
+                        দেখে exact কোথায় থামা হয়েছিল তা জানে এবং recover করে।</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6: ACID ছাড়া কী হয় -->
+        <div class="slide" data-slide="6">
+            <div class="label r">বাস্তব ভয়</div>
+            <h2 class="r">ACID <span class="red">ছাড়া</span> কী হতো?</h2>
+            <div class="r" style="display:flex;flex-direction:column;gap:12px;max-width:840px;width:100%;">
+                <div class="card" style="display:flex;gap:14px;align-items:center;border-color:var(--red);">
+                    <span style="font-size:28px;flex-shrink:0;">🏦</span>
+                    <div>
+                        <h3 style="font-size:15px;color:var(--red);margin-bottom:6px;">বিকাশ/Nagad — Atomicity ছাড়া
+                        </h3>
+                        <p style="text-align:left;font-size:13px;">রোজ হাজার হাজার মানুষের টাকা হারিয়ে যেত। Transfer
+                            fail হলে টাকা কোথাও না কোথাও আটকে থাকত। দেশে financial chaos।</p>
+                    </div>
+                </div>
+                <div class="card" style="display:flex;gap:14px;align-items:center;border-color:var(--yellow);">
+                    <span style="font-size:28px;flex-shrink:0;">🛒</span>
+                    <div>
+                        <h3 style="font-size:15px;color:var(--yellow);margin-bottom:6px;">Daraz/Amazon — Isolation ছাড়া
+                        </h3>
+                        <p style="text-align:left;font-size:13px;">একটা product ১০০০ জন একসাথে কিনতে পারত। Stock ০টা
+                            হলেও বিক্রি হত। দোকান দেউলিয়া।</p>
+                    </div>
+                </div>
+                <div class="card" style="display:flex;gap:14px;align-items:center;border-color:var(--purple);">
+                    <span style="font-size:28px;flex-shrink:0;">💾</span>
+                    <div>
+                        <h3 style="font-size:15px;color:var(--purple);margin-bottom:6px;">যেকোনো সিস্টেম — Durability
+                            ছাড়া</h3>
+                        <p style="text-align:left;font-size:13px;">বিদ্যুৎ গেলে সব data হারিয়ে যেত। Hospital patient
+                            record নেই। School result নেই। পুরো digital world অবিশ্বাসযোগ্য।</p>
+                    </div>
+                </div>
+            </div>
+            <p class="r" style="margin-top:16px;font-size:14px;color:var(--muted);">ACID শুধু একটা technical concept না
+                — এটাই digital trust-এর ভিত্তি।</p>
+        </div>
+
+        <!-- 7: তুমি কীভাবে ব্যবহার করবে -->
+        <div class="slide" data-slide="7">
+            <div class="label r">তোমার code-এ</div>
+            <h2 class="r">কখন <span class="accent">$transaction</span> ব্যবহার করবে?</h2>
+            <div style="max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px;">
+                <div class="r" style="display:flex;gap:12px;">
+                    <div class="card" style="flex:1;border-color:var(--green);">
+                        <h3 style="color:var(--green);font-size:14px;margin-bottom:10px;">✅ Transaction লাগবে</h3>
+                        <ul class="blist">
+                            <li>টাকা transfer (debit + credit)</li>
+                            <li>Order create (order + stock কমাও)</li>
+                            <li>Registration (user + profile + role)</li>
+                            <li>একাধিক table একসাথে update</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="flex:1;border-color:var(--muted);">
+                        <h3 style="color:var(--muted);font-size:14px;margin-bottom:10px;">একটা কাজ = Transaction নয়
+                        </h3>
+                        <ul class="blist">
+                            <li>শুধু profile update</li>
+                            <li>শুধু comment post</li>
+                            <li>একটা table-এ insert</li>
+                            <li>Read-only query</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="r code" style="font-size:12px;">
+                    <div style="color:var(--dim);">// Order করার সময় — stock + order একসাথে</div>
+                    <div><span style="color:var(--purple);">const</span> result = <span
+                            style="color:var(--purple);">await</span> prisma.<span
+                            style="color:var(--accent);">$transaction</span>(<span
+                            style="color:var(--yellow);">async</span> (tx) <span style="color:var(--yellow);">=></span>
+                        {'{'}</div>
+                    <div>&nbsp;&nbsp;<span style="color:var(--dim);">// stock কমাও</span></div>
+                    <div>&nbsp;&nbsp;<span style="color:var(--purple);">await</span> tx.product.<span
+                            style="color:var(--accent);">update</span>({'{'} where: {'{'} id {'}'}, data: {'{'} stock:
+                        {'{'} <span style="color:var(--red);">decrement</span>: 1 {'}'} {'}'} {'}'});</div>
+                    <div>&nbsp;&nbsp;<span style="color:var(--dim);">// order তৈরি করো</span></div>
+                    <div>&nbsp;&nbsp;<span style="color:var(--purple);">return</span> tx.order.<span
+                            style="color:var(--accent);">create</span>({'{'} data: {'{'} userId, productId, amount {'}'}
+                        {'}'});</div>
+                    <div>{'}'});</div>
+                    <div style="color:var(--dim);">// এর যেকোনো একটা fail করলে দুটোই rollback হবে</div>
+                </div>
+                <p class="r" style="font-size:13px;color:var(--muted);">Rule of thumb: একাধিক table পরিবর্তন হলে সবসময়
+                    <span class="mono accent">$transaction</span> ব্যবহার করো।</p>
+            </div>
+        </div>
+
+        <!-- 8: Common Mistakes -->
+        <div class="slide" data-slide="8">
+            <div class="label r">সতর্কতা</div>
+            <h2 class="r">যে <span class="red">ভুলগুলো</span> সবাই করে</h2>
+            <div class="r" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:860px;width:100%;">
+                <div class="card" style="border-left:3px solid var(--red);">
+                    <h3 style="color:var(--red);font-size:14px;margin-bottom:8px;">❌ Transaction-এর বাইরে business logic
+                    </h3>
+                    <p style="text-align:left;font-size:13px;">Stock check করলে বাইরে, কেনাকাটা transaction-এর ভেতরে।
+                        মাঝখানে অন্য কেউ কিনে ফেলতে পারে।</p>
+                </div>
+                <div class="card" style="border-left:3px solid var(--red);">
+                    <h3 style="color:var(--red);font-size:14px;margin-bottom:8px;">❌ Long transaction</h3>
+                    <p style="text-align:left;font-size:13px;">Transaction-এর ভেতরে API call করা। Lock ধরে রাখলে অন্যরা
+                        block হয়। ২০০ms-এর বেশি = সমস্যা।</p>
+                </div>
+                <div class="card" style="border-left:3px solid var(--yellow);">
+                    <h3 style="color:var(--yellow);font-size:14px;margin-bottom:8px;">⚠️ Error handle না করা</h3>
+                    <p style="text-align:left;font-size:13px;">Transaction error ধরা না হলে user জানবে না কী হয়েছে।
+                        সবসময় try-catch দাও।</p>
+                </div>
+                <div class="card" style="border-left:3px solid var(--yellow);">
+                    <h3 style="color:var(--yellow);font-size:14px;margin-bottom:8px;">⚠️ Wrong isolation level</h3>
+                    <p style="text-align:left;font-size:13px;">Financial transaction-এ Read Committed যথেষ্ট না হতে
+                        পারে। Serializable অনেক slow। Repeatable Read সাধারণত best choice।</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9: Summary -->
+        <div class="slide" data-slide="9">
+            <div class="label r">মনে রাখো</div>
+            <h2 class="r">ACID — <span class="accent">৪ লাইনে</span></h2>
+            <div style="max-width:720px;width:100%;display:flex;flex-direction:column;gap:12px;margin-top:12px;">
+                <div class="r card" style="display:flex;gap:14px;align-items:center;border-color:var(--accent);">
+                    <div style="font-size:32px;font-weight:900;color:var(--accent);min-width:44px;text-align:center;">A
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Atomicity — সব অথবা কিছুই না
+                        </div>
+                        <div style="font-size:13px;color:var(--muted);">রহিমের টাকা কাটলে করিমও পাবে — নইলে কেউ পাবে না
+                        </div>
+                    </div>
+                </div>
+                <div class="r card" style="display:flex;gap:14px;align-items:center;border-color:var(--green);">
+                    <div style="font-size:32px;font-weight:900;color:var(--green);min-width:44px;text-align:center;">C
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Consistency — নিয়ম সবসময় মানে
+                        </div>
+                        <div style="font-size:13px;color:var(--muted);">জাবেরের balance কখনো ০-এর নিচে যাবে না</div>
+                    </div>
+                </div>
+                <div class="r card" style="display:flex;gap:14px;align-items:center;border-color:var(--yellow);">
+                    <div style="font-size:32px;font-weight:900;color:var(--yellow);min-width:44px;text-align:center;">I
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Isolation — একে অপরকে বিরক্ত করে
+                            না</div>
+                        <div style="font-size:13px;color:var(--muted);">রহিম-করিম দুজন একই জিনিস কিনতে পারবে না</div>
+                    </div>
+                </div>
+                <div class="r card" style="display:flex;gap:14px;align-items:center;border-color:var(--purple);">
+                    <div style="font-size:32px;font-weight:900;color:var(--purple);min-width:44px;text-align:center;">D
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:16px;margin-bottom:4px;">Durability — একবার save সবসময়
+                            আছে</div>
+                        <div style="font-size:13px;color:var(--muted);">হাচানের order — crash হলেও থাকবে, WAL দিয়ে
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10: Call to Action -->
+        <div class="slide" data-slide="10">
+            <div style="font-size:64px;margin-bottom:20px;" class="r">🎯</div>
+            <h2 class="r">এখন থেকে <span class="green">তুমি</span> কী করবে?</h2>
+            <div style="max-width:720px;width:100%;display:flex;flex-direction:column;gap:12px;margin-top:12px;">
+                <div class="r card" style="border-color:var(--green);">
+                    <ul class="blist">
+                        <li>একাধিক table update → সবসময় <span class="mono accent">$transaction</span></li>
+                        <li>Financial code → Repeatable Read isolation</li>
+                        <li>Constraint database-এ রাখো, শুধু code-এ না</li>
+                        <li>Transaction-এর ভেতরে API call করবে না</li>
+                        <li>Error ধরো, user-কে জানাও</li>
+                    </ul>
+                </div>
+                <div class="r"
+                    style="background:rgba(79,142,247,.1);border:1px solid var(--accent);border-radius:12px;padding:16px 20px;text-align:center;">
+                    <p style="font-size:15px;color:var(--text);">ACID মানলে তোমার app-এ রহিমের টাকা কখনো হারাবে না, করিম
+                        সবসময় পাবে, জাবেরের data safe থাকবে, হাচান রাতে order দিলে সকালে পাবে। ✅</p>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /slides -->
+    <script>
+        const TOTAL = 11; let current = 0, revealIdx = 0, revealMode = false;
+        function buildDots() { const d = document.getElementById('dots'); for (let i = 0; i < TOTAL; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === 0 ? ' active' : ''); dot.onclick = () => goSlide(i); d.appendChild(dot); } }
+        function updateUI() { document.getElementById('progress').style.width = ((current + 1) / TOTAL * 100) + '%'; document.getElementById('counter').textContent = String(current + 1).padStart(2, '0') + ' / ' + String(TOTAL).padStart(2, '0'); document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current)); }
+        function getReveals(idx) { return document.querySelectorAll('.slide[data-slide="' + idx + '"] .r'); }
+        function showReveals(idx, n) { getReveals(idx).forEach((r, i) => r.classList.toggle('visible', i < n)); }
+        function setMode(on) { revealMode = on; const lA = document.getElementById('lbl-all'), lS = document.getElementById('lbl-step'); lA.className = on ? '' : 'active-label'; lS.className = on ? 'active-label' : ''; if (on) { showReveals(current, 0); revealIdx = 0; } else { showReveals(current, 999); revealIdx = 999; } }
+        function advance() { if (!revealMode) { nextSlide(); return; } const rs = getReveals(current); if (revealIdx < rs.length) { rs[revealIdx].classList.add('visible'); revealIdx++; } else { nextSlide(); } }
+        function nextSlide() { if (current < TOTAL - 1) goSlide(current + 1); }
+        function prevSlide() { if (current > 0) goSlide(current - 1); }
+        function goSlide(idx) { document.querySelectorAll('.slide').forEach(s => s.classList.remove('active')); document.querySelector('.slide[data-slide="' + idx + '"]').classList.add('active'); current = idx; revealIdx = 0; if (revealMode) { showReveals(idx, 0); } else { showReveals(idx, 999); revealIdx = 999; } updateUI(); }
+        document.addEventListener('keydown', e => { if (['Space', 'ArrowRight', 'ArrowDown'].includes(e.code)) { e.preventDefault(); advance(); } else if (['ArrowLeft', 'ArrowUp'].includes(e.code)) { e.preventDefault(); prevSlide(); } });
+        let tx = 0; document.getElementById('slides').addEventListener('click', e => { const r = document.createElement('div'); r.style.cssText = `position:fixed;width:70px;height:70px;border-radius:50%;background:rgba(79,142,247,.15);left:${e.clientX - 35}px;top:${e.clientY - 35}px;animation:rpl .5s ease forwards;pointer-events:none;z-index:999;`; document.body.appendChild(r); setTimeout(() => r.remove(), 600); advance(); });
+        const s = document.createElement('style'); s.textContent = '@keyframes rpl{from{transform:scale(0);opacity:1}to{transform:scale(4);opacity:0}}'; document.head.appendChild(s);
+        buildDots(); updateUI(); showReveals(0, 999);
+    </script>
+</body>
+
+</html>

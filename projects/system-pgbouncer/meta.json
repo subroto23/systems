@@ -1,0 +1,9 @@
+{
+  "title": "PgBouncer + PostgreSQL",
+  "tagline": "১০০০ জন একসাথে লগইন করলে database কি টিকবে?",
+  "description": "হাজারো কনকারেন্ট কানেকশন সরাসরি PostgreSQL-এ গেলে কী সমস্যা হয়, আর PgBouncer দিয়ে connection pooling করে কীভাবে সেটা সামলানো যায় — সব ভিজ্যুয়ালি ব্যাখ্যা করা হয়েছে।",
+  "category": "Database",
+  "tags": ["pgbouncer", "postgresql", "connection-pooling", "scalability"],
+  "status": "live",
+  "icon": "🚦"
+}

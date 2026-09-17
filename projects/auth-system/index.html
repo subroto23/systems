@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Auth System — JWT, Redis, Permission</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #07101f;
+            --surf: #0d1b2e;
+            --card: #112240;
+            --bdr: #1e3a5f;
+            --acc: #4f8ef7;
+            --grn: #43d49e;
+            --red: #ff5e5e;
+            --yel: #ffc554;
+            --pur: #b06fff;
+            --txt: #e8eaf6;
+            --sub: #8899aa;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--txt);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center
+        }
+
+        .deck {
+            width: min(900px, 96vw);
+            height: min(560px, 94vh);
+            position: relative
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            background: var(--surf);
+            border-radius: 18px;
+            border: 1px solid var(--bdr);
+            padding: 42px 48px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden
+        }
+
+        .slide.active {
+            display: flex
+        }
+
+        /* thumbnail */
+        .slide.thumb {
+            background: linear-gradient(135deg, #07101f 0%, #0d1b2e 40%, #112240 100%);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 36px
+        }
+
+        .thumb-shock {
+            font-size: clamp(22px, 4vw, 34px);
+            font-weight: 900;
+            line-height: 1.3;
+            margin-bottom: 18px
+        }
+
+        .thumb-shock span {
+            color: var(--red)
+        }
+
+        .thumb-sub {
+            font-size: clamp(13px, 2vw, 17px);
+            color: var(--sub);
+            margin-bottom: 28px;
+            line-height: 1.6
+        }
+
+        .thumb-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 28px
+        }
+
+        .tpill {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 30px;
+            padding: 7px 18px;
+            font-size: 13px;
+            color: var(--acc)
+        }
+
+        .thumb-cta {
+            background: linear-gradient(90deg, var(--acc), var(--pur));
+            border-radius: 10px;
+            padding: 13px 34px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            display: inline-block
+        }
+
+        /* slide header */
+        .sl-num {
+            font-size: 11px;
+            color: var(--sub);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px
+        }
+
+        h1 {
+            font-size: clamp(19px, 3vw, 27px);
+            font-weight: 800;
+            margin-bottom: 4px
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: var(--sub);
+            margin-bottom: 20px
+        }
+
+        /* layout helpers */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            flex: 1
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+            flex: 1
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 12px;
+            padding: 16px
+        }
+
+        .card h3 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 3px 11px;
+            font-size: 11px;
+            font-weight: 700
+        }
+
+        .badge-acc {
+            background: #4f8ef720;
+            color: var(--acc);
+            border: 1px solid var(--acc)
+        }
+
+        .badge-grn {
+            background: #43d49e20;
+            color: var(--grn);
+            border: 1px solid var(--grn)
+        }
+
+        .badge-red {
+            background: #ff5e5e20;
+            color: var(--red);
+            border: 1px solid var(--red)
+        }
+
+        .badge-yel {
+            background: #ffc55420;
+            color: var(--yel);
+            border: 1px solid var(--yel)
+        }
+
+        .badge-pur {
+            background: #b06fff20;
+            color: var(--pur);
+            border: 1px solid var(--pur)
+        }
+
+        ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        ul li {
+            font-size: 13px;
+            color: var(--sub);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5
+        }
+
+        ul li::before {
+            content: '▸';
+            color: var(--acc);
+            flex-shrink: 0;
+            margin-top: 1px
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 13px;
+            color: var(--sub);
+            padding: 8px 12px;
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            margin-bottom: 8px
+        }
+
+        .step-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--acc);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .step p {
+            line-height: 1.5
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px
+        }
+
+        .fbox {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12px;
+            text-align: center;
+            white-space: nowrap
+        }
+
+        .farr {
+            color: var(--acc);
+            font-size: 16px
+        }
+
+        .code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            background: #060f1c;
+            border: 1px solid var(--bdr);
+            border-radius: 8px;
+            padding: 14px;
+            color: #a8d8a8;
+            line-height: 1.7;
+            overflow-x: auto
+        }
+
+        .big-num {
+            font-size: clamp(28px, 5vw, 46px);
+            font-weight: 900;
+            color: var(--acc)
+        }
+
+        .big-label {
+            font-size: 12px;
+            color: var(--sub);
+            margin-top: 4px
+        }
+
+        .metric-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 16px 0
+        }
+
+        .metric {
+            text-align: center
+        }
+
+        .warn-box {
+            background: #ff5e5e18;
+            border: 1px solid var(--red);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--sub);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start
+        }
+
+        .good-box {
+            background: #43d49e18;
+            border: 1px solid var(--grn);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--sub);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px
+        }
+
+        .table th {
+            background: var(--card);
+            padding: 8px 12px;
+            text-align: left;
+            color: var(--sub);
+            font-weight: 600;
+            border: 1px solid var(--bdr)
+        }
+
+        .table td {
+            padding: 8px 12px;
+            border: 1px solid var(--bdr);
+            color: var(--sub)
+        }
+
+        .table tr:nth-child(even) td {
+            background: #0a1626
+        }
+
+        /* reveals */
+        .r {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity .4s, transform .4s
+        }
+
+        .r.visible {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        /* dots */
+        #dots {
+            display: flex;
+            gap: 6px;
+            margin-top: 14px;
+            justify-content: center;
+            flex-wrap: wrap
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--bdr);
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .dot.on {
+            background: var(--acc)
+        }
+
+        /* mode bar */
+        #mode-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px
+        }
+
+        .active-label {
+            color: var(--acc);
+            font-weight: 700
+        }
+
+        #mode-bar span {
+            font-size: 13px;
+            color: var(--sub)
+        }
+
+        .tog {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            cursor: pointer;
+            display: inline-block
+        }
+
+        .tog input {
+            display: none
+        }
+
+        .tog-track {
+            position: absolute;
+            inset: 0;
+            background: var(--bdr);
+            border-radius: 30px;
+            transition: .3s
+        }
+
+        .tog-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .3s
+        }
+
+        .tog input:checked~.tog-track {
+            background: var(--acc)
+        }
+
+        .tog input:checked~.tog-thumb {
+            left: 23px
+        }
+
+        #nav {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px
+        }
+
+        button.nb {
+            background: var(--card);
+            border: 1px solid var(--bdr);
+            color: var(--txt);
+            border-radius: 8px;
+            padding: 7px 20px;
+            cursor: pointer;
+            font-size: 13px
+        }
+
+        button.nb:hover {
+            border-color: var(--acc)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="deck">
+        <!-- SLIDE 0: THUMBNAIL -->
+        <div class="slide thumb active" data-slide="0">
+            <div class="thumb-shock">রহিম কি করিমের account-এ<br><span>ঢুকতে পারবে?</span></div>
+            <div class="thumb-sub">Login করলেই কি সব দেখা যায়? নাকি system জানে<br>কে কোথায় যেতে পারবে — এবং কেন?
+            </div>
+            <div class="thumb-pills">
+                <span class="tpill">JWT Token</span>
+                <span class="tpill">Redis Cache</span>
+                <span class="tpill">Permission System</span>
+                <span class="tpill">RBAC</span>
+                <span class="tpill">১০ লাখ User</span>
+            </div>
+            <div class="thumb-cta">পুরো Auth System বুঝব ৩০ মিনিটে</div>
+        </div>
+
+        <!-- SLIDE 1: System Overview -->
+        <div class="slide" data-slide="1">
+            <div class="sl-num">SLIDE 01</div>
+            <h1>পুরো Auth System এক নজরে</h1>
+            <div class="tagline">Login থেকে Permission — সব কিছু এক পথে</div>
+            <div class="flow r">
+                <div class="fbox">Browser</div>
+                <div class="farr">→</div>
+                <div class="fbox">API Gateway</div>
+                <div class="farr">→</div>
+                <div class="fbox">Auth Middleware</div>
+                <div class="farr">→</div>
+                <div class="fbox">Redis Cache</div>
+                <div class="farr">→</div>
+                <div class="fbox">Route Handler</div>
+            </div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="card r">
+                        <h3><span class="badge badge-acc">Authentication</span></h3>
+                        <ul>
+                            <li>তুমি কে? — পরিচয় যাচাই</li>
+                            <li>Email + Password → JWT Token</li>
+                            <li>Token থেকে User বের করা</li>
+                        </ul>
+                    </div>
+                    <div class="card r">
+                        <h3><span class="badge badge-grn">Authorization</span></h3>
+                        <ul>
+                            <li>তুমি কী করতে পারবে? — অধিকার যাচাই</li>
+                            <li>Role: Admin / Teacher / Student</li>
+                            <li>Permission: read / write / delete</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card r">
+                        <h3><span class="badge badge-pur">Redis Cache</span></h3>
+                        <ul>
+                            <li>প্রতি request-এ DB query নয়</li>
+                            <li>Token → User data RAM-এ রাখা</li>
+                            <li>১০ লাখ user handle করার রহস্য</li>
+                        </ul>
+                    </div>
+                    <div class="card r">
+                        <h3><span class="badge badge-yel">Scale</span></h3>
+                        <ul>
+                            <li>Stateless JWT — server-এ session নেই</li>
+                            <li>Multiple server-এও কাজ করে</li>
+                            <li>Redis distributed cache</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Authentication -->
+        <div class="slide" data-slide="2">
+            <div class="sl-num">SLIDE 02</div>
+            <h1>Authentication — তুমি কে?</h1>
+            <div class="tagline">পরিচয় যাচাই করার পুরো পদ্ধতি</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="warn-box r"><span>❌</span>
+                        <div>সমস্যা: প্রতিবার DB-তে password check করলে ১০ লাখ user-এর request সামলানো যাবে না — server
+                            মরে যাবে</div>
+                    </div>
+                    <div class="card r">
+                        <h3>JWT Token কী?</h3>
+                        <ul>
+                            <li>একটা ডিজিটাল পরিচয়পত্র</li>
+                            <li>তিন ভাগ: Header . Payload . Signature</li>
+                            <li>Payload-এ থাকে: userId, role, expiry</li>
+                            <li>Server verify করে — DB query নেই</li>
+                        </ul>
+                    </div>
+                    <div class="card r">
+                        <h3>Token Lifecycle</h3>
+                        <ul>
+                            <li>Access Token: ১৫ মিনিট (ছোট, fast)</li>
+                            <li>Refresh Token: ৩০ দিন (DB-তে থাকে)</li>
+                            <li>Access expire → Refresh দিয়ে নতুন নাও</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="code r">// Login করলে
+                        const token = jwt.sign(
+                        { userId: রহিম.id, role: 'student' },
+                        SECRET_KEY,
+                        { expiresIn: '15m' }
+                        );
+
+                        // প্রতি request-এ verify
+                        const decoded = jwt.verify(
+                        token, SECRET_KEY
+                        );
+                        // decoded = { userId: 'rahim-123',
+                        // role: 'student', exp: 1234567 }</div>
+                    <div class="good-box r"><span>✅</span>
+                        <div>JWT verify করতে শুধু SECRET_KEY দরকার — DB-তে যেতে হয় না। তাই ১০ লাখ request সামলানো
+                            সম্ভব।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Authorization / RBAC -->
+        <div class="slide" data-slide="3">
+            <div class="sl-num">SLIDE 03</div>
+            <h1>Authorization — কে কী করতে পারবে?</h1>
+            <div class="tagline">RBAC: Role-Based Access Control</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="card r">
+                        <h3>Role Hierarchy</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    <th>ক্ষমতা</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>SuperAdmin</td>
+                                    <td>সব কিছু</td>
+                                </tr>
+                                <tr>
+                                    <td>Admin</td>
+                                    <td>User manage, Course manage</td>
+                                </tr>
+                                <tr>
+                                    <td>Teacher</td>
+                                    <td>নিজের Course manage</td>
+                                </tr>
+                                <tr>
+                                    <td>Student</td>
+                                    <td>শুধু পড়তে পারবে</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="warn-box r"><span>⚠️</span>
+                        <div>রহিম (Student) যদি teacher-এর route-এ ঢোকার চেষ্টা করে — ৪০৩ Forbidden। Role check ব্যর্থ।
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="code r">// Permission Middleware
+                        function requireRole(...roles) {
+                        return (req, res, next) => {
+                        const { role } = req.user;
+
+                        if (!roles.includes(role)) {
+                        return res.status(403).json({
+                        error: 'তোমার এখানে প্রবেশ নিষেধ'
+                        });
+                        }
+                        next();
+                        };
+                        }
+
+                        // Route-এ ব্যবহার
+                        router.delete('/user/:id',
+                        authenticate,
+                        requireRole('admin','superadmin'),
+                        deleteUser
+                        );</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: New User Sign Up -->
+        <div class="slide" data-slide="4">
+            <div class="sl-num">SLIDE 04</div>
+            <h1>নতুন User Sign Up</h1>
+            <div class="tagline">রহিম প্রথমবার account খুলছে</div>
+            <div class="step r">
+                <div class="step-num">১</div>
+                <div>
+                    <p><strong>Email + Password দেয়</strong> — রহিম form fill করে submit করে</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">২</div>
+                <div>
+                    <p><strong>Validation</strong> — Email format ঠিক আছে? Password ৮ character-এর বেশি?</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৩</div>
+                <div>
+                    <p><strong>Email duplicate check</strong> — DB-তে এই email আগে আছে কিনা</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৪</div>
+                <div>
+                    <p><strong>bcrypt দিয়ে password hash</strong> — কখনো plain password DB-তে রাখা হয় না। hash:
+                        $2b$10$xyz...</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৫</div>
+                <div>
+                    <p><strong>DB-তে save</strong> — role: 'student' দিয়ে নতুন record</p>
+                </div>
+            </div>
+            <div class="step r">
+                <div class="step-num">৬</div>
+                <div>
+                    <p><strong>Access + Refresh Token generate</strong> — রহিম-কে দিয়ে দাও, সে login হয়ে গেছে</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Existing User Login -->
+        <div class="slide" data-slide="5">
+            <div class="sl-num">SLIDE 05</div>
+            <h1>Existing User Login</h1>
+            <div class="tagline">করিম আবার ফিরে এসেছে</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="step r">
+                        <div class="step-num">১</div>
+                        <div>
+                            <p>Email + Password দেয়</p>
+                        </div>
+                    </div>
+                    <div class="step r">
+                        <div class="step-num">২</div>
+                        <div>
+                            <p>DB-তে email খোঁজো — পাওয়া না গেলে ৪০৪</p>
+                        </div>
+                    </div>
+                    <div class="step r">
+                        <div class="step-num">৩</div>
+                        <div>
+                            <p>bcrypt.compare() — দেওয়া password vs stored hash</p>
+                        </div>
+                    </div>
+                    <div class="step r">
+                        <div class="step-num">৪</div>
+                        <div>
+                            <p>Match? → JWT Access + Refresh Token দাও</p>
+                        </div>
+                    </div>
+                    <div class="step r">
+                        <div class="step-num">৫</div>
+                        <div>
+                            <p>Redis-এ user data cache করো (TTL: ১৫ মিনিট)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="code r">// Login flow
+                        const user = await db.user.findUnique({
+                        where: { email }
+                        });
+                        if (!user) throw new Error('User নেই');
+
+                        const match = await bcrypt.compare(
+                        password, user.passwordHash
+                        );
+                        if (!match) throw new Error('Wrong password');
+
+                        // Redis-এ cache
+                        await redis.setex(
+                        `user:${user.id}`,
+                        900, // 15 মিনিট
+                        JSON.stringify(user)
+                        );
+
+                        return { accessToken, refreshToken };</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Protected Route -->
+        <div class="slide" data-slide="6">
+            <div class="sl-num">SLIDE 06</div>
+            <h1>Protected Route — Middleware Chain</h1>
+            <div class="tagline">প্রতিটা request এই পথে আসে</div>
+            <div class="flow r">
+                <div class="fbox">Request আসে</div>
+                <div class="farr">→</div>
+                <div class="fbox">Token extract</div>
+                <div class="farr">→</div>
+                <div class="fbox">JWT verify</div>
+                <div class="farr">→</div>
+                <div class="fbox">Redis check</div>
+                <div class="farr">→</div>
+                <div class="fbox">DB fallback</div>
+                <div class="farr">→</div>
+                <div class="fbox">Route</div>
+            </div>
+            <div class="two-col" style="margin-top:12px">
+                <div class="code r" style="font-size:11px">async function authenticate(req, res, next) {
+                    const token = req.headers.authorization
+                    ?.split(' ')[1];
+                    if (!token) return res.status(401).json(
+                    { error: 'Token নেই' }
+                    );
+
+                    const decoded = jwt.verify(token, SECRET);
+
+                    // Redis-এ আছে?
+                    let user = await redis.get(
+                    `user:${decoded.userId}`
+                    );
+
+                    if (!user) {
+                    // DB থেকে নাও + cache করো
+                    user = await db.user.findUnique(
+                    { where: { id: decoded.userId } }
+                    );
+                    await redis.setex(`user:${user.id}`,
+                    900, JSON.stringify(user));
+                    }
+
+                    req.user = user;
+                    next();
+                    }</div>
+                <div class="col">
+                    <div class="good-box r"><span>✅</span>
+                        <div><strong>৯৫% request</strong> Redis থেকে serve হয় — DB touch করে না। এই কারণে ১০ লাখ user
+                            handle সম্ভব।</div>
+                    </div>
+                    <div class="warn-box r"><span>❌</span>
+                        <div>Token invalid বা expire → ৪০১ Unauthorized। রহিমকে আবার login করতে হবে।</div>
+                    </div>
+                    <div class="card r">
+                        <h3>Cache Miss কখন?</h3>
+                        <ul>
+                            <li>প্রথম login-এর পর (Redis-এ নেই)</li>
+                            <li>TTL expire হলে (১৫ মিনিট পর)</li>
+                            <li>User data update হলে (cache invalidate)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Redis Cache -->
+        <div class="slide" data-slide="7">
+            <div class="sl-num">SLIDE 07</div>
+            <h1>Redis Cache — Memory-তে রাখার জাদু</h1>
+            <div class="tagline">Database-এ বারবার যাওয়া বন্ধ</div>
+            <div class="three-col">
+                <div class="card r">
+                    <h3>Redis কী?</h3>
+                    <ul>
+                        <li>RAM-এ data রাখার database</li>
+                        <li>HDD/SSD-এর চেয়ে ১০০x দ্রুত</li>
+                        <li>Key-Value format: "user:123" → {...}</li>
+                        <li>TTL দিলে auto expire হয়</li>
+                    </ul>
+                </div>
+                <div class="card r">
+                    <h3>কী কী Cache করি?</h3>
+                    <ul>
+                        <li>User info (id, email, role)</li>
+                        <li>Permission list</li>
+                        <li>Course access list</li>
+                        <li>Rate limit counter</li>
+                    </ul>
+                </div>
+                <div class="card r">
+                    <h3>Cache Invalidation</h3>
+                    <ul>
+                        <li>User role বদলালে → cache delete</li>
+                        <li>Password change → সব session clear</li>
+                        <li>Logout → token blacklist Redis-এ</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="metric-row r">
+                <div class="metric">
+                    <div class="big-num">0.1ms</div>
+                    <div class="big-label">Redis response time</div>
+                </div>
+                <div class="metric">
+                    <div class="big-num">5-10ms</div>
+                    <div class="big-label">Database query time</div>
+                </div>
+                <div class="metric">
+                    <div class="big-num">50-100x</div>
+                    <div class="big-label">Redis কত গুণ দ্রুত</div>
+                </div>
+            </div>
+            <div class="good-box r"><span>💡</span>
+                <div>উদাহরণ: ১ লাখ user একসাথে request পাঠাল। Redis ছাড়া → ১ লাখ DB query। Redis সহ → ৫,০০০ DB query +
+                    ৯৫,০০০ Redis hit। Server বাঁচল।</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Course Access -->
+        <div class="slide" data-slide="8">
+            <div class="sl-num">SLIDE 08</div>
+            <h1>Course Access — কে কোন Course দেখতে পাবে?</h1>
+            <div class="tagline">জাবের কি premium course-এ ঢুকতে পারবে?</div>
+            <div class="two-col">
+                <div class="col">
+                    <div class="step r">
+                        <div class="step-num">১</div>
+                        <div>
+                            <p>জাবের /course/456/video request পাঠায়</p>
+                        </div>
+                    </div>
+                    <div class="step r">
+                        <div class="step-num">২</div>
+                        <div>
+                            <p>Authenticate middleware: জাবের কে? → Token verify</p>
+                        </div>
+                    </div>
+                    <div class="step r">
+                        <div class="step-num">৩</div>
+                        <div>
+                            <p>Course access check: জাবের কি এই course কিনেছে?</p>
+                        </div>
+                    </div>
+                    <div class="step r">
+                        <div class="step-num">৪</div>
+                        <div>
+                            <p>Redis: `enrollment:জাবের.id:course456` → YES/NO</p>
+                        </div>
+                    </div>
+                    <div class="step r">
+                        <div class="step-num">৫</div>
+                        <div>
+                            <p>YES → Video দেখতে পাবে। NO → Payment page-এ পাঠাও।</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="code r">async function checkCourseAccess(
+                        userId, courseId
+                        ) {
+                        // Redis-এ আছে?
+                        const cacheKey =
+                        `enroll:${userId}:${courseId}`;
+                        const cached = await redis.get(cacheKey);
+                        if (cached) return cached === 'true';
+
+                        // DB check
+                        const enrollment = await db.enrollment
+                        .findUnique({
+                        where: { userId_courseId:
+                        { userId, courseId } }
+                        });
+
+                        const hasAccess = !!enrollment;
+                        // Cache করো ১ ঘণ্টার জন্য
+                        await redis.setex(cacheKey, 3600,
+                        String(hasAccess));
+
+                        return hasAccess;
+                        }</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Scale 10-20 lakh -->
+        <div class="slide" data-slide="9">
+            <div class="sl-num">SLIDE 09</div>
+            <h1>১০–২০ লাখ User Handle করার Strategy</h1>
+            <div class="tagline">ছোট system কীভাবে বড় হয়</div>
+            <div class="three-col">
+                <div class="card r">
+                    <h3><span class="badge badge-acc">Stateless JWT</span></h3>
+                    <ul>
+                        <li>Server-এ session রাখা হয় না</li>
+                        <li>যেকোনো server request handle করতে পারে</li>
+                        <li>নতুন server যোগ করলেই scale</li>
+                    </ul>
+                </div>
+                <div class="card r">
+                    <h3><span class="badge badge-grn">Redis Cluster</span></h3>
+                    <ul>
+                        <li>একটা Redis → multiple Redis node</li>
+                        <li>Data শেয়ার হয় সব node-এ</li>
+                        <li>একটা মরলে অন্যটা চলে</li>
+                    </ul>
+                </div>
+                <div class="card r">
+                    <h3><span class="badge badge-pur">Rate Limiting</span></h3>
+                    <ul>
+                        <li>এক IP থেকে বেশি request → block</li>
+                        <li>Redis-এ counter রাখা হয়</li>
+                        <li>Brute force attack বন্ধ করে</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="two-col" style="margin-top:12px">
+                <div class="warn-box r"><span>❌</span>
+                    <div><strong>ভুল approach:</strong> Session-based auth → সব server-এ session sync করতে হয় →
+                        nightmare at scale</div>
+                </div>
+                <div class="good-box r"><span>✅</span>
+                    <div><strong>সঠিক approach:</strong> JWT + Redis → Server stateless, cache distributed → ১০ লাখ
+                        user, ১০০ server — সব ঠিকঠাক</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Summary -->
+        <div class="slide" data-slide="10">
+            <div class="sl-num">SLIDE 10</div>
+            <h1>যা শিখলাম — এক নজরে</h1>
+            <div class="tagline">Auth System-এর পুরো ছবি</div>
+            <div class="three-col">
+                <div class="card r">
+                    <h3><span class="badge badge-acc">Authentication</span></h3>
+                    <ul>
+                        <li>JWT — stateless, fast</li>
+                        <li>bcrypt password hashing</li>
+                        <li>Access + Refresh token pair</li>
+                    </ul>
+                </div>
+                <div class="card r">
+                    <h3><span class="badge badge-grn">Authorization</span></h3>
+                    <ul>
+                        <li>RBAC — Role-Based Access</li>
+                        <li>Middleware chain</li>
+                        <li>Permission per route</li>
+                    </ul>
+                </div>
+                <div class="card r">
+                    <h3><span class="badge badge-pur">Cache & Scale</span></h3>
+                    <ul>
+                        <li>Redis — ৯৫% DB query বাঁচায়</li>
+                        <li>Distributed cache</li>
+                        <li>Rate limiting protection</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="good-box r" style="margin-top:16px"><span>🎯</span>
+                <div>মনে রাখো: Authentication = কে তুমি? Authorization = কী করতে পারবে? Redis = দ্রুত উত্তর দেওয়ার
+                    চাবি।</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dots"></div>
+    <div style="display:flex;align-items:center;gap:20px;margin-top:8px">
+        <div id="nav">
+            <button class="nb" onclick="prevSlide()">◀ আগে</button>
+            <button class="nb" onclick="nextSlide()">পরে ▶</button>
+        </div>
+        <div id="mode-bar">
+            <span id="lbl-all" class="active-label">সব একসাথে</span>
+            <label class="tog">
+                <input type="checkbox" id="tog-inp" onchange="setMode(this.checked)">
+                <div class="tog-track"></div>
+                <div class="tog-thumb"></div>
+            </label>
+            <span id="lbl-step">ধাপে ধাপে</span>
+        </div>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const total = slides.length;
+        let current = 0, revealMode = false, revealIdx = 0;
+
+        function getReveals(idx) { return [...slides[idx].querySelectorAll('.r')] }
+        function showReveals(idx, upTo) { getReveals(idx).forEach((el, i) => el.classList.toggle('visible', i < upTo)) }
+
+        function buildDots() {
+            const c = document.getElementById('dots'); c.innerHTML = '';
+            for (let i = 0; i < total; i++) { const d = document.createElement('div'); d.className = 'dot' + (i === 0 ? ' on' : ''); d.onclick = () => goSlide(i); c.appendChild(d); }
+        }
+        function updateUI() {
+            document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === current));
+        }
+        function goSlide(idx) {
+            slides[current].classList.remove('active');
+            current = idx;
+            slides[current].classList.add('active');
+            if (revealMode) { showReveals(current, 0); revealIdx = 0; }
+            else { showReveals(current, 999); }
+            updateUI();
+        }
+        function nextSlide() { if (current < total - 1) goSlide(current + 1); }
+        function prevSlide() { if (current > 0) goSlide(current - 1); }
+        function advance() {
+            if (!revealMode) { nextSlide(); return; }
+            const rs = getReveals(current);
+            if (revealIdx < rs.length) { rs[revealIdx].classList.add('visible'); revealIdx++; }
+            else nextSlide();
+        }
+        function setMode(on) {
+            revealMode = on;
+            const lA = document.getElementById('lbl-all'), lS = document.getElementById('lbl-step');
+            lA.className = on ? '' : 'active-label'; lS.className = on ? 'active-label' : '';
+            if (on) { showReveals(current, 0); revealIdx = 0; }
+            else { showReveals(current, 999); }
+        }
+        document.addEventListener('keydown', e => {
+            if (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); advance(); }
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevSlide(); }
+        });
+        document.querySelector('.deck').addEventListener('click', e => {
+            if (!e.target.closest('button') && !e.target.closest('.tog') && !e.target.closest('.dot')) advance();
+        });
+        buildDots(); updateUI(); showReveals(0, 999);
+    </script>
+</body>
+
+</html>

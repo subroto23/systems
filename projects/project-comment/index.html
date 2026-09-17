@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment System — Production Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07101f;
+            --surface: #0d1b30;
+            --surface2: #132239;
+            --blue: #2563eb;
+            --blue-light: #3b82f6;
+            --green: #10b981;
+            --purple: #7c3aed;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --cyan: #06b6d4;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(37, 99, 235, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slideshow {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            padding: 44px 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(60px);
+            transition: opacity 0.55s ease, transform 0.55s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+
+        .slide.exit {
+            opacity: 0;
+            transform: translateX(-60px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+            transition: width 0.4s ease;
+            z-index: 100;
+            box-shadow: 0 0 12px var(--blue);
+        }
+
+        .nav-container {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 100;
+            background: rgba(13, 27, 48, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 10px 22px;
+        }
+
+        .nav-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 18px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--blue);
+            border-color: var(--blue);
+        }
+
+        .slide-dots {
+            display: flex;
+            gap: 7px;
+            align-items: center;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--blue);
+            box-shadow: 0 0 8px var(--blue);
+            transform: scale(1.3);
+        }
+
+        .slide-counter {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue-light);
+            margin-bottom: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 3.8vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--blue-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 680px;
+        }
+
+        .code-block {
+            background: #0a0f1a;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 12px;
+            padding: 18px 22px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.85;
+            overflow-x: auto;
+        }
+
+        .kw {
+            color: #818cf8;
+        }
+
+        .fn {
+            color: #34d399;
+        }
+
+        .str {
+            color: #fbbf24;
+        }
+
+        .cm {
+            color: #475569;
+            font-style: italic;
+        }
+
+        .var {
+            color: #f1f5f9;
+        }
+
+        .prop {
+            color: #60a5fa;
+        }
+
+        .num {
+            color: #f97316;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(37, 99, 235, 0.15);
+        }
+
+        .card-icon {
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-blue {
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--blue-light);
+            border: 1px solid rgba(37, 99, 235, 0.4);
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .badge-purple {
+            background: rgba(124, 58, 237, 0.2);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.4);
+        }
+
+        .badge-orange {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--orange);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .badge-cyan {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--cyan);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+        }
+
+        .step-item {
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .slide.active .step-item:nth-child(1) {
+            transition-delay: 0.15s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(2) {
+            transition-delay: 0.3s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(3) {
+            transition-delay: 0.45s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(4) {
+            transition-delay: 0.6s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(5) {
+            transition-delay: 0.75s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(6) {
+            transition-delay: 0.9s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(7) {
+            transition-delay: 1.05s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.13), rgba(124, 58, 237, 0.08));
+            border: 1px solid rgba(37, 99, 235, 0.32);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 10px 0;
+        }
+
+        .hl-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--blue-light);
+            margin-bottom: 4px;
+        }
+
+        .hl-body {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            line-height: 1.65;
+        }
+
+        .warn-box {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.07));
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 10px 0;
+        }
+
+        .warn-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #f87171;
+            margin-bottom: 4px;
+        }
+
+        .warn-body {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            line-height: 1.65;
+        }
+
+        .layer {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            padding: 12px 18px;
+            margin: 5px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .layer::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .layer.l1::before {
+            background: var(--blue);
+        }
+
+        .layer.l2::before {
+            background: var(--green);
+        }
+
+        .layer.l3::before {
+            background: var(--purple);
+        }
+
+        .layer.l4::before {
+            background: var(--orange);
+        }
+
+        .layer.l5::before {
+            background: var(--red);
+        }
+
+        .layer.l6::before {
+            background: var(--cyan);
+        }
+
+        .layer-num {
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            min-width: 28px;
+        }
+
+        .layer-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .layer-detail {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .stat-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 2.2rem;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, var(--blue-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .accent-num {
+            font-size: 5rem;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            opacity: 0.06;
+            position: absolute;
+            right: 48px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--blue);
+            line-height: 1;
+        }
+
+        /* Comment tree visual */
+        .comment-tree {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 2;
+        }
+
+        .comment-node {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+
+        .comment-node.root {
+            background: rgba(37, 99, 235, 0.12);
+            border: 1px solid rgba(37, 99, 235, 0.25);
+        }
+
+        .comment-node.reply1 {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            margin-left: 32px;
+        }
+
+        .comment-node.reply2 {
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            margin-left: 64px;
+        }
+
+        .c-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .c-avatar.student {
+            background: rgba(37, 99, 235, 0.3);
+        }
+
+        .c-avatar.admin {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .c-body {
+            flex: 1;
+        }
+
+        .c-name {
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .c-text {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .c-time {
+            font-size: 10px;
+            color: #475569;
+            margin-top: 2px;
+        }
+
+        .c-indent-line {
+            width: 2px;
+            background: rgba(37, 99, 235, 0.2);
+            margin-left: 13px;
+            margin-right: 14px;
+            align-self: stretch;
+            border-radius: 2px;
+        }
+
+        /* Flow arrows */
+        .flow-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin: 6px 0;
+        }
+
+        .flow-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 10px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-align: center;
+            min-width: 110px;
+        }
+
+        .flow-box.blue {
+            border-color: var(--blue);
+            background: rgba(37, 99, 235, 0.12);
+            color: var(--blue-light);
+        }
+
+        .flow-box.green {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--green);
+        }
+
+        .flow-box.purple {
+            border-color: var(--purple);
+            background: rgba(124, 58, 237, 0.12);
+            color: #a78bfa;
+        }
+
+        .flow-box.orange {
+            border-color: var(--orange);
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--orange);
+        }
+
+        .flow-box.red {
+            border-color: var(--red);
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+        }
+
+        .flow-box.cyan {
+            border-color: var(--cyan);
+            background: rgba(6, 182, 212, 0.12);
+            color: var(--cyan);
+        }
+
+        .flow-arrow {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+            position: relative;
+            min-width: 20px;
+        }
+
+        .flow-arrow::after {
+            content: '▶';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--purple);
+        }
+
+        @keyframes packet-move {
+            0% {
+                left: 0%;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                left: calc(100% - 10px);
+                opacity: 0;
+            }
+        }
+
+        .packet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--blue);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 6px var(--blue);
+            animation: packet-move 2s infinite;
+        }
+
+        .packet.p2 {
+            animation-delay: 0.7s;
+            background: var(--purple);
+            box-shadow: 0 0 6px var(--purple);
+        }
+
+        .packet.p3 {
+            animation-delay: 1.4s;
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .hero-glow {
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.11) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-glow-2 {
+            position: absolute;
+            bottom: -100px;
+            right: -100px;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.09) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* notification preview */
+        .notif-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 14px 18px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .notif-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .notif-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .notif-body {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            line-height: 1.5;
+        }
+
+        .notif-time {
+            font-size: 10px;
+            color: #475569;
+            margin-top: 4px;
+        }
+
+        /* soft-delete visual */
+        .deleted-row {
+            text-decoration: line-through;
+            opacity: 0.4;
+        }
+
+        .active-row {
+            color: var(--green);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="slideshow" id="slideshow">
+
+        <!-- SLIDE 1: HOOK -->
+        <div class="slide active" id="slide-0">
+            <div class="hero-glow"></div>
+            <div class="hero-glow-2"></div>
+            <div class="tag">// Real-World Comment System Engineering</div>
+            <h1>
+                Comment System মানে<br>
+                শুধু <span class="gradient-text">table এ row insert</span><br>
+                না — এটা ভুল।
+            </h1>
+            <p class="subtitle" style="margin-top:18px;">
+                বেশিরভাগ developer comment system বানায় তিনটা জিনিস দিয়ে: একটা table, একটা INSERT, একটা SELECT।<br>
+                তারপর যখন nested reply, notification, soft delete, admin dashboard, multi-tenant filtering আসে — সব ভেঙে
+                পড়ে।<br><br>
+                আজকে দেখবো — কীভাবে একটা <strong style="color:var(--text)">production-grade comment system</strong>
+                বানাতে হয় যেটা লাখ user handle করতে পারে।
+            </p>
+            <div style="display:flex; gap:14px; margin-top:28px; flex-wrap:wrap;">
+                <span class="badge badge-blue">Nested Comments</span>
+                <span class="badge badge-green">Soft Delete</span>
+                <span class="badge badge-purple">Push Notification</span>
+                <span class="badge badge-orange">Multi-tenant Filter</span>
+                <span class="badge badge-cyan">Admin Dashboard</span>
+            </div>
+            <div class="float"
+                style="position:absolute; right:80px; top:50%; transform:translateY(-50%); text-align:center; opacity:0.85;">
+                <div style="font-size:72px; filter:drop-shadow(0 0 24px rgba(37,99,235,0.5));">💬</div>
+                <div
+                    style="font-size:12px; color:var(--text-muted); margin-top:8px; font-family:'JetBrains Mono',monospace;">
+                    comment system</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Common mistakes -->
+        <div class="slide" id="slide-1">
+            <div class="accent-num">02</div>
+            <div class="tag">// The Wrong Way</div>
+            <h2>সবাই যে ভুলগুলো করে</h2>
+            <p class="subtitle" style="margin-bottom:22px;">Junior থেকে senior — এই mistakes দেখা যায় সব জায়গায়।</p>
+
+            <div class="two-col">
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div class="warn-box step-item">
+                        <div class="warn-title">❌ ভুল #1 — Hard Delete</div>
+                        <div class="warn-body"><code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#f87171;">DELETE FROM comments WHERE id = ?</code><br>Data
+                            চলে গেলে recover করা যায় না। Child replies orphan হয়ে যায়।</div>
+                    </div>
+                    <div class="warn-box step-item">
+                        <div class="warn-title">❌ ভুল #2 — Recursive Query নেই</div>
+                        <div class="warn-body">Nested reply fetch করতে সবাই multiple round-trip করে। N+1 query problem।
+                        </div>
+                    </div>
+                    <div class="warn-box step-item">
+                        <div class="warn-title">❌ ভুল #3 — Reply মানে নতুন Table</div>
+                        <div class="warn-body"><code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#f87171;">comments</code>
+                            + <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#f87171;">comment_replies</code>
+                            — দুটো table, দুটো service, দুটো join। Self-referential হলে একটাই যথেষ্ট।</div>
+                    </div>
+                    <div class="warn-box step-item">
+                        <div class="warn-title">❌ ভুল #4 — Reply এ Notification নেই</div>
+                        <div class="warn-body">Teacher reply দিলে student জানতে পারে না। Engagement শূন্য হয়ে যায়।
+                        </div>
+                    </div>
+                    <div class="warn-box step-item">
+                        <div class="warn-title">❌ ভুল #5 — Admin সব comment দেখে</div>
+                        <div class="warn-body">Multi-course platform এ admin নিজের course এর বাইরের comment দেখতে পারা —
+                            data leak।</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:14px;">কেন এই
+                        ভুলগুলো হয়?</div>
+                    <div class="code-block" style="font-size:11.5px; line-height:1.85;">
+                        <span class="cm">// ❌ Most people do this</span>
+                        <span class="kw">const</span> comment = <span class="kw">await</span> db.<span
+                            class="fn">query</span>(
+                        <span class="str">`SELECT * FROM comments
+                            WHERE content_id = ?`</span>,
+                        [contentId]
+                        );
+
+                        <span class="cm">// Then for each comment, get replies:</span>
+                        <span class="kw">for</span> (<span class="kw">const</span> c <span class="kw">of</span>
+                        comments) {
+                        c.replies = <span class="kw">await</span> db.<span class="fn">query</span>(
+                        <span class="str">`SELECT * FROM replies
+                            WHERE comment_id = ?`</span>,
+                        [c.id]
+                        );
+                        }
+                        <span class="cm">// 100 comments = 101 DB queries 😱</span>
+                        <span class="cm">// N+1 Problem!</span>
+                    </div>
+
+                    <div class="highlight-box" style="margin-top:12px;">
+                        <div class="hl-title">এই system এ সমাধান কীভাবে?</div>
+                        <div class="hl-body">Single <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">classComment</code>
+                            table, <code style="font-family:'JetBrains Mono',monospace; font-size:11px;">parentId</code>
+                            self-reference, Prisma include দিয়ে একটাই query।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Data Model -->
+        <div class="slide" id="slide-2">
+            <div class="accent-num">03</div>
+            <div class="tag">// Data Model</div>
+            <h2>Self-Referential Table Design</h2>
+            <p class="subtitle" style="margin-bottom:20px;">একটাই table — parent comment এবং child reply দুটোই। <code
+                    style="font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--blue-light);">parentId = null</code>
+                মানে root comment।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11.5px; line-height:1.9;">
+                        <span class="cm">// Prisma Schema</span>
+                        <span class="kw">model</span> <span class="fn">classComment</span> {
+                        id String @id @default(uuid())
+                        comment String
+
+                        <span class="cm">// Who wrote it (mutually exclusive)</span>
+                        studentId String?
+                        adminId String?
+                        student Student? @relation(...)
+                        admin Admin? @relation(...)
+
+                        <span class="cm">// Where it belongs</span>
+                        classContentId String? <span class="cm">// Admission/FRB</span>
+                        cycleContentId String? <span class="cm">// Academic</span>
+
+                        <span class="cm">// 🔑 Self-reference = nested reply</span>
+                        parentId String?
+                        parent classComment? @relation(<span class="str">"CommentReplies"</span>, fields: [parentId],
+                        ...)
+                        replies classComment[] @relation(<span class="str">"CommentReplies"</span>)
+
+                        <span class="cm">// Soft delete</span>
+                        isDeleted Boolean @default(false)
+
+                        createdAt DateTime @default(now())
+                        updatedAt DateTime @updatedAt
+                        }
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:14px;">Visual
+                        Tree Structure</div>
+
+                    <div class="comment-tree">
+                        <div class="comment-node root step-item">
+                            <div class="c-avatar student">👨‍🎓</div>
+                            <div class="c-body">
+                                <div class="c-name" style="color:var(--blue-light);">Rahim (Student) <span
+                                        class="badge badge-blue" style="font-size:9px;">parentId: null</span></div>
+                                <div class="c-text">"এই অধ্যায়টা বুঝলাম না..."</div>
+                                <div class="c-time">2 hours ago</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; margin-left:14px;">
+                            <div class="c-indent-line"></div>
+                            <div style="flex:1;">
+                                <div class="comment-node reply1 step-item">
+                                    <div class="c-avatar admin">👨‍🏫</div>
+                                    <div class="c-body">
+                                        <div class="c-name" style="color:var(--green);">Teacher Karim (Admin) <span
+                                                class="badge badge-green" style="font-size:9px;">parentId:
+                                                root.id</span></div>
+                                        <div class="c-text">"এইভাবে ভাবো..."</div>
+                                        <div class="c-time">1 hour ago 🔔 push sent</div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; margin-left:14px;">
+                                    <div class="c-indent-line" style="background:rgba(124,58,237,0.2);"></div>
+                                    <div style="flex:1;">
+                                        <div class="comment-node reply2 step-item">
+                                            <div class="c-avatar student">👨‍🎓</div>
+                                            <div class="c-body">
+                                                <div class="c-name" style="color:#a78bfa;">Rahim (Student) <span
+                                                        class="badge badge-purple" style="font-size:9px;">parentId:
+                                                        reply1.id</span></div>
+                                                <div class="c-text">"ধন্যবাদ স্যার! বুঝেছি।"</div>
+                                                <div class="c-time">45 min ago</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box step-item" style="margin-top:10px;">
+                        <div class="hl-title">Key Insight</div>
+                        <div class="hl-body"><code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">parentId = null</code> →
+                            root comment<br><code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">parentId = someId</code>
+                            → reply<br>Depth কতটাই হোক — একটাই table, একটাই model।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Recursive Fetch -->
+        <div class="slide" id="slide-3">
+            <div class="accent-num">04</div>
+            <div class="tag">// Nested Fetch Strategy</div>
+            <h2>Recursive Reply Fetch</h2>
+            <p class="subtitle" style="margin-bottom:18px;">Single content এর সব nested comment — recursive function
+                দিয়ে unlimited depth support।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11.5px; line-height:1.85;">
+                        <span class="cm">// getSingleCommentfromDb()</span>
+                        <span class="kw">async function</span> <span class="fn">getReplies</span>(commentId) {
+                        <span class="kw">const</span> replies = <span class="kw">await</span> prisma.classComment.<span
+                            class="fn">findMany</span>({
+                        where: {
+                        parentId: commentId,
+                        isDeleted: <span class="kw">false</span>, <span class="cm">// soft-deleted বাদ</span>
+                        },
+                        orderBy: { createdAt: <span class="str">'asc'</span> },
+                        select: selectFields,
+                        });
+
+                        <span class="cm">// Recursively fetch each reply's children</span>
+                        <span class="kw">return</span> Promise.<span class="fn">all</span>(
+                        replies.<span class="fn">map</span>(<span class="kw">async</span> (r) => ({
+                        ...r,
+                        replies: <span class="kw">await</span> <span class="fn">getReplies</span>(r.id),
+                        }))
+                        );
+                        }
+
+                        <span class="cm">// Root comments first (parentId: null)</span>
+                        <span class="kw">const</span> parentComments = <span class="kw">await</span> prisma.classComment
+                        .<span class="fn">findMany</span>({
+                        where: {
+                        OR: [
+                        { classContentId: id },
+                        { cycleContentId: id }, <span class="cm">// dual content!</span>
+                        ],
+                        parentId: <span class="kw">null</span>,
+                        isDeleted: <span class="kw">false</span>,
+                        },
+                        orderBy: { createdAt: <span class="str">'desc'</span> },
+                        select: selectFields,
+                        });
+
+                        <span class="cm">// Attach nested replies</span>
+                        <span class="kw">return</span> Promise.<span class="fn">all</span>(
+                        parentComments.<span class="fn">map</span>(<span class="kw">async</span> (c) => ({
+                        ...c,
+                        replies: <span class="kw">await</span> <span class="fn">getReplies</span>(c.id),
+                        }))
+                        );
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="highlight-box step-item">
+                        <div class="hl-title">কেন এই approach ভালো?</div>
+                        <div class="hl-body">
+                            <strong style="color:var(--text);">Depth unlimited</strong> — 3 level, 5 level, যতই nested
+                            হোক কাজ করবে।<br>
+                            <strong style="color:var(--text);">Promise.all()</strong> — replies গুলো parallel এ fetch
+                            হয়, sequential না।<br>
+                            <strong style="color:var(--text);">isDeleted filter</strong> — deleted comment automatically
+                            hide।
+                        </div>
+                    </div>
+
+                    <div class="card step-item">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-title">Dual Content Support</div>
+                        <div class="card-desc">
+                            <code style="font-family:'JetBrains Mono',monospace; font-size:11px;">classContentId</code>
+                            — Admission/FRB platform<br>
+                            <code style="font-family:'JetBrains Mono',monospace; font-size:11px;">cycleContentId</code>
+                            — Academic platform<br>
+                            একটাই endpoint, দুই platform এর content handle করে।
+                        </div>
+                    </div>
+
+                    <div class="card step-item">
+                        <div class="card-icon">🔒</div>
+                        <div class="card-title">selectFields — nestedSelectFields Helper</div>
+                        <div class="card-desc">
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">nestedSelectFields(["student.name", "admin.photo"])</code>
+                            → automatically nested Prisma select object। Over-fetching নেই।
+                        </div>
+                    </div>
+
+                    <div class="warn-box step-item">
+                        <div class="warn-title">⚠️ একটা সীমাবদ্ধতা</div>
+                        <div class="warn-body">Deeply nested (5+ level) হলে DB round-trips বাড়ে। Fix: CTE (Common Table
+                            Expression) বা Redis cache। এই system এ comment সাধারণত 2 level — safe।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Admin Dashboard Query -->
+        <div class="slide" id="slide-4">
+            <div class="accent-num">05</div>
+            <div class="tag">// Admin Dashboard</div>
+            <h2>Admin Dashboard — 5টা Query একসাথে</h2>
+            <p class="subtitle" style="margin-bottom:18px;">Admin একটা request এ পায়: total, filtered, replied,
+                pending, today — সব <code
+                    style="font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--blue-light);">prisma.$transaction([])</code>
+                দিয়ে।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11px; line-height:1.8;">
+                        <span class="cm">// One DB round-trip, 5 queries parallel</span>
+                        <span class="kw">const</span> [
+                        totalCount,
+                        comments,
+                        filteredTotalCount,
+                        repliedComments,
+                        todayComments,
+                        ] = <span class="kw">await</span> prisma.<span class="fn">$transaction</span>([
+
+                        <span class="cm">// 1. সব parent comment count (unfiltered)</span>
+                        prisma.classComment.<span class="fn">count</span>({ where: totalCountWhere }),
+
+                        <span class="cm">// 2. Actual data (paginated, filtered)</span>
+                        prisma.classComment.<span class="fn">findMany</span>({
+                        where: listWhere, orderBy, skip, take,
+                        select: getAllselectFieldsForGetAllComments,
+                        }),
+
+                        <span class="cm">// 3. Filtered total (for pagination)</span>
+                        prisma.classComment.<span class="fn">count</span>({ where: listWhere }),
+
+                        <span class="cm">// 4. Replied count (admin replied করেছে)</span>
+                        prisma.classComment.<span class="fn">count</span>({ where: repliedCountWhere }),
+
+                        <span class="cm">// 5. Today's comments (24h window)</span>
+                        prisma.classComment.<span class="fn">count</span>({ where: todayCountWhere }),
+                        ]);
+
+                        <span class="kw">const</span> pendingComments = totalCount - repliedComments;
+                        <span class="cm">// pending derive করা — আলাদা query লাগে না!</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="grid-2" style="gap:10px; margin-bottom:12px;">
+                        <div class="stat-box step-item">
+                            <div class="stat-num">5</div>
+                            <div class="stat-label">Queries in 1 round-trip</div>
+                        </div>
+                        <div class="stat-box step-item">
+                            <div class="stat-num">0</div>
+                            <div class="stat-label">Extra pending query (derived)</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div class="layer l1 step-item">
+                            <div class="layer-num">📊</div>
+                            <div style="flex:1;">
+                                <div class="layer-title" style="font-size:12px; color:#60a5fa;">filterData: "pending"
+                                </div>
+                                <div class="layer-detail">replies.none { adminId: not null } — admin reply নেই এমন</div>
+                            </div>
+                        </div>
+                        <div class="layer l2 step-item">
+                            <div class="layer-num">✅</div>
+                            <div style="flex:1;">
+                                <div class="layer-title" style="font-size:12px; color:var(--green);">filterData:
+                                    "replied"</div>
+                                <div class="layer-detail">replies.some { adminId: not null } — admin reply আছে এমন</div>
+                            </div>
+                        </div>
+                        <div class="layer l3 step-item">
+                            <div class="layer-num">📅</div>
+                            <div style="flex:1;">
+                                <div class="layer-title" style="font-size:12px; color:#a78bfa;">today filter</div>
+                                <div class="layer-detail">createdAt: { gte: startOfToday, lt: endOfToday } — midnight to
+                                    midnight</div>
+                            </div>
+                        </div>
+                        <div class="layer l4 step-item">
+                            <div class="layer-num">🔐</div>
+                            <div style="flex:1;">
+                                <div class="layer-title" style="font-size:12px; color:var(--orange);">Admin Scope Filter
+                                </div>
+                                <div class="layer-detail">Admin শুধু তার assigned course এর comment দেখতে পারে</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Multi-Tenant Filtering -->
+        <div class="slide" id="slide-5">
+            <div class="accent-num">06</div>
+            <div class="tag">// Multi-Tenant Architecture</div>
+            <h2>Host-Based + Role-Based Filtering</h2>
+            <p class="subtitle" style="margin-bottom:18px;">একটাই backend, তিনটা platform। কোন admin কোন comment দেখবে —
+                hostname + adminId দিয়ে decide।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11px; line-height:1.8;">
+                        <span class="cm">// Admin scope: শুধু assigned courses</span>
+                        <span class="kw">if</span> (user?.adminId) {
+                        <span class="kw">const</span> accessibleCourses = <span class="kw">await</span>
+                        prisma.courseAdmin.<span class="fn">findMany</span>({
+                        where: { adminId: user.adminId,
+                        isDeleted: <span class="kw">false</span> },
+                        select: { courseId: <span class="kw">true</span> },
+                        });
+                        accessibleCourseIds = accessibleCourses
+                        .<span class="fn">map</span>((c) => c.courseId);
+                        }
+
+                        <span class="cm">// Host-based platform separation</span>
+                        <span class="kw">if</span> (hostName === config.frb_host_name) {
+                        <span class="cm">// FRB: Academic + FRB product</span>
+                        classContentRelation = {
+                        courseSubjectChapter: { courseSubject: {
+                        course: { AND: [
+                        { Category: { contains: <span class="str">'Academic'</span> } },
+                        { productName: { contains: <span class="str">'FRB'</span> } },
+                        { id: { in: accessibleCourseIds } },
+                        ]}
+                        }}
+                        };
+                        } <span class="kw">else if</span> (hostName === config.academic_host_name) {
+                        <span class="cm">// Academic: cycleContent path</span>
+                        cycleContentRelation = { ... };
+                        } <span class="kw">else</span> {
+                        <span class="cm">// Admission: non-academic category</span>
+                        classContentRelation = { ... };
+                        }
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Platform →
+                        Data Path</div>
+
+                    <div class="flow-row step-item">
+                        <div class="flow-box blue" style="min-width:130px; font-size:11px;">admission.domain.com</div>
+                        <div class="flow-arrow" style="position:relative; flex:1;">
+                            <div class="packet"></div>
+                        </div>
+                        <div class="flow-box orange" style="font-size:11px;">classContent<br>(Admission)</div>
+                    </div>
+
+                    <div class="flow-row step-item">
+                        <div class="flow-box green" style="min-width:130px; font-size:11px;">frb.domain.com</div>
+                        <div class="flow-arrow" style="position:relative; flex:1;">
+                            <div class="packet p2"></div>
+                        </div>
+                        <div class="flow-box orange" style="font-size:11px;">classContent<br>(Academic+FRB)</div>
+                    </div>
+
+                    <div class="flow-row step-item">
+                        <div class="flow-box purple" style="min-width:130px; font-size:11px;">academic.domain.com</div>
+                        <div class="flow-arrow" style="position:relative; flex:1;">
+                            <div class="packet p3"></div>
+                        </div>
+                        <div class="flow-box cyan" style="font-size:11px;">cycleContent<br>(Academic)</div>
+                    </div>
+
+                    <div class="highlight-box step-item">
+                        <div class="hl-title">Security by Design</div>
+                        <div class="hl-body">Admin A শুধু course X, Y এর comment দেখে। Admin B শুধু course Z।
+                            Cross-platform leakage impossible — DB query level এ filter।</div>
+                    </div>
+
+                    <div class="highlight-box step-item">
+                        <div class="hl-title">OR Content Condition</div>
+                        <div class="hl-body"><code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">contentConditions.length === 0</code>
+                            হলে empty return — unknown platform এ কোনো data expose হয় না।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Soft Delete + Reply Notification -->
+        <div class="slide" id="slide-6">
+            <div class="accent-num">07</div>
+            <div class="tag">// Soft Delete + Notification</div>
+            <h2>Soft Delete & Push Notification</h2>
+            <p class="subtitle" style="margin-bottom:18px;">Delete মানে data মুছে ফেলা না — <code
+                    style="font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--blue-light);">isDeleted: true</code>
+                করা। Reply হলে instant notification।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11.5px; line-height:1.85;">
+                        <span class="cm">// ✅ Soft Delete — data থাকে, hide হয়</span>
+                        <span class="kw">const</span> <span class="fn">deleteCommentFromDb</span> = <span
+                            class="kw">async</span> (id) => {
+                        <span class="kw">await</span> prisma.classComment.<span class="fn">update</span>({
+                        where: { id },
+                        data: { isDeleted: <span class="kw">true</span> }, <span class="cm">// not DELETE!</span>
+                        });
+                        <span class="kw">return</span> {};
+                        };
+
+                        <span class="cm">// Notification flow on reply:</span>
+                        <span class="kw">const</span> <span class="fn">replyToCommentIntoDb</span> = <span
+                            class="kw">async</span> (payload) => {
+                        <span class="kw">const</span> result = <span class="kw">await</span> prisma.classComment
+                        .<span class="fn">create</span>({ data: replayData });
+
+                        <span class="cm">// Non-blocking notification (try/catch)</span>
+                        <span class="kw">try</span> {
+                        <span class="kw">await</span> <span class="fn">replayCommandSentToNotification</span>(
+                        replayData
+                        );
+                        } <span class="kw">catch</span> (error) {
+                        console.<span class="fn">log</span>(<span class="str">"Notif error:"</span>, error.message);
+                        <span class="cm">// Reply succeeds even if notif fails</span>
+                        }
+                        <span class="kw">return</span> response;
+                        };
+                    </div>
+
+                    <div class="highlight-box" style="margin-top:10px;">
+                        <div class="hl-title">Non-blocking Design</div>
+                        <div class="hl-body">Notification fail হলেও reply সফল হয়। try/catch দিয়ে isolate করা —
+                            critical path আলাদা।</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">Push
+                        Notification Flow</div>
+
+                    <div class="layer l1 step-item">
+                        <div style="flex:1;">
+                            <div class="layer-title" style="font-size:12px; color:#60a5fa;">1. Content Info Fetch</div>
+                            <div class="layer-detail">classContentId → course → subject → chapter chain</div>
+                        </div>
+                    </div>
+                    <div class="layer l2 step-item">
+                        <div style="flex:1;">
+                            <div class="layer-title" style="font-size:12px; color:var(--green);">2. Domain URL Detect
+                            </div>
+                            <div class="layer-detail">academic/admission/frb — deep link URL auto-generate</div>
+                        </div>
+                    </div>
+                    <div class="layer l3 step-item">
+                        <div style="flex:1;">
+                            <div class="layer-title" style="font-size:12px; color:#a78bfa;">3. Sender Role Check</div>
+                            <div class="layer-detail">teacher/co-teacher/cx → আলাদা notification title বাংলায়</div>
+                        </div>
+                    </div>
+                    <div class="layer l4 step-item">
+                        <div style="flex:1;">
+                            <div class="layer-title" style="font-size:12px; color:var(--orange);">4. NotificationLog
+                                Create</div>
+                            <div class="layer-detail">DB তে log + bumpNotificationUserVersion() → Firebase push</div>
+                        </div>
+                    </div>
+
+                    <div class="notif-card step-item" style="margin-top:4px;">
+                        <div class="notif-icon">🔔</div>
+                        <div>
+                            <div class="notif-title">শিক্ষক Karim তোমার কমেন্টের উত্তর দিয়েছেন</div>
+                            <div class="notif-body">শিক্ষক Karim: 'এই সূত্রটা মনে রাখো...'</div>
+                            <div class="notif-time">Deep link → course → class content → comment</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: nestedSelectFields helper -->
+        <div class="slide" id="slide-7">
+            <div class="accent-num">08</div>
+            <div class="tag">// Reusable Helper</div>
+            <h2><span class="gradient-text">nestedSelectFields()</span> — Hidden Gem</h2>
+            <p class="subtitle" style="margin-bottom:18px;">Prisma এর nested select object manually লেখা nightmare। এই
+                helper দিয়ে string array → Prisma select object।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11.5px; line-height:1.85;">
+                        <span class="cm">// nestedSelectFields.js</span>
+                        <span class="kw">export const</span> <span class="fn">nestedSelectFields</span> = (fields = [])
+                        => {
+                        <span class="kw">const</span> select = {};
+
+                        fields.<span class="fn">forEach</span>((fieldPath) => {
+                        <span class="kw">const</span> keys = fieldPath.<span class="fn">split</span>(<span
+                            class="str">'.'</span>);
+                        <span class="kw">let</span> current = select;
+
+                        <span class="kw">while</span> (keys.length > <span class="num">0</span>) {
+                        <span class="kw">const</span> key = keys.<span class="fn">shift</span>();
+
+                        <span class="kw">if</span> (!current[key]) {
+                        current[key] = keys.length > <span class="num">0</span>
+                        ? { select: {} }
+                        : <span class="kw">true</span>;
+                        }
+
+                        <span class="kw">if</span> (keys.length > <span class="num">0</span>) {
+                        current = current[key].select;
+                        }
+                        }
+                        });
+
+                        <span class="kw">return</span> select;
+                        };
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:12px;">Before vs
+                        After</div>
+
+                    <div style="font-size:11.5px; color:var(--red); margin-bottom:6px; font-weight:600;">❌ Without
+                        helper (manual)</div>
+                    <div class="code-block" style="font-size:11px; line-height:1.7; margin-bottom:12px;">
+                        <span class="cm">// 20 lines of nested objects</span>
+                        select: {
+                        id: <span class="kw">true</span>,
+                        student: {
+                        select: {
+                        name: <span class="kw">true</span>,
+                        profilePhoto: <span class="kw">true</span>,
+                        }
+                        },
+                        replies: {
+                        select: {
+                        admin: {
+                        select: { name: <span class="kw">true</span> }
+                        }
+                        }
+                        }
+                        }
+                    </div>
+
+                    <div style="font-size:11.5px; color:var(--green); margin-bottom:6px; font-weight:600;">✅ With helper
+                        (clean)</div>
+                    <div class="code-block" style="font-size:11px; line-height:1.7;">
+                        <span class="fn">nestedSelectFields</span>([
+                        <span class="str">"id"</span>,
+                        <span class="str">"student.name"</span>,
+                        <span class="str">"student.profilePhoto"</span>,
+                        <span class="str">"replies.admin.name"</span>,
+                        <span class="str">"replies.student.name"</span>,
+                        ])
+                        <span class="cm">// → same nested Prisma object</span>
+                        <span class="cm">// Auto-generated! Error-free.</span>
+                    </div>
+
+                    <div class="highlight-box step-item" style="margin-top:10px;">
+                        <div class="hl-title">কেন এটা important?</div>
+                        <div class="hl-body">Comment এর select field 20+ nested path। manually লিখলে typo, missing
+                            field, refactor nightmare। এই helper দিয়ে array এ path লিখো — Prisma object automatic।
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Validation + Restriction -->
+        <div class="slide" id="slide-8">
+            <div class="accent-num">09</div>
+            <div class="tag">// Validation + Restriction</div>
+            <h2>Comment করার আগে 3 Layer Check</h2>
+            <p class="subtitle" style="margin-bottom:20px;">প্রতিটা comment create/reply request এ — auth → restriction
+                → validation — তিনটা gate।</p>
+
+            <div class="two-col">
+                <div>
+                    <div style="font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:10px;">Route
+                        Definition</div>
+                    <div class="code-block" style="font-size:11px; line-height:1.85;">
+                        router.<span class="fn">post</span>(<span class="str">'/'</span>,
+                        <span class="cm">// Gate 1: JWT verify + role check</span>
+                        authorizationMiddleware.<span class="fn">authorize</span>([
+                        Enums.roles.ADMIN,
+                        Enums.roles.STUDENT,
+                        Enums.roles.SUPERADMIN,
+                        ]),
+
+                        <span class="cm">// Gate 2: Zod schema validation</span>
+                        <span class="fn">validationRequest</span>(
+                        CommentValidationSchema
+                        .createCommentValidationSchema
+                        ),
+
+                        <span class="cm">// Gate 3: Student restriction check</span>
+                        <span class="fn">checkRestriction</span>(
+                        RestrictionType.MEDIA_COMMENT
+                        ),
+
+                        CommentController.<span class="fn">createComment</span>
+                        );
+
+                        <span class="cm">// Zod: one of classContentId OR cycleContentId</span>
+                        body.<span class="fn">refine</span>(
+                        (data) => data.classContentId ||
+                        data.cycleContentId,
+                        { message: <span class="str">'Either content id required'</span> }
+                        );
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">3 Gate
+                        Flow</div>
+
+                    <div class="layer l1 step-item">
+                        <div class="layer-num">01</div>
+                        <div style="flex:1;">
+                            <div class="layer-title" style="color:#60a5fa;">JWT Auth + Role</div>
+                            <div class="layer-detail">Token verify → student/admin/superAdmin only। Anonymous কেউ
+                                comment করতে পারে না।</div>
+                        </div>
+                        <span class="badge badge-blue">authorize()</span>
+                    </div>
+
+                    <div class="layer l2 step-item">
+                        <div class="layer-num">02</div>
+                        <div style="flex:1;">
+                            <div class="layer-title" style="color:var(--green);">Zod Schema Validate</div>
+                            <div class="layer-detail">comment string required, contentId must be UUID, classContentId OR
+                                cycleContentId required।</div>
+                        </div>
+                        <span class="badge badge-green">validationRequest()</span>
+                    </div>
+
+                    <div class="layer l3 step-item">
+                        <div class="layer-num">03</div>
+                        <div style="flex:1;">
+                            <div class="layer-title" style="color:#a78bfa;">Student Restriction</div>
+                            <div class="layer-detail">Student কি comment করার permission আছে? Admin ban করে রেখেছে?
+                                MEDIA_COMMENT restriction check।</div>
+                        </div>
+                        <span class="badge badge-purple">checkRestriction()</span>
+                    </div>
+
+                    <div class="highlight-box step-item">
+                        <div class="hl-title">Zod Refinement — Smart Validation</div>
+                        <div class="hl-body"><code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">.refine()</code> দিয়ে
+                            cross-field validation — classContentId বা cycleContentId এর যেকোনো একটা থাকতেই হবে। Prisma
+                            পর্যন্ত invalid data পৌঁছায় না।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Summary -->
+        <div class="slide" id="slide-9">
+            <div class="hero-glow"></div>
+            <div class="hero-glow-2"></div>
+            <div class="accent-num">10</div>
+            <div class="tag">// Summary</div>
+            <h2>এই Comment System কেন Best?</h2>
+            <p class="subtitle" style="margin-bottom:22px;">প্রতিটা design decision এর পিছনে কারণ আছে।</p>
+
+            <div class="grid-3" style="margin-bottom:16px;">
+                <div class="card step-item">
+                    <div class="card-icon">🌲</div>
+                    <div class="card-title">Self-Referential Model</div>
+                    <div class="card-desc">একটাই table, unlimited depth nested reply। parent আলাদা table নেই — JOIN
+                        complexity নেই।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">🗑️</div>
+                    <div class="card-title">Soft Delete</div>
+                    <div class="card-desc">isDeleted: true — data হারায় না, audit trail থাকে, child reply orphan হয়
+                        না।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-title">$transaction([5 queries])</div>
+                    <div class="card-desc">Admin dashboard এ 5টা count/data query একটাই DB round-trip এ। performance
+                        optimal।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">🔐</div>
+                    <div class="card-title">Multi-Tenant Security</div>
+                    <div class="card-desc">hostname + adminId দিয়ে DB query level এ filter। cross-platform data leak
+                        impossible।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">🔔</div>
+                    <div class="card-title">Smart Notification</div>
+                    <div class="card-desc">Reply হলে parent commenter পায় push। Teacher/CX আলাদা বাংলা message। Deep
+                        link দিয়ে সরাসরি comment এ যায়।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">🧩</div>
+                    <div class="card-title">nestedSelectFields Helper</div>
+                    <div class="card-desc">20+ nested path string array → Prisma select object। Over-fetch নেই, typo
+                        নেই।</div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="max-width:750px;">
+                <div class="hl-title" style="font-size:13px;">মূল কথা</div>
+                <div class="hl-body" style="font-size:13px;">Comment system ছোট মনে হয়, কিন্তু এর ভেতরে আছে —
+                    multi-tenancy, nested data, notification pipeline, security layers, admin analytics। এই patterns
+                    জানলে যেকোনো complex feature handle করতে পারবে।</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-container">
+        <button class="nav-btn" onclick="changeSlide(-1)">← Prev</button>
+        <div class="slide-dots" id="dots"></div>
+        <div class="slide-counter" id="counter">1 / 10</div>
+        <button class="nav-btn" onclick="changeSlide(1)">Next →</button>
+    </div>
+
+    <script>
+        let current = 0;
+        const total = 10;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('counter');
+        const dotsContainer = document.getElementById('dots');
+
+        for (let i = 0; i < total; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.onclick = () => goTo(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        function goTo(index) {
+            slides[current].classList.remove('active');
+            slides[current].classList.add('exit');
+            setTimeout(() => slides.forEach(s => s.classList.remove('exit')), 450);
+            current = index;
+            slides[current].classList.add('active');
+            document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+            progressBar.style.width = ((current + 1) / total * 100) + '%';
+            counter.textContent = (current + 1) + ' / ' + total;
+        }
+
+        function changeSlide(dir) {
+            const next = Math.max(0, Math.min(total - 1, current + dir));
+            if (next !== current) goTo(next);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); changeSlide(1); }
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); changeSlide(-1); }
+        });
+
+        progressBar.style.width = (1 / total * 100) + '%';
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,9 @@
+{
+  "title": "PostgreSQL + Prisma — Real-World Design Patterns",
+  "tagline": "PostgreSQL আর Prisma দিয়ে বাস্তব প্রজেক্টের ডিজাইন প্যাটার্ন",
+  "description": "PostgreSQL ও Prisma ORM একসাথে ব্যবহার করে বাস্তব প্রজেক্টে কীভাবে রিইউজেবল, মডিউল-বেজড ও মেইনটেইনেবল ডিজাইন প্যাটার্ন তৈরি করা যায় তার প্র্যাকটিক্যাল ব্যাখ্যা।",
+  "category": "Database",
+  "tags": ["postgresql", "prisma", "orm", "design-patterns", "reusable-code"],
+  "status": "live",
+  "icon": "♻️"
+}

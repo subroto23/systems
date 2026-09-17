@@ -1,0 +1,9 @@
+{
+  "title": "Comment System — Production Architecture",
+  "tagline": "নেস্টেড কমেন্ট ও রিপ্লাই — প্রোডাকশন-গ্রেড আর্কিটেকচার",
+  "description": "সেলফ-রেফারেন্সিয়াল ও রিকার্সিভ ডেটা স্ট্রাকচার দিয়ে নেস্টেড কমেন্ট/রিপ্লাই সিস্টেম কীভাবে এফিশিয়েন্টভাবে ডিজাইন ও কোয়েরি করা যায় তার প্রোডাকশন-রেডি আর্কিটেকচার ব্যাখ্যা করা হয়েছে।",
+  "category": "Database",
+  "tags": ["comment", "recursive", "self-referential", "database", "architecture"],
+  "status": "live",
+  "icon": "💭"
+}

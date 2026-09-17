@@ -24,6 +24,9 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const PROJECTS_DIR = path.join(ROOT, "projects");
 const OUTPUT_FILE = path.join(ROOT, "assets", "js", "projects.js");
+const SITEMAP_FILE = path.join(ROOT, "sitemap.xml");
+const LLMS_FILE = path.join(ROOT, "llms.txt");
+const SITE_ORIGIN = "https://systems.subromart.com";
 
 function readProjects() {
   if (!fs.existsSync(PROJECTS_DIR)) return [];
@@ -118,11 +121,39 @@ ${entries}
 `;
 }
 
+function renderSitemap(projects) {
+  const urls = [
+    `  <url>\n    <loc>${SITE_ORIGIN}/</loc>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>`,
+    ...projects.map(
+      p => `  <url>\n    <loc>${SITE_ORIGIN}/${p.url}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`
+    )
+  ];
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`;
+}
+
+function renderLlmsTxt(projects) {
+  const lines = projects.map(
+    p => `- [${p.title}](${SITE_ORIGIN}/${p.url}): ${p.description}`
+  );
+  return `# Systems Hub
+
+> প্রডাকশন-গ্রেড সিস্টেম ও প্রজেক্টসমূহের কেন্দ্রীয় ডিরেক্টরি। প্রতিটি লিংক একটি স্বতন্ত্র সিস্টেমের বিস্তারিত পেজে যায়।
+
+এই ফাইলটি AI/LLM-চালিত সার্চ ও ক্রলারদের জন্য — প্রতিটি সিস্টেমের নাম, কাজ, এবং লিংক এক জায়গায়।
+⚠️ এই ফাইলটি অটো-জেনারেটেড (projects/*/meta.json থেকে) — সরাসরি এডিট করবেন না, node scripts/generate-projects.js চালান।
+
+## Systems
+
+${lines.join("\n")}
+`;
+}
+
 function main() {
   const projects = readProjects();
-  const output = render(projects);
-  fs.writeFileSync(OUTPUT_FILE, output, "utf8");
-  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js জেনারেট হলো।`);
+  fs.writeFileSync(OUTPUT_FILE, render(projects), "utf8");
+  fs.writeFileSync(SITEMAP_FILE, renderSitemap(projects), "utf8");
+  fs.writeFileSync(LLMS_FILE, renderLlmsTxt(projects), "utf8");
+  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো।`);
 }
 
 main();

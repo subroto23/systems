@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL + Prisma — Real-World Design Patterns</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07101f;
+            --surface: #0d1b30;
+            --surface2: #132239;
+            --blue: #2563eb;
+            --blue-light: #3b82f6;
+            --green: #10b981;
+            --purple: #7c3aed;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(37, 99, 235, 0.25);
+            --glow: rgba(37, 99, 235, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* ===== SLIDES ===== */
+        .slideshow {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            padding: 48px 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(60px);
+            transition: opacity 0.55s ease, transform 0.55s ease;
+            pointer-events: none;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+
+        .slide.exit {
+            opacity: 0;
+            transform: translateX(-60px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        /* ===== GRID BG ===== */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide {
+            z-index: 1;
+        }
+
+        /* ===== PROGRESS + NAV ===== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+            transition: width 0.4s ease;
+            z-index: 100;
+            box-shadow: 0 0 12px var(--blue);
+        }
+
+        .nav-container {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            z-index: 100;
+            background: rgba(13, 27, 48, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 12px 24px;
+        }
+
+        .nav-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 20px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--blue);
+            border-color: var(--blue);
+        }
+
+        .slide-dots {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--blue);
+            box-shadow: 0 0 8px var(--blue);
+            transform: scale(1.3);
+        }
+
+        .slide-counter {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            min-width: 48px;
+            text-align: center;
+        }
+
+        /* ===== TYPOGRAPHY ===== */
+        .tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue-light);
+            margin-bottom: 14px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 4vw, 3.8rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 2.8vw, 2.4rem);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--blue-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 1.6vw, 1.25rem);
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 700px;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(37, 99, 235, 0.15);
+        }
+
+        .card-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px;
+        }
+
+        /* ===== CODE BLOCK ===== */
+        .code-block {
+            background: #0a0f1a;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 12px;
+            padding: 20px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            line-height: 1.8;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block .ln {
+            color: #334155;
+            margin-right: 16px;
+            user-select: none;
+        }
+
+        .kw {
+            color: #818cf8;
+        }
+
+        .fn {
+            color: #34d399;
+        }
+
+        .str {
+            color: #fbbf24;
+        }
+
+        .cm {
+            color: #475569;
+            font-style: italic;
+        }
+
+        .var {
+            color: #f1f5f9;
+        }
+
+        .op {
+            color: #94a3b8;
+        }
+
+        .num {
+            color: #f97316;
+        }
+
+        .prop {
+            color: #60a5fa;
+        }
+
+        /* ===== FLOW DIAGRAM ===== */
+        .flow-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin: 8px 0;
+        }
+
+        .flow-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            text-align: center;
+            min-width: 120px;
+            position: relative;
+        }
+
+        .flow-box.blue {
+            border-color: var(--blue);
+            background: rgba(37, 99, 235, 0.12);
+        }
+
+        .flow-box.green {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--green);
+        }
+
+        .flow-box.purple {
+            border-color: var(--purple);
+            background: rgba(124, 58, 237, 0.12);
+            color: #a78bfa;
+        }
+
+        .flow-box.orange {
+            border-color: var(--orange);
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--orange);
+        }
+
+        .flow-arrow {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--blue), var(--purple));
+            position: relative;
+            min-width: 30px;
+        }
+
+        .flow-arrow::after {
+            content: '▶';
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--purple);
+        }
+
+        /* ===== PACKET ANIMATION ===== */
+        @keyframes packet-move {
+            0% {
+                left: 0%;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                left: calc(100% - 12px);
+                opacity: 0;
+            }
+        }
+
+        .packet {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--blue);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 8px var(--blue);
+            animation: packet-move 2.5s infinite;
+        }
+
+        .packet:nth-child(2) {
+            animation-delay: 0.8s;
+            background: var(--purple);
+            box-shadow: 0 0 8px var(--purple);
+        }
+
+        .packet:nth-child(3) {
+            animation-delay: 1.6s;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        /* ===== BADGE ===== */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-blue {
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--blue-light);
+            border: 1px solid rgba(37, 99, 235, 0.4);
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .badge-purple {
+            background: rgba(124, 58, 237, 0.2);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.4);
+        }
+
+        .badge-orange {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--orange);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        /* ===== STAT BOXES ===== */
+        .stat-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, var(--blue-light), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* ===== LIST ===== */
+        .check-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .check-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .check-list li::before {
+            content: '→';
+            color: var(--blue-light);
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ===== STEP REVEAL (animated) ===== */
+        .step-item {
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .slide.active .step-item:nth-child(1) {
+            transition-delay: 0.2s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(2) {
+            transition-delay: 0.4s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(3) {
+            transition-delay: 0.6s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(4) {
+            transition-delay: 0.8s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(5) {
+            transition-delay: 1.0s;
+            opacity: 1;
+            transform: none;
+        }
+
+        .slide.active .step-item:nth-child(6) {
+            transition-delay: 1.2s;
+            opacity: 1;
+            transform: none;
+        }
+
+        /* ===== LAYER DIAGRAM ===== */
+        .layer {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin: 6px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .layer::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .layer.l1::before {
+            background: var(--blue);
+        }
+
+        .layer.l2::before {
+            background: var(--green);
+        }
+
+        .layer.l3::before {
+            background: var(--purple);
+        }
+
+        .layer.l4::before {
+            background: var(--orange);
+        }
+
+        .layer.l5::before {
+            background: var(--red);
+        }
+
+        .layer-num {
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            min-width: 32px;
+        }
+
+        .layer-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .layer-detail {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ===== COMPARISON TABLE ===== */
+        .compare-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1px;
+        }
+
+        .compare-cell {
+            background: var(--surface);
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+        .compare-cell.header {
+            background: var(--surface2);
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .compare-cell.good {
+            color: var(--green);
+        }
+
+        .compare-cell.bad {
+            color: var(--red);
+        }
+
+        /* ===== DB ANIMATION ===== */
+        @keyframes db-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
+            }
+        }
+
+        .db-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: rgba(37, 99, 235, 0.15);
+            border: 2px solid var(--blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            animation: db-pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        /* ===== HERO SLIDE ===== */
+        .hero-glow {
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-glow-2 {
+            position: absolute;
+            bottom: -100px;
+            right: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.10) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        .float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* ===== QUERY FLOW ANIM ===== */
+        @keyframes slide-in-left {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .anim-in {
+            animation: slide-in-left 0.5s ease forwards;
+        }
+
+        /* ===== SCROLL-LIKE TICKER ===== */
+        @keyframes scroll-up {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-50%);
+            }
+        }
+
+        .query-ticker {
+            height: 120px;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #0a0f1a;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .query-ticker-inner {
+            animation: scroll-up 6s linear infinite;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--green);
+            padding: 8px 14px;
+            line-height: 2;
+        }
+
+        /* ===== HIGHLIGHT ===== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(124, 58, 237, 0.1));
+            border: 1px solid rgba(37, 99, 235, 0.35);
+            border-radius: 12px;
+            padding: 18px 24px;
+            margin: 12px 0;
+        }
+
+        .hl-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--blue-light);
+            margin-bottom: 4px;
+        }
+
+        .hl-body {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* big number accent */
+        .accent-num {
+            font-size: 5rem;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            opacity: 0.07;
+            position: absolute;
+            right: 48px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--blue);
+            line-height: 1;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="slideshow" id="slideshow">
+
+        <!-- ===== SLIDE 1: HOOK ===== -->
+        <div class="slide active" id="slide-0">
+            <div class="hero-glow"></div>
+            <div class="hero-glow-2"></div>
+
+            <div class="tag">// Real-World Backend Engineering</div>
+            <h1>
+                তুমি কি জানো,<br>
+                <span class="gradient-text">বেশিরভাগ Backend</span><br>
+                কেন ভেঙে পড়ে?
+            </h1>
+            <p class="subtitle" style="margin-top:20px; max-width:640px;">
+                Raw SQL লেখা, copy-paste করা query, কোনো structure নেই — এই ভুলগুলো ছোট project এ ধরা পড়ে না।<br>
+                কিন্তু যখন <strong style="color:var(--text)">লাখ লাখ user</strong> আসে, তখন সব ভেঙে পড়ে।<br><br>
+                আজকে দেখবো — Prisma + PostgreSQL দিয়ে কীভাবে এমন একটা system বানানো যায় যেটা <span
+                    style="color:var(--blue-light); font-weight:700">reusable, maintainable, এবং scalable</span> —
+                production-ready কোড দিয়ে।
+            </p>
+
+            <div style="display:flex; gap:16px; margin-top:36px; flex-wrap:wrap;">
+                <span class="badge badge-blue">PostgreSQL</span>
+                <span class="badge badge-green">Prisma ORM</span>
+                <span class="badge badge-purple">Design Patterns</span>
+                <span class="badge badge-orange">Reusable Architecture</span>
+            </div>
+
+            <div class="float"
+                style="position:absolute; right:80px; top:50%; transform:translateY(-50%); text-align:center; opacity:0.8;">
+                <div style="font-size:80px; line-height:1; filter:drop-shadow(0 0 30px rgba(37,99,235,0.5));">🐘</div>
+                <div
+                    style="font-size:13px; color:var(--text-muted); margin-top:10px; font-family:'JetBrains Mono',monospace;">
+                    PostgreSQL</div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 2: THE PROBLEM ===== -->
+        <div class="slide" id="slide-1">
+            <div class="accent-num">02</div>
+            <div class="tag">// The Problem</div>
+            <h2>যে ভুলটা সবাই করে</h2>
+            <p class="subtitle" style="margin-bottom:28px;">Junior থেকে mid-level — সবাই এই trap এ পড়ে।</p>
+
+            <div class="two-col">
+                <div>
+                    <div
+                        style="font-size:13px; font-weight:700; color:var(--red); margin-bottom:12px; letter-spacing:1px;">
+                        ❌ সমস্যা যেভাবে লেখে</div>
+                    <div class="code-block">
+                        <span class="cm">// Route handler এ সরাসরি DB call</span>
+                        <span class="kw">app</span>.<span class="fn">get</span>(<span class="str">'/courses'</span>,
+                        <span class="kw">async</span> (req, res) => {
+                        <span class="kw">const</span> <span class="var">page</span> = req.query.page || <span
+                            class="num">1</span>;
+                        <span class="kw">const</span> <span class="var">limit</span> = req.query.limit || <span
+                            class="num">10</span>;
+
+                        <span class="cm">// কোনো validation নেই</span>
+                        <span class="cm">// কোনো error handling নেই</span>
+                        <span class="cm">// duplicate code হবে সব জায়গায়</span>
+                        <span class="kw">const</span> <span class="var">data</span> = <span class="kw">await</span>
+                        prisma.course.<span class="fn">findMany</span>({
+                        skip: (page - <span class="num">1</span>) * limit,
+                        take: Number(limit),
+                        <span class="cm">// search? filter? sort?</span>
+                        <span class="cm">// copy করতে হবে আবার...</span>
+                        });
+                        res.<span class="fn">json</span>(data);
+                        });
+                    </div>
+                </div>
+
+                <div>
+                    <div
+                        style="font-size:13px; font-weight:700; color:var(--green); margin-bottom:12px; letter-spacing:1px;">
+                        ✅ Production-ready পদ্ধতি</div>
+                    <div class="code-block">
+                        <span class="cm">// Clean service layer separation</span>
+                        <span class="kw">const</span> { skip, take, orderBy, where }
+                        = <span class="fn">buildQueryOptions</span>(
+                        query,
+                        searchableFields,
+                        sortableFields,
+                        filterableFields
+                        );
+
+                        <span class="kw">const</span> [data, total] = <span class="kw">await</span> Promise.<span
+                            class="fn">all</span>([
+                        prisma.course.<span class="fn">findMany</span>({ where, skip,
+                        take, orderBy }),
+                        prisma.course.<span class="fn">count</span>({ where }),
+                        ]);
+                        <span class="cm">// ✅ Reusable everywhere</span>
+                        <span class="cm">// ✅ Search + Sort + Filter + Pagination</span>
+                    </div>
+
+                    <div class="highlight-box" style="margin-top:12px;">
+                        <div class="hl-title">এই পার্থক্যটা বোঝা দরকার কারণ...</div>
+                        <div class="hl-body">১০০টা endpoint এ আলাদা আলাদা pagination logic = ১০০টা জায়গায় bug। একটা
+                            reusable helper = একবার fix, সব ঠিক।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 3: ARCHITECTURE OVERVIEW ===== -->
+        <div class="slide" id="slide-2">
+            <div class="accent-num">03</div>
+            <div class="tag">// Architecture</div>
+            <h2>Module-Based Architecture</h2>
+            <p class="subtitle" style="margin-bottom:24px;">প্রতিটা feature তার নিজের layer এ থাকে — সব কিছু
+                predictable।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:12px; line-height:2;">
+                        <span class="prop">src/app/modules/</span>
+                        <span class="op">├──</span> <span class="fn">student/</span>
+                        <span class="op">│ ├──</span> <span class="var">courseStudent.routes.js</span>
+                        <span class="op">│ ├──</span> <span class="var">courseStudent.controller.js</span>
+                        <span class="op">│ ├──</span> <span class="kw">courseStudent.services.js</span>
+                        <span class="op">│ ├──</span> <span class="var">courseStudent.constants.js</span>
+                        <span class="op">│ └──</span> <span class="var">courseStudent.cache.js</span>
+                        <span class="op">├──</span> <span class="fn">admin/</span>
+                        <span class="op">│ ├──</span> <span class="var">class.routes.js</span>
+                        <span class="op">│ ├──</span> <span class="var">class.controller.js</span>
+                        <span class="op">│ └──</span> <span class="kw">class.services.js</span>
+                        <span class="prop">src/helper/</span>
+                        <span class="op">├──</span> <span class="kw">buildQueryOptions.js</span> <span class="cm">←
+                            shared</span>
+                        <span class="op">└──</span> <span class="var">activityLog.js</span> <span class="cm">←
+                            shared</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div class="layer l1 step-item">
+                        <div class="layer-num">01</div>
+                        <div style="flex:1">
+                            <div class="layer-title" style="color:#60a5fa">Route Layer</div>
+                            <div class="layer-detail">URL mapping, middleware attach, validation</div>
+                        </div>
+                        <span class="badge badge-blue">routes.js</span>
+                    </div>
+                    <div class="layer l2 step-item">
+                        <div class="layer-num">02</div>
+                        <div style="flex:1">
+                            <div class="layer-title" style="color:var(--green)">Controller Layer</div>
+                            <div class="layer-detail">Request parse, response send — কোনো business logic নেই</div>
+                        </div>
+                        <span class="badge badge-green">controller.js</span>
+                    </div>
+                    <div class="layer l3 step-item">
+                        <div class="layer-num">03</div>
+                        <div style="flex:1">
+                            <div class="layer-title" style="color:#a78bfa">Service Layer</div>
+                            <div class="layer-detail">সব business logic এখানে — Prisma call করে</div>
+                        </div>
+                        <span class="badge badge-purple">services.js</span>
+                    </div>
+                    <div class="layer l4 step-item">
+                        <div class="layer-num">04</div>
+                        <div style="flex:1">
+                            <div class="layer-title" style="color:var(--orange)">Constants Layer</div>
+                            <div class="layer-detail">searchableFields, filterableFields, sortableFields</div>
+                        </div>
+                        <span class="badge badge-orange">constants.js</span>
+                    </div>
+                    <div class="layer l5 step-item">
+                        <div class="layer-num">05</div>
+                        <div style="flex:1">
+                            <div class="layer-title" style="color:#f87171">Cache Layer</div>
+                            <div class="layer-detail">Redis-backed cache, DB load কমায়</div>
+                        </div>
+                        <span class="badge"
+                            style="background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.4)">cache.js</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 4: buildQueryOptions ===== -->
+        <div class="slide" id="slide-3">
+            <div class="accent-num">04</div>
+            <div class="tag">// The Magic Helper</div>
+            <h2><span class="gradient-text">buildQueryOptions()</span></h2>
+            <p class="subtitle" style="margin-bottom:20px;">একটাই function — pagination, search, sort, filter সব handle
+                করে। লিখতে হয় একবার, ব্যবহার হয় সব জায়গায়।</p>
+
+            <div class="two-col">
+                <div class="code-block" style="font-size:11.5px; line-height:1.85;">
+                    <span class="kw">export const</span> <span class="fn">buildQueryOptions</span> = (
+                    query = {},
+                    searchableFields = [], <span class="cm">// partial match</span>
+                    sortableFields = [], <span class="cm">// allowed sorts</span>
+                    exactMatchFields = [], <span class="cm">// filter=value</span>
+                    ) => {
+                    <span class="kw">const</span> page = <span class="fn">parseInt</span>(query?.page) || <span
+                        class="num">1</span>;
+                    <span class="kw">const</span> limit = <span class="fn">Math.min</span>(
+                    <span class="fn">parseInt</span>(query?.limit) || <span class="num">10</span>, <span
+                        class="num">1000</span>
+                    );
+                    <span class="kw">const</span> sortBy = query?.sortBy || <span class="str">'createdAt'</span>;
+                    <span class="kw">const</span> sortOrder = query?.sortOrder || <span class="str">'desc'</span>;
+
+                    <span class="kw">const</span> skip = (page - <span class="num">1</span>) * limit;
+                    <span class="kw">const</span> orderBy = sortableFields.<span class="fn">includes</span>(sortBy)
+                    ? { [sortBy]: sortOrder === <span class="str">'asc'</span> ? <span class="str">'asc'</span> : <span
+                        class="str">'desc'</span> }
+                    : {};
+
+                    <span class="cm">// search বা exact filter — দুটো একসাথে না</span>
+                    <span class="kw">const</span> where = <span class="fn">buildWhere</span>(
+                    query, searchableFields, exactMatchFields
+                    );
+
+                    <span class="kw">return</span> { skip, take: limit, orderBy, where };
+                    };
+                </div>
+
+                <div>
+                    <div style="margin-bottom:12px; font-size:13px; font-weight:700; color:var(--text-muted);">Query
+                        Parameters → Prisma Options</div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div class="step-item"
+                            style="display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 16px;">
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--orange);">?searchTerm=math</code>
+                            <span style="color:var(--text-muted)">→</span>
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--green);">OR [contains: "math"]</code>
+                        </div>
+                        <div class="step-item"
+                            style="display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 16px;">
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--orange);">?filter=active</code>
+                            <span style="color:var(--text-muted)">→</span>
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--green);">OR [equals: "active"]</code>
+                        </div>
+                        <div class="step-item"
+                            style="display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 16px;">
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--orange);">?page=2&limit=20</code>
+                            <span style="color:var(--text-muted)">→</span>
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--green);">skip: 20, take: 20</code>
+                        </div>
+                        <div class="step-item"
+                            style="display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 16px;">
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--orange);">?sortBy=title&sortOrder=asc</code>
+                            <span style="color:var(--text-muted)">→</span>
+                            <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--green);">orderBy: {title: 'asc'}</code>
+                        </div>
+                        <div class="step-item"
+                            style="display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px 16px; border-color:rgba(245,158,11,0.3);">
+                            <span style="font-size:12px; color:var(--orange); font-weight:600;">Security:</span>
+                            <span style="font-size:12px; color:var(--text-muted);">limit max 1000 — DDoS protection
+                                built-in</span>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box" style="margin-top:14px;">
+                        <div class="hl-title">Nested Field Support</div>
+                        <div class="hl-body"><code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--green);">"course.title"</code>
+                            → <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--green);">{ course: { title: { contains: ... } } }</code><br>Prisma
+                            এর nested relation query automatic।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 5: Constants Pattern ===== -->
+        <div class="slide" id="slide-4">
+            <div class="accent-num">05</div>
+            <div class="tag">// Constants Pattern</div>
+            <h2>Constants দিয়ে Behavior Control</h2>
+            <p class="subtitle" style="margin-bottom:20px;">কোন field এ search হবে, কোনটায় sort হবে — এটা code এ
+                hardcode না করে, constants file এ declare করো।</p>
+
+            <div class="two-col">
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:10px;">
+                        constants.js</div>
+                    <div class="code-block" style="font-size:12px; line-height:2;">
+                        <span class="kw">export const</span> searchableFields = [
+                        <span class="str">'course.title'</span>,
+                        <span class="str">'course.productName'</span>,
+                        <span class="str">'student.fullName'</span>, <span class="cm">← nested!</span>
+                        ];
+
+                        <span class="kw">export const</span> sortableFields = [
+                        <span class="str">'createdAt'</span>,
+                        <span class="str">'updatedAt'</span>,
+                        <span class="str">'enrolledAt'</span>,
+                        ];
+
+                        <span class="kw">export const</span> filterableFields = [
+                        <span class="str">'status'</span>,
+                        <span class="str">'paymentStatus'</span>,
+                        ];
+
+                        <span class="kw">export const</span> selectFields = {
+                        id: <span class="kw">true</span>,
+                        studentId: <span class="kw">true</span>,
+                        course: {
+                        select: { title: <span class="kw">true</span>, courseImage: <span class="kw">true</span> }
+                        }
+                        };
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <div class="highlight-box step-item">
+                        <div class="hl-title">কেন এটা ভালো?</div>
+                        <div class="hl-body">Service file খুলতে হয় না। শুধু constants.js বদলালেই পুরো module এর
+                            behavior বদলে যায়। নতুন developer ও instantly বুঝতে পারে।</div>
+                    </div>
+
+                    <div class="card step-item">
+                        <div class="card-icon">🔒</div>
+                        <div class="card-title">SQL Injection Protection</div>
+                        <div class="card-desc"><code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">sortableFields.includes(sortBy)</code>
+                            check করে — user যা পাঠাক, শুধু allow-listed field এ sort হবে।</div>
+                    </div>
+
+                    <div class="card step-item">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-title">Select Optimization</div>
+                        <div class="card-desc">Prisma এর <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">select</code> দিয়ে শুধু
+                            দরকারি column fetch — unnecessary data transfer নেই।</div>
+                    </div>
+
+                    <div class="card step-item">
+                        <div class="card-icon">🔄</div>
+                        <div class="card-title">Module Independence</div>
+                        <div class="card-desc">প্রতিটা module এর আলাদা constants — student module এর search field admin
+                            module কে affect করে না।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 6: Validation Middleware ===== -->
+        <div class="slide" id="slide-5">
+            <div class="accent-num">06</div>
+            <div class="tag">// Validation Pattern</div>
+            <h2>Zod + Middleware = Clean Validation</h2>
+            <p class="subtitle" style="margin-bottom:20px;">Database এ ভুল data ঢোকার আগেই block করো — Zod schema +
+                reusable middleware দিয়ে।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11.5px; line-height:1.85;">
+                        <span class="cm">// validation.middleware.js</span>
+                        <span class="kw">const</span> <span class="fn">validationRequest</span> = (schema) => {
+                        <span class="kw">return async</span> (req, res, next) => {
+                        <span class="kw">try</span> {
+                        <span class="kw">const</span> parsed = <span class="kw">await</span> schema.<span
+                            class="fn">parseAsync</span>({
+                        body: req.body,
+                        query: req.query,
+                        params: req.params,
+                        });
+                        req.body = parsed.body;
+                        <span class="fn">next</span>();
+                        } <span class="kw">catch</span> (err) {
+                        <span class="fn">next</span>(err); <span class="cm">// Zod error → global handler</span>
+                        }
+                        };
+                        };
+
+                        <span class="cm">// routes.js এ use:</span>
+                        router.<span class="fn">post</span>(<span class="str">'/enroll'</span>,
+                        <span class="fn">validationRequest</span>(enrollmentSchema),
+                        controller.<span class="fn">enroll</span>
+                        );
+                    </div>
+
+                    <div style="margin-top:12px;" class="code-block" style="font-size:11.5px;">
+                        <span class="cm">// Zod schema</span>
+                        <span class="kw">const</span> enrollmentSchema = z.<span class="fn">object</span>({
+                        body: z.<span class="fn">object</span>({
+                        courseId: z.<span class="fn">string</span>().<span class="fn">uuid</span>(),
+                        paymentMethod: z.<span class="fn">enum</span>([
+                        <span class="str">'BKASH'</span>, <span class="str">'NAGAD'</span>, <span
+                            class="str">'BANK'</span>
+                        ]),
+                        })
+                        });
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:14px;">Request
+                        Flow</div>
+
+                    <div class="flow-row step-item">
+                        <div class="flow-box blue">Client Request</div>
+                        <div class="flow-arrow" style="position:relative;">
+                            <div class="packet"></div>
+                            <div class="packet"></div>
+                        </div>
+                        <div class="flow-box orange">Zod Validate</div>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; margin:4px 0;">
+                        <div
+                            style="width:120px; height:30px; border-right:2px solid var(--border); border-bottom:2px solid var(--border); border-radius:0 0 8px 0; position:relative;">
+                            <div style="position:absolute; right:-8px; bottom:0; font-size:11px; color:var(--red);">❌
+                                Invalid</div>
+                        </div>
+                    </div>
+                    <div class="flow-row step-item" style="justify-content:flex-end;">
+                        <div class="flow-box green">Service Layer</div>
+                        <div class="flow-arrow" style="position:relative;">
+                            <div class="packet"></div>
+                        </div>
+                        <div class="flow-box purple">Prisma → DB</div>
+                    </div>
+
+                    <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+                        <div class="step-item" style="display:flex; gap:12px; align-items:flex-start;">
+                            <span style="color:var(--green); font-size:18px; line-height:1;">✓</span>
+                            <span style="font-size:13px; color:var(--text-muted);">Type check, format check — controller
+                                এ একটা line ও লাগে না</span>
+                        </div>
+                        <div class="step-item" style="display:flex; gap:12px; align-items:flex-start;">
+                            <span style="color:var(--green); font-size:18px; line-height:1;">✓</span>
+                            <span style="font-size:13px; color:var(--text-muted);">Error message automatic — Zod বলে
+                                দেয় ঠিক কোন field ভুল</span>
+                        </div>
+                        <div class="step-item" style="display:flex; gap:12px; align-items:flex-start;">
+                            <span style="color:var(--green); font-size:18px; line-height:1;">✓</span>
+                            <span style="font-size:13px; color:var(--text-muted);">Schema reuse করা যায় — create ও
+                                update এ same schema extend</span>
+                        </div>
+                        <div class="step-item" style="display:flex; gap:12px; align-items:flex-start;">
+                            <span style="color:var(--green); font-size:18px; line-height:1;">✓</span>
+                            <span style="font-size:13px; color:var(--text-muted);">TypeScript-like type safety —
+                                JavaScript এও</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 7: AppErrors + Error Handling ===== -->
+        <div class="slide" id="slide-6">
+            <div class="accent-num">07</div>
+            <div class="tag">// Error Handling Pattern</div>
+            <h2>Centralized Error Handling</h2>
+            <p class="subtitle" style="margin-bottom:20px;">প্রতিটা route এ try/catch লিখলে code mess হয়। একটা
+                centralized system দিয়ে সব errors handle করো।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11.5px; line-height:1.85;">
+                        <span class="cm">// AppErrors.js — Custom Error Class</span>
+                        <span class="kw">class</span> <span class="fn">AppErrors</span> <span class="kw">extends</span>
+                        <span class="var">Error</span> {
+                        <span class="fn">constructor</span>(statusCode, message) {
+                        <span class="kw">super</span>(message);
+                        <span class="kw">this</span>.statusCode = statusCode;
+                        <span class="kw">this</span>.isOperational = <span class="kw">true</span>;
+                        }
+                        }
+
+                        <span class="cm">// Service এ throw করো:</span>
+                        <span class="kw">if</span> (!user) <span class="kw">throw new</span> <span
+                            class="fn">AppErrors</span>(
+                        StatusCodes.NOT_FOUND,
+                        <span class="str">'User not found'</span>
+                        );
+
+                        <span class="kw">if</span> (!hasAccess) <span class="kw">throw new</span> <span
+                            class="fn">AppErrors</span>(
+                        StatusCodes.FORBIDDEN,
+                        <span class="str">'Course access denied'</span>
+                        );
+
+                        <span class="cm">// Global error handler (app.js):</span>
+                        <span class="fn">app</span>.<span class="fn">use</span>((err, req, res, next) => {
+                        <span class="kw">if</span> (err.<span class="var">isOperational</span>) {
+                        res.<span class="fn">status</span>(err.statusCode).<span class="fn">json</span>({
+                        success: <span class="kw">false</span>,
+                        message: err.message
+                        });
+                        } <span class="kw">else</span> {
+                        <span class="cm">// Unexpected error — log & 500</span>
+                        console.<span class="fn">error</span>(err);
+                        res.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">json</span>({
+                        ... });
+                        }
+                        });
+                    </div>
+                </div>
+
+                <div>
+                    <div class="grid-2" style="gap:12px; margin-bottom:14px;">
+                        <div class="stat-box step-item">
+                            <div class="stat-num">0</div>
+                            <div class="stat-label">Route এ try/catch দরকার</div>
+                        </div>
+                        <div class="stat-box step-item">
+                            <div class="stat-num">1</div>
+                            <div class="stat-label">Global handler সব handle করে</div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box step-item">
+                        <div class="hl-title">isOperational Flag</div>
+                        <div class="hl-body">AppErrors দিয়ে throw হলে <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">isOperational = true</code>
+                            — এটা expected error (user না পাওয়া, permission নেই)। Unexpected crash হলে <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">false</code> — আলাদাভাবে
+                            log করো।</div>
+                    </div>
+
+                    <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+                        <div class="step-item"
+                            style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                            <span style="font-size:13px;">NOT_FOUND (404)</span>
+                            <span
+                                style="font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">user/course/data
+                                নেই</span>
+                        </div>
+                        <div class="step-item"
+                            style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                            <span style="font-size:13px;">FORBIDDEN (403)</span>
+                            <span
+                                style="font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">access
+                                নেই</span>
+                        </div>
+                        <div class="step-item"
+                            style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                            <span style="font-size:13px;">UNAUTHORIZED (401)</span>
+                            <span
+                                style="font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">token
+                                নেই/expired</span>
+                        </div>
+                        <div class="step-item"
+                            style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                            <span style="font-size:13px;">CONFLICT (409)</span>
+                            <span
+                                style="font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">duplicate
+                                data</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 8: Redis Cache Layer ===== -->
+        <div class="slide" id="slide-7">
+            <div class="accent-num">08</div>
+            <div class="tag">// Cache Layer</div>
+            <h2>Redis Cache on Top of Prisma</h2>
+            <p class="subtitle" style="margin-bottom:20px;">লাখ user এর জন্য প্রতিটা request এ DB hit করলে system মরবে।
+                Redis cache দিয়ে DB load ৯০%+ কমাও।</p>
+
+            <div class="two-col">
+                <div>
+                    <div class="code-block" style="font-size:11.5px; line-height:1.85;">
+                        <span class="cm">// getOrLoadStrictCache pattern</span>
+                        <span class="kw">const</span> <span class="fn">getCachedAuthUser</span> = <span
+                            class="kw">async</span> (userId) => {
+                        <span class="kw">const</span> cacheKey = <span class="str">`auth:user:</span>${userId}<span
+                            class="str">`</span>;
+
+                        <span class="kw">return</span> <span class="kw">await</span> <span
+                            class="fn">getOrLoadStrictCache</span>(
+                        cacheKey,
+                        <span class="kw">async</span> () => {
+                        <span class="cm">// শুধু cache miss হলে DB call</span>
+                        <span class="kw">return</span> <span class="kw">await</span> prisma.user.<span
+                            class="fn">findUnique</span>({
+                        where: { id: userId },
+                        select: { id: <span class="kw">true</span>, role: <span class="kw">true</span>,
+                        status: <span class="kw">true</span> }
+                        });
+                        },
+                        { ttl: <span class="num">120</span> } <span class="cm">// 2 minutes TTL</span>
+                        );
+                        };
+
+                        <span class="cm">// Enrollment change হলে cache invalidate:</span>
+                        <span class="kw">await</span> <span class="fn">invalidateCourseStudentAccess</span>(
+                        studentId, courseId
+                        );
+                    </div>
+                </div>
+
+                <div>
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:13px; font-weight:700; color:var(--text-muted); margin-bottom:12px;">Cache
+                            Keys Architecture</div>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <div class="step-item"
+                                style="display:flex; gap:12px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:11.5px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                                <span style="color:var(--blue-light); min-width:20px;">🔑</span>
+                                <span style="color:var(--green);">auth:user:{userId}</span>
+                                <span style="color:var(--text-muted); margin-left:auto;">2min TTL</span>
+                            </div>
+                            <div class="step-item"
+                                style="display:flex; gap:12px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:11.5px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                                <span style="color:var(--blue-light); min-width:20px;">🔑</span>
+                                <span style="color:var(--green);">auth:session:{userId}</span>
+                                <span style="color:var(--text-muted); margin-left:auto;">2min TTL</span>
+                            </div>
+                            <div class="step-item"
+                                style="display:flex; gap:12px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:11.5px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                                <span style="color:var(--blue-light); min-width:20px;">🔑</span>
+                                <span style="color:var(--purple);">course:access:{studentId}:{courseId}</span>
+                                <span style="color:var(--text-muted); margin-left:auto;">auto clear</span>
+                            </div>
+                            <div class="step-item"
+                                style="display:flex; gap:12px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:11.5px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                                <span style="color:var(--blue-light); min-width:20px;">🔑</span>
+                                <span style="color:var(--orange);">course:context:{entityId}</span>
+                                <span style="color:var(--text-muted); margin-left:auto;">2min TTL</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box step-item">
+                        <div class="hl-title">Cache Invalidation Strategy</div>
+                        <div class="hl-body">Data বদলালে cache clear করতে হয়। Enrollment হলে → <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">invalidateCourseStudentAccess()</code>।
+                            Many students এ → <code
+                                style="font-family:'JetBrains Mono',monospace; font-size:11px;">invalidateCourseStudentAccessMany()</code>।
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 9: Full Request Flow ===== -->
+        <div class="slide" id="slide-8">
+            <div class="accent-num">09</div>
+            <div class="tag">// End-to-End Flow</div>
+            <h2>একটা API Request এর পুরো journey</h2>
+            <p class="subtitle" style="margin-bottom:20px;">GET /my-courses request পাঠালে কী হয় — step by step।</p>
+
+            <div style="display:flex; flex-direction:column; gap:10px; max-width:900px; margin:0 auto;">
+                <div class="layer l1 step-item" style="padding:14px 20px;">
+                    <div class="layer-num">01</div>
+                    <div style="flex:1">
+                        <div class="layer-title" style="font-size:13px; color:#60a5fa;">Route →
+                            validationRequest(schema) → authorize(['student'])</div>
+                        <div class="layer-detail">Zod দিয়ে query validate, তারপর JWT verify + role check</div>
+                    </div>
+                    <span class="badge badge-blue">~2ms</span>
+                </div>
+
+                <div class="layer l2 step-item" style="padding:14px 20px;">
+                    <div class="layer-num">02</div>
+                    <div style="flex:1">
+                        <div class="layer-title" style="font-size:13px; color:var(--green);">Redis Cache Check —
+                            getCachedAuthUser(userId)</div>
+                        <div class="layer-detail">User data cache এ আছে? → directly use। নেই? → Prisma call</div>
+                    </div>
+                    <span class="badge badge-green">~1ms hit</span>
+                </div>
+
+                <div class="layer l3 step-item" style="padding:14px 20px;">
+                    <div class="layer-num">03</div>
+                    <div style="flex:1">
+                        <div class="layer-title" style="font-size:13px; color:#a78bfa;">Controller →
+                            service.getMyCourses(query, payload)</div>
+                        <div class="layer-detail">Request parsed, payload (userId, role) extracted থেকে service call
+                        </div>
+                    </div>
+                    <span class="badge badge-purple">~0ms</span>
+                </div>
+
+                <div class="layer l4 step-item" style="padding:14px 20px;">
+                    <div class="layer-num">04</div>
+                    <div style="flex:1">
+                        <div class="layer-title" style="font-size:13px; color:var(--orange);">buildQueryOptions(query,
+                            fields…) → Prisma options</div>
+                        <div class="layer-detail">search, sort, filter, pagination — সব resolve হয়ে যায় এখানে</div>
+                    </div>
+                    <span class="badge badge-orange">~0ms</span>
+                </div>
+
+                <div class="layer l5 step-item" style="padding:14px 20px;">
+                    <div class="layer-num">05</div>
+                    <div style="flex:1">
+                        <div class="layer-title" style="font-size:13px; color:#f87171;">Promise.all([findMany, count]) →
+                            PostgreSQL</div>
+                        <div class="layer-detail">Data + total count — দুটো query parallel এ চলে, time অর্ধেক</div>
+                    </div>
+                    <span class="badge"
+                        style="background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.4)">~15ms</span>
+                </div>
+
+                <div class="layer step-item" style="padding:14px 20px; border-color:var(--green);">
+                    <div class="layer-num" style="color:var(--green);">06</div>
+                    <div style="flex:1">
+                        <div class="layer-title" style="font-size:13px; color:var(--green);">Response: { data, meta: {
+                            page, limit, total } }</div>
+                        <div class="layer-detail">Consistent response format — সব endpoint এ same structure</div>
+                    </div>
+                    <span class="badge badge-green">✓ Done</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== SLIDE 10: Key Takeaways ===== -->
+        <div class="slide" id="slide-9">
+            <div class="hero-glow"></div>
+            <div class="hero-glow-2"></div>
+            <div class="accent-num">10</div>
+            <div class="tag">// Summary</div>
+            <h2>এই Patterns গুলো দিয়ে কী পেলাম?</h2>
+            <p class="subtitle" style="margin-bottom:28px;">একটা production system এ এই design decisions এর impact।</p>
+
+            <div class="grid-3" style="margin-bottom:20px;">
+                <div class="card step-item">
+                    <div class="card-icon">♻️</div>
+                    <div class="card-title">Reusability</div>
+                    <div class="card-desc">buildQueryOptions একবার লেখা, ৫০+ endpoint এ use। এক জায়গায় fix = সব
+                        জায়গায় fix।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">🧩</div>
+                    <div class="card-title">Maintainability</div>
+                    <div class="card-desc">Module-based structure — নতুন developer আসলে instantly বুঝতে পারে কোথায় কী
+                        আছে।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">🚀</div>
+                    <div class="card-title">Scalability</div>
+                    <div class="card-desc">Redis cache + Prisma optimize query — লাখ user এও DB overwhelm হয় না।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">🔒</div>
+                    <div class="card-title">Security</div>
+                    <div class="card-desc">Zod validation, allowlist sort fields, AppErrors — সব layer এ protection।
+                    </div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">🐛</div>
+                    <div class="card-title">Debuggability</div>
+                    <div class="card-desc">Centralized error handling + activity log — production issue instantly track
+                        করা যায়।</div>
+                </div>
+                <div class="card step-item">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-title">Performance</div>
+                    <div class="card-desc">Promise.all parallel queries, select optimization, limit max 1000 — সব কিছু
+                        intentional।</div>
+                </div>
+            </div>
+
+            <div class="highlight-box" style="max-width:700px;">
+                <div class="hl-title" style="font-size:14px;">মূল কথা</div>
+                <div class="hl-body" style="font-size:14px;">Good architecture মানে বেশি code লেখা না — মানে <strong
+                        style="color:var(--text)">কম code দিয়ে বেশি করা</strong>। এই patterns গুলো practice করো, তোমার
+                    project ও production-ready হবে।</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- NAV -->
+    <div class="nav-container">
+        <button class="nav-btn" onclick="changeSlide(-1)">← Prev</button>
+        <div class="slide-dots" id="dots"></div>
+        <div class="slide-counter" id="counter">1 / 10</div>
+        <button class="nav-btn" onclick="changeSlide(1)">Next →</button>
+    </div>
+
+    <script>
+        let current = 0;
+        const total = 10;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('counter');
+        const dotsContainer = document.getElementById('dots');
+
+        // Create dots
+        for (let i = 0; i < total; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dot.onclick = () => goTo(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        function goTo(index) {
+            slides[current].classList.remove('active');
+            slides[current].classList.add('exit');
+            setTimeout(() => slides[current - (current > index ? 0 : 0)].classList.remove('exit'), 450);
+
+            // remove exit from all
+            slides.forEach(s => { if (s !== slides[index]) { setTimeout(() => s.classList.remove('exit'), 450); } });
+
+            current = index;
+            slides[current].classList.add('active');
+
+            // update dots
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                d.classList.toggle('active', i === current);
+            });
+
+            // update progress
+            const pct = ((current + 1) / total) * 100;
+            progressBar.style.width = pct + '%';
+            counter.textContent = (current + 1) + ' / ' + total;
+        }
+
+        function changeSlide(dir) {
+            const next = Math.max(0, Math.min(total - 1, current + dir));
+            if (next !== current) goTo(next);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                changeSlide(-1);
+            }
+        });
+
+        // init progress
+        progressBar.style.width = (1 / total * 100) + '%';
+    </script>
+</body>
+
+</html>

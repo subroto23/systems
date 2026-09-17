@@ -1,0 +1,9 @@
+{
+  "title": "Comment System — Self-Referential & Recursive",
+  "tagline": "সবাই যে ভুলগুলো করে — Self-Referential Table Design",
+  "description": "নেস্টেড কমেন্ট সিস্টেম বানাতে গিয়ে সবাই যে কমন ভুলগুলো করে, আর সেলফ-রেফারেন্সিয়াল টেবিল ডিজাইন দিয়ে কীভাবে সেটা সঠিকভাবে করা যায় তার বেসিক ব্যাখ্যা।",
+  "category": "Database",
+  "tags": ["comment", "recursive", "self-referential", "database"],
+  "status": "live",
+  "icon": "💭"
+}

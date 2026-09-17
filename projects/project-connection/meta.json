@@ -1,0 +1,9 @@
+{
+  "title": "Socket.IO — Production Architecture",
+  "tagline": "কেন শুধু HTTP যথেষ্ট না — Socket.IO দিয়ে প্রোডাকশন আর্কিটেকচার",
+  "description": "রিয়েল-টাইম কানেকশনের জন্য HTTP কেন যথেষ্ট নয়, আর Socket.IO দিয়ে কীভাবে স্কেলেবল, রিলায়েবল প্রোডাকশন-গ্রেড কানেকশন আর্কিটেকচার বানানো যায় তার বিস্তারিত ব্যাখ্যা।",
+  "category": "Realtime",
+  "tags": ["socket.io", "websocket", "realtime", "architecture", "production"],
+  "status": "live",
+  "icon": "🔌"
+}

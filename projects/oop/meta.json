@@ -1,0 +1,9 @@
+{
+  "title": "OOP — Object Oriented Programming",
+  "tagline": "প্রতিবার কি নতুন করে সব লিখতে হবে? OOP দিয়ে সমাধান",
+  "description": "কোড রিপিটিশনের সমস্যা থেকে শুরু করে ক্লাস, ইনহেরিটেন্স, এনক্যাপসুলেশন ও পলিমরফিজম — অবজেক্ট ওরিয়েন্টেড প্রোগ্রামিং-এর মূল ধারণাগুলো একটা বাস্তব সমস্যা-সমাধান স্টোরি আকারে ব্যাখ্যা করা হয়েছে।",
+  "category": "Programming Concepts",
+  "tags": ["oop", "class", "inheritance", "design-patterns", "reusability"],
+  "status": "live",
+  "icon": "🧩"
+}
