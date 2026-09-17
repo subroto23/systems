@@ -56,9 +56,15 @@ projects/
 - মূল হাবের favicon (`../../assets/favicon.svg`) ও PWA manifest লিংক
 - `<link rel="canonical">` — নিজের সঠিক URL
 - Open Graph + Twitter Card ট্যাগ (শেয়ার করলে প্রিভিউ সুন্দর দেখাবে)
-- JSON-LD (`SoftwareApplication`, হাবের সাথে `isPartOf` লিংক করা) — যাতে Google, Bing ও AI এজেন্ট (ChatGPT/Claude search ইত্যাদি) পেজটা সহজে বুঝতে ও ইনডেক্স করতে পারে
+- JSON-LD `SoftwareApplication` (হাবের সাথে `isPartOf` লিংক করা) + `BreadcrumbList` — যাতে Google, Bing ও AI এজেন্ট (ChatGPT/Claude search ইত্যাদি) পেজটা সহজে বুঝতে ও ইনডেক্স করতে পারে, এবং Google-এর সার্চ রেজাল্টে breadcrumb দেখাতে পারে
+- Google Analytics (gtag.js, GA4) — প্রতিটা পেজে ভিজিটর ট্র্যাক করার জন্য
+- একটা "← Systems Hub" ব্যাক বাটন (যদি পেজে নিজস্ব একটা আগে থেকে না থাকে)
 
 এটা হাতে লেখা কিছুর দরকার নেই — `meta.json` ঠিকঠাক থাকলেই এই পুরো ব্লক অটো বসে যায়, এবং বারবার রান করলেও ব্লকটা রিপ্লেস হয় (ডুপ্লিকেট হয় না)।
+
+### সার্চ ইঞ্জিনকে দ্রুত জানানো (IndexNow)
+
+`.github/workflows/indexnow.yml` — main ব্রাঞ্চে যেকোনো push হলেই `sitemap.xml`-এর সব URL [IndexNow](https://www.indexnow.org/) প্রোটোকল দিয়ে Bing/Yandex-কে পাঠিয়ে দেয়, যাতে নতুন/পরিবর্তিত পেজ ক্রল হতে অপেক্ষা করতে না হয়। এর জন্য কোনো লগইন/API-কী লাগে না — রুটে থাকা `<key>.txt` ফাইলটাই ভেরিফিকেশন। (Google নিজে IndexNow সাপোর্ট করে না — Google-এর জন্য Search Console-এ সাইটম্যাপ সাবমিট করাই এখনো সবচেয়ে ভালো উপায়, এটা ম্যানুয়াল।)
 
 লোকালি টেস্ট করতে চাইলে push না করেও চালাতে পারেন:
 

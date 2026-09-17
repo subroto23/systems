@@ -35,6 +35,7 @@ const OUTPUT_FILE = path.join(ROOT, "assets", "js", "projects.js");
 const SITEMAP_FILE = path.join(ROOT, "sitemap.xml");
 const LLMS_FILE = path.join(ROOT, "llms.txt");
 const SITE_ORIGIN = "https://systems.subromart.com";
+const GA_MEASUREMENT_ID = "G-33ZFYJTQY7";
 
 function readProjects() {
   if (!fs.existsSync(PROJECTS_DIR)) return [];
@@ -150,7 +151,17 @@ function seoBlock(p, includeTitle) {
     url,
     applicationCategory: p.category,
     isPartOf: { "@type": "CollectionPage", name: "Systems Hub", url: `${SITE_ORIGIN}/` },
-    author: { "@type": "Person", name: "Subroto Das" }
+    author: { "@type": "Person", name: "Subroto Das" },
+    keywords: keywords
+  };
+
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Systems Hub", item: `${SITE_ORIGIN}/` },
+      { "@type": "ListItem", position: 2, name: p.title, item: url }
+    ]
   };
 
   return `${SEO_START}
@@ -173,6 +184,7 @@ ${includeTitle ? `<title>${escapeHtml(p.title)}</title>\n` : ""}<meta name="desc
 <meta name="twitter:description" content="${escapeAttr(p.tagline)}">
 <meta name="twitter:image" content="${SITE_ORIGIN}/assets/og-cover.png">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
+<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>
 ${SEO_END}`;
 }
 
@@ -207,6 +219,50 @@ function injectSeo(projects) {
     const block = seoBlock(p, !hasTitle);
     html = html.slice(0, headEnd) + `${block}\n` + html.slice(headEnd);
 
+    fs.writeFileSync(filePath, html, "utf8");
+  }
+}
+
+const GA_START = "<!-- AUTO-GA:START (scripts/generate-projects.js জেনারেট করে — সরাসরি এডিট করবেন না) -->";
+const GA_END = "<!-- AUTO-GA:END -->";
+
+function gaBlock() {
+  return `${GA_START}
+<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '${GA_MEASUREMENT_ID}');
+</script>
+${GA_END}`;
+}
+
+function injectGa(projects) {
+  for (const p of projects) {
+    const filePath = path.join(PROJECTS_DIR, p.id, "index.html");
+    if (!fs.existsSync(filePath)) continue;
+
+    let html = fs.readFileSync(filePath, "utf8");
+
+    let prevStart = html.indexOf(GA_START);
+    if (prevStart !== -1) {
+      const prevEnd = html.indexOf(GA_END, prevStart);
+      if (prevEnd !== -1) {
+        if (html[prevStart - 1] === "\n") prevStart -= 1;
+        html = html.slice(0, prevStart) + html.slice(prevEnd + GA_END.length);
+      }
+    }
+
+    const headMatch = html.match(/<head[^>]*>/);
+    if (!headMatch) {
+      console.warn(`⚠️  projects/${p.id}/index.html-এ <head> পাওয়া যায়নি — GA ট্যাগ যোগ করা গেল না।`);
+      fs.writeFileSync(filePath, html, "utf8");
+      continue;
+    }
+
+    const insertAt = headMatch.index + headMatch[0].length;
+    html = html.slice(0, insertAt) + "\n" + gaBlock() + html.slice(insertAt);
     fs.writeFileSync(filePath, html, "utf8");
   }
 }
@@ -291,9 +347,10 @@ function main() {
   fs.writeFileSync(OUTPUT_FILE, render(projects), "utf8");
   fs.writeFileSync(SITEMAP_FILE, renderSitemap(projects), "utf8");
   fs.writeFileSync(LLMS_FILE, renderLlmsTxt(projects), "utf8");
+  injectGa(projects);
   injectSeo(projects);
   injectBackLink(projects);
-  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো, এবং প্রতিটা প্রজেক্ট পেজে SEO/favicon/ব্যাক-লিংক ইনজেক্ট করা হলো।`);
+  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো, এবং প্রতিটা প্রজেক্ট পেজে GA/SEO/favicon/ব্যাক-লিংক ইনজেক্ট করা হলো।`);
 }
 
 main();
