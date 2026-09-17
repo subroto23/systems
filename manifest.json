@@ -1,7 +1,7 @@
 {
   "name": "Systems Hub",
   "short_name": "SystemsHub",
-  "description": "প্রডাকশন-গ্রেড সিস্টেম ও প্রজেক্টসমূহের কেন্দ্রীয় ডিরেক্টরি।",
+  "description": "সফটওয়্যার ইঞ্জিনিয়ার Subroto Das-এর ব্যক্তিগত প্রজেক্ট ও সিস্টেম ডিজাইনের কেন্দ্রীয় ডিরেক্টরি।",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0d14",
