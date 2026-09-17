@@ -646,7 +646,48 @@ a { color: inherit; text-decoration: none; }
 .highlight-card p { color: var(--text-muted); font-size: 0.88rem; margin: 0; }
 
 /* ============ Video Course ============ */
-.course-section { padding-block: 72px; background: var(--bg-subtle); border-block: 1px solid var(--border); }
+.course-section {
+  position: relative;
+  padding-block: 72px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  scroll-margin-top: 76px;
+}
+.course-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 70%);
+}
+.course-section .container { position: relative; z-index: 1; }
+
+.course-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.course-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 22px;
+  margin-top: 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
 
 .course-layout {
   display: grid;
@@ -685,11 +726,23 @@ a { color: inherit; text-decoration: none; }
 .course-info > p { color: var(--text-muted); font-size: 0.92rem; margin: 0; }
 .course-topics {
   margin: 0 0 20px;
-  padding-left: 20px;
+  padding-left: 0;
+  list-style: none;
   color: var(--text-muted);
   font-size: 0.9rem;
   display: grid;
-  gap: 8px;
+  gap: 10px;
+}
+.course-topics li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.4;
+}
+.course-topics li span {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1.4;
 }
 .btn-course {
   display: inline-flex;

@@ -89,9 +89,9 @@
     </a>
 
     <nav class="main-nav" id="mainNav" aria-label="প্রধান নেভিগেশন">
+      <a href="#course">ভিডিও কোর্স</a>
       <a href="#projects">সিস্টেমসমূহ</a>
       <a href="#highlights">বৈশিষ্ট্য</a>
-      <a href="#course">ভিডিও কোর্স</a>
       <a href="#contact">যোগাযোগ</a>
     </nav>
 
@@ -109,102 +109,21 @@
 
 <main id="main">
 
-  <section class="hero">
-    <div class="hero-bg" aria-hidden="true">
-      <span class="blob blob-a"></span>
-      <span class="blob blob-b"></span>
-      <span class="hero-grid"></span>
-    </div>
-    <div class="container hero-inner">
-      <p class="eyebrow">প্রোডাকশন ইঞ্জিনিয়ারিং, শেখা যায় এমনভাবে</p>
-      <h1>প্রোডাকশনে <span class="accent">কীভাবে কাজ করতে হয়</span> —<br>এখান থেকেই শেখা যায়</h1>
-      <p class="hero-sub">
-        প্রতিটা প্রজেক্ট শুরু হয়েছে একটা বাস্তব প্রোডাকশন সমস্যা দিয়ে — কী সমস্যা হয়েছিল, কেন হয়েছিল, আর
-        কীভাবে ধাপে ধাপে সমাধান করা হয়েছে, সবটা দেখানো আছে। একবার পড়লেই স্কেলেবিলিটি, ডেটাবেস ইন্টারনালস,
-        অথেনটিকেশন আর রিয়েল-টাইম সিস্টেমের মতো কোর বিষয়গুলো বাস্তব উদাহরণ দিয়ে বোঝা যায়।
-      </p>
-
-      <ul class="hero-topics" aria-label="যেসব কোর বিষয় শেখা যাবে">
-        <li><span aria-hidden="true">⚡</span> স্কেলেবিলিটি</li>
-        <li><span aria-hidden="true">🗄️</span> ডেটাবেস ইন্টারনালস</li>
-        <li><span aria-hidden="true">🔐</span> অথ ও সিকিউরিটি</li>
-        <li><span aria-hidden="true">🔌</span> রিয়েল-টাইম সিস্টেম</li>
-        <li><span aria-hidden="true">🧱</span> সিস্টেম আর্কিটেকচার</li>
-      </ul>
-
-      <div class="search-wrap" role="search">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input
-          type="search"
-          id="searchInput"
-          placeholder="সিস্টেমের নাম, কাজ বা ট্যাগ লিখে খুঁজুন… (যেমনঃ inventory, billing, auth)"
-          autocomplete="off"
-          aria-label="সিস্টেম খুঁজুন">
-        <kbd class="search-kbd">/</kbd>
-      </div>
-
-      <div class="stats" id="stats" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <section class="projects-section" id="projects">
-    <div class="container">
-      <div class="section-head reveal">
-        <h2>সিস্টেমসমূহ</h2>
-      </div>
-
-      <div class="filters" id="filters" role="tablist" aria-label="ক্যাটাগরি ফিল্টার">
-        <!-- filter chips injected by main.js -->
-      </div>
-
-      <div class="project-grid" id="projectGrid" aria-live="polite">
-        <!-- project cards injected by main.js -->
-      </div>
-
-      <p class="no-results" id="noResults" hidden>কোনো সিস্টেম পাওয়া যায়নি। অন্য কিছু দিয়ে খুঁজে দেখুন।</p>
-    </div>
-  </section>
-
-  <section class="highlights-section" id="highlights">
-    <div class="container">
-      <div class="section-head reveal center">
-        <h2>কেন এই সিস্টেমগুলো আলাদা</h2>
-        <p class="section-sub">প্রতিটা সিস্টেম বানানোর সময় যেসব বিষয় মাথায় রাখা হয়</p>
-      </div>
-      <div class="highlight-grid">
-        <div class="highlight-card reveal">
-          <span class="highlight-icon" aria-hidden="true">⚡</span>
-          <h3>স্কেলেবিলিটি প্রথমে</h3>
-          <p>লাখো ইউজার ও হাই-থ্রুপুট লোড মাথায় রেখে queue, cache ও distributed lock দিয়ে ডিজাইন করা।</p>
-        </div>
-        <div class="highlight-card reveal">
-          <span class="highlight-icon" aria-hidden="true">🔒</span>
-          <h3>রিলায়াবিলিটি ও সিকিউরিটি</h3>
-          <p>retry, dead-token cleanup, rate-limiting ও cache-stampede প্রোটেকশন — প্রোডাকশন-রেডি প্র্যাকটিস।</p>
-        </div>
-        <div class="highlight-card reveal">
-          <span class="highlight-icon" aria-hidden="true">📱</span>
-          <h3>যেকোনো ডিভাইসে</h3>
-          <p>মোবাইল, ট্যাব ও ডেস্কটপ — সব স্ক্রিনে সমান স্বচ্ছন্দে ব্যবহারযোগ্য, রেসপনসিভ ইন্টারফেস।</p>
-        </div>
-        <div class="highlight-card reveal">
-          <span class="highlight-icon" aria-hidden="true">📖</span>
-          <h3>ভিজ্যুয়াল ব্যাখ্যা</h3>
-          <p>শুকনো ডকুমেন্টেশন নয় — অ্যানিমেটেড, ইন্টারঅ্যাক্টিভ স্টোরির মাধ্যমে আর্কিটেকচার বোঝানো।</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
   <section class="course-section" id="course">
+    <div class="course-bg" aria-hidden="true"></div>
     <div class="container">
-      <div class="section-head reveal center">
-        <h2>C প্রোগ্রামিং শিখুন — ফ্রি ভিডিও কোর্স (বাংলায়)</h2>
-        <p class="section-sub">নিজের বানানো একটা ফ্রি ইউটিউব প্লেলিস্ট — বেসিক থেকে শুরু করে প্রবলেম সলভিং পর্যন্ত, একটার পর একটা ভিডিওতে ধাপে ধাপে শেখানো</p>
+      <div class="section-head center">
+        <span class="course-badge">🎥 ফ্রি ইউটিউব কোর্স · বাংলায়</span>
+        <h2>C প্রোগ্রামিং শিখুন শুরু থেকে — একদম ফ্রিতে</h2>
+        <p class="section-sub">নিজের বানানো একটা প্লেলিস্ট — বেসিক থেকে শুরু করে প্রবলেম সলভিং পর্যন্ত, একটার পর একটা ভিডিওতে ধাপে ধাপে শেখানো</p>
+        <div class="course-stats">
+          <span>📺 ১৯টি ভিডিও</span>
+          <span>⏱️ ৯+ ঘণ্টা কনটেন্ট</span>
+          <span>💯 সম্পূর্ণ ফ্রি</span>
+        </div>
       </div>
 
-      <div class="course-layout reveal">
+      <div class="course-layout">
         <div class="course-player">
           <div class="course-player-frame">
             <iframe
@@ -226,13 +145,13 @@
 
           <h4>যা যা শিখবেন:</h4>
           <ul class="course-topics">
-            <li>VS Code ও কম্পাইলার সেটআপ (Windows-এ প্রথম থেকে)</li>
-            <li>ভ্যারিয়েবল, ডেটা টাইপ, ইনপুট/আউটপুট, অপারেটর ও কন্ডিশনাল</li>
-            <li>লুপ দিয়ে বাস্তব প্রবলেম সলভিং (for, while, do-while)</li>
-            <li>অ্যারে — ইনসার্ট, ডিলিট, সোয়াপ, রিভার্স, টু-পয়েন্টার টেকনিক</li>
-            <li>স্ট্রিং ও স্ট্রিং ফাংশন (strcpy, strcat, gets vs fgets)</li>
-            <li>ফাংশন, পয়েন্টার, রিকার্শন ও 2D অ্যারে</li>
-            <li>প্যাটার্ন প্রিন্টিং, সিলেকশন সর্ট ও টু-সাম-এর মতো ক্লাসিক প্রবলেম</li>
+            <li><span aria-hidden="true">⚙️</span> VS Code ও কম্পাইলার সেটআপ (Windows-এ প্রথম থেকে)</li>
+            <li><span aria-hidden="true">🔤</span> ভ্যারিয়েবল, ডেটা টাইপ, ইনপুট/আউটপুট, অপারেটর ও কন্ডিশনাল</li>
+            <li><span aria-hidden="true">🔁</span> লুপ দিয়ে বাস্তব প্রবলেম সলভিং (for, while, do-while)</li>
+            <li><span aria-hidden="true">📊</span> অ্যারে — ইনসার্ট, ডিলিট, সোয়াপ, রিভার্স, টু-পয়েন্টার টেকনিক</li>
+            <li><span aria-hidden="true">🔡</span> স্ট্রিং ও স্ট্রিং ফাংশন (strcpy, strcat, gets vs fgets)</li>
+            <li><span aria-hidden="true">🧠</span> ফাংশন, পয়েন্টার, রিকার্শন ও 2D অ্যারে</li>
+            <li><span aria-hidden="true">🧩</span> প্যাটার্ন প্রিন্টিং, সিলেকশন সর্ট ও টু-সাম-এর মতো ক্লাসিক প্রবলেম</li>
           </ul>
 
           <a class="btn-course" href="https://www.youtube.com/playlist?list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e" target="_blank" rel="noopener noreferrer">
@@ -478,6 +397,94 @@
       </div>
     </div>
   </section>
+
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true">
+      <span class="blob blob-a"></span>
+      <span class="blob blob-b"></span>
+      <span class="hero-grid"></span>
+    </div>
+    <div class="container hero-inner">
+      <p class="eyebrow">প্রোডাকশন ইঞ্জিনিয়ারিং, শেখা যায় এমনভাবে</p>
+      <h1>প্রোডাকশনে <span class="accent">কীভাবে কাজ করতে হয়</span> —<br>এখান থেকেই শেখা যায়</h1>
+      <p class="hero-sub">
+        প্রতিটা প্রজেক্ট শুরু হয়েছে একটা বাস্তব প্রোডাকশন সমস্যা দিয়ে — কী সমস্যা হয়েছিল, কেন হয়েছিল, আর
+        কীভাবে ধাপে ধাপে সমাধান করা হয়েছে, সবটা দেখানো আছে। একবার পড়লেই স্কেলেবিলিটি, ডেটাবেস ইন্টারনালস,
+        অথেনটিকেশন আর রিয়েল-টাইম সিস্টেমের মতো কোর বিষয়গুলো বাস্তব উদাহরণ দিয়ে বোঝা যায়।
+      </p>
+
+      <ul class="hero-topics" aria-label="যেসব কোর বিষয় শেখা যাবে">
+        <li><span aria-hidden="true">⚡</span> স্কেলেবিলিটি</li>
+        <li><span aria-hidden="true">🗄️</span> ডেটাবেস ইন্টারনালস</li>
+        <li><span aria-hidden="true">🔐</span> অথ ও সিকিউরিটি</li>
+        <li><span aria-hidden="true">🔌</span> রিয়েল-টাইম সিস্টেম</li>
+        <li><span aria-hidden="true">🧱</span> সিস্টেম আর্কিটেকচার</li>
+      </ul>
+
+      <div class="search-wrap" role="search">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="সিস্টেমের নাম, কাজ বা ট্যাগ লিখে খুঁজুন… (যেমনঃ inventory, billing, auth)"
+          autocomplete="off"
+          aria-label="সিস্টেম খুঁজুন">
+        <kbd class="search-kbd">/</kbd>
+      </div>
+
+      <div class="stats" id="stats" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="projects-section" id="projects">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2>সিস্টেমসমূহ</h2>
+      </div>
+
+      <div class="filters" id="filters" role="tablist" aria-label="ক্যাটাগরি ফিল্টার">
+        <!-- filter chips injected by main.js -->
+      </div>
+
+      <div class="project-grid" id="projectGrid" aria-live="polite">
+        <!-- project cards injected by main.js -->
+      </div>
+
+      <p class="no-results" id="noResults" hidden>কোনো সিস্টেম পাওয়া যায়নি। অন্য কিছু দিয়ে খুঁজে দেখুন।</p>
+    </div>
+  </section>
+
+  <section class="highlights-section" id="highlights">
+    <div class="container">
+      <div class="section-head reveal center">
+        <h2>কেন এই সিস্টেমগুলো আলাদা</h2>
+        <p class="section-sub">প্রতিটা সিস্টেম বানানোর সময় যেসব বিষয় মাথায় রাখা হয়</p>
+      </div>
+      <div class="highlight-grid">
+        <div class="highlight-card reveal">
+          <span class="highlight-icon" aria-hidden="true">⚡</span>
+          <h3>স্কেলেবিলিটি প্রথমে</h3>
+          <p>লাখো ইউজার ও হাই-থ্রুপুট লোড মাথায় রেখে queue, cache ও distributed lock দিয়ে ডিজাইন করা।</p>
+        </div>
+        <div class="highlight-card reveal">
+          <span class="highlight-icon" aria-hidden="true">🔒</span>
+          <h3>রিলায়াবিলিটি ও সিকিউরিটি</h3>
+          <p>retry, dead-token cleanup, rate-limiting ও cache-stampede প্রোটেকশন — প্রোডাকশন-রেডি প্র্যাকটিস।</p>
+        </div>
+        <div class="highlight-card reveal">
+          <span class="highlight-icon" aria-hidden="true">📱</span>
+          <h3>যেকোনো ডিভাইসে</h3>
+          <p>মোবাইল, ট্যাব ও ডেস্কটপ — সব স্ক্রিনে সমান স্বচ্ছন্দে ব্যবহারযোগ্য, রেসপনসিভ ইন্টারফেস।</p>
+        </div>
+        <div class="highlight-card reveal">
+          <span class="highlight-icon" aria-hidden="true">📖</span>
+          <h3>ভিজ্যুয়াল ব্যাখ্যা</h3>
+          <p>শুকনো ডকুমেন্টেশন নয় — অ্যানিমেটেড, ইন্টারঅ্যাক্টিভ স্টোরির মাধ্যমে আর্কিটেকচার বোঝানো।</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
 
   <section class="contact-section" id="contact">
     <div class="container">
