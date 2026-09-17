@@ -35,11 +35,17 @@
 <meta name="twitter:image" content="https://systems.subromart.com/assets/og-cover.png">
 
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="assets/favicon-32x32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16x16.png" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b0f19">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap"></noscript>
 <link rel="stylesheet" href="assets/css/style.css">
 
 <!-- JSON-LD structured data: helps traditional SEO crawlers AND AI/LLM search engines
@@ -77,7 +83,7 @@
 
 <header class="site-header" id="top">
   <div class="container header-inner">
-    <a class="brand" href="#top" aria-label="Systems Hub — হোমে যান">
+    <a class="brand" href="#top">
       <span class="brand-mark" aria-hidden="true">◆</span>
       <span class="brand-text">Systems<span class="brand-accent">Hub</span></span>
     </a>
@@ -110,14 +116,14 @@
       <span class="hero-grid"></span>
     </div>
     <div class="container hero-inner">
-      <p class="eyebrow reveal">প্রডাকশন-গ্রেড সিস্টেম ডিরেক্টরি</p>
-      <h1 class="reveal">একটা জায়গায় — <span class="accent">সব সিস্টেম</span>,<br>এক নজরে কাজ বোঝা যায়</h1>
-      <p class="hero-sub reveal">
+      <p class="eyebrow">প্রডাকশন-গ্রেড সিস্টেম ডিরেক্টরি</p>
+      <h1>একটা জায়গায় — <span class="accent">সব সিস্টেম</span>,<br>এক নজরে কাজ বোঝা যায়</h1>
+      <p class="hero-sub">
         আমার তৈরি প্রতিটা প্রজেক্ট এখানে তালিকাভুক্ত — কোনটা কী কাজ করে, কীভাবে কাজ করে তার সংক্ষিপ্ত বিবরণসহ।
         যেকোনো একটা সিস্টেমে ক্লিক করলেই সরাসরি সেই সিস্টেমের বিস্তারিত পেজে চলে যাবেন।
       </p>
 
-      <div class="search-wrap reveal" role="search">
+      <div class="search-wrap" role="search">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <input
           type="search"
@@ -128,7 +134,7 @@
         <kbd class="search-kbd">/</kbd>
       </div>
 
-      <div class="stats reveal" id="stats" aria-live="polite"></div>
+      <div class="stats" id="stats" aria-live="polite"></div>
     </div>
   </section>
 
