@@ -205,11 +205,12 @@
         <div class="course-layout">
           <div class="course-player">
             <div class="course-player-frame">
-              <iframe src="https://www.youtube.com/embed/videoseries?list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e"
-                title="C Programming Bangla — সম্পূর্ণ প্লেলিস্ট" loading="lazy"
+              <iframe id="coursePlayer" src="https://www.youtube.com/embed/4kMM2WtKD9k?list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=1"
+                title="C Programming Bangla — ভিডিও প্লেয়ার" loading="lazy"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen></iframe>
             </div>
+            <p class="course-now-playing">▶ এখন চলছে: <span id="nowPlayingTitle">VS Code + Compiler সেটআপ (Windows-এ C/C++ প্রোগ্রামিং শুরু করার প্রথম ধাপ)</span></p>
           </div>
 
           <div class="course-info">
@@ -230,278 +231,293 @@
         </div>
 
         <div class="course-episodes reveal">
-          <h3 class="course-episodes-title">কোর্স কনটেন্ট — ১৯টি ভিডিও</h3>
+          <h3 class="course-episodes-title">কোর্স কনটেন্ট — ১৯টি ভিডিও (ক্লিক করলে এখানেই চলবে)</h3>
           <ol class="episode-list">
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=4kMM2WtKD9k&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=1"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn is-active" data-video-id="4kMM2WtKD9k" data-index="1" aria-pressed="true">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/4kMM2WtKD9k/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/4kMM2WtKD9k/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">01</span>
-                  <span class="episode-title">VS Code + Compiler সেটআপ (Windows-এ C/C++ প্রোগ্রামিং শুরু করার প্রথম
-                    ধাপ)</span>
+                  <span class="episode-top">
+                    <span class="episode-index">01</span>
+                    <span class="episode-title">VS Code + Compiler সেটআপ (Windows-এ C/C++ প্রোগ্রামিং শুরু করার প্রথম ধাপ)</span>
+                  </span>
+                  <span class="episode-desc">VS Code, Git Bash আর GCC কম্পাইলার সেটআপ করে প্রথম C প্রোগ্রাম (Hello World) রান করা শিখবেন — একদম শূন্য থেকে।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=qbWKshemXyU&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=2"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="qbWKshemXyU" data-index="2" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/qbWKshemXyU/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/qbWKshemXyU/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">02</span>
-                  <span class="episode-title">C Programming Basics — Structure, Input, Output, Variables & Data
-                    Types</span>
+                  <span class="episode-top">
+                    <span class="episode-index">02</span>
+                    <span class="episode-title">C Programming Basics — Structure, Input, Output, Variables & Data Types</span>
+                  </span>
+                  <span class="episode-desc">C প্রোগ্রামের বেসিক গঠন, ভ্যারিয়েবল, ডেটা টাইপ এবং scanf/printf দিয়ে ইনপুট-আউটপুট নেওয়া শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=W0bbWySj65A&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=3"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="W0bbWySj65A" data-index="3" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/W0bbWySj65A/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/W0bbWySj65A/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">03</span>
-                  <span class="episode-title">Operators & Conditional Statement</span>
+                  <span class="episode-top">
+                    <span class="episode-index">03</span>
+                    <span class="episode-title">Operators & Conditional Statement</span>
+                  </span>
+                  <span class="episode-desc">Arithmetic ও logical operator, আর if-else দিয়ে প্রোগ্রামে সিদ্ধান্ত নেওয়ার লজিক শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=rQu_ev4uk3g&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=4"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="rQu_ev4uk3g" data-index="4" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/rQu_ev4uk3g/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/rQu_ev4uk3g/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">04</span>
-                  <span class="episode-title">Loop Full Tutorial — For, While, do-While + Problem Solving</span>
+                  <span class="episode-top">
+                    <span class="episode-index">04</span>
+                    <span class="episode-title">Loop Full Tutorial — For, While, do-While + Problem Solving</span>
+                  </span>
+                  <span class="episode-desc">for, while, do-while লুপ ব্যবহার করে বাস্তব প্রবলেম সলভ করা ধাপে ধাপে শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=j1pt0ZfOAHE&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=5"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="j1pt0ZfOAHE" data-index="5" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/j1pt0ZfOAHE/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/j1pt0ZfOAHE/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">05</span>
-                  <span class="episode-title">VS Code Snippet + Codeforces Problem Solving + Data Types</span>
+                  <span class="episode-top">
+                    <span class="episode-index">05</span>
+                    <span class="episode-title">VS Code Snippet + Codeforces Problem Solving + Data Types</span>
+                  </span>
+                  <span class="episode-desc">দ্রুত কোড লিখতে VS Code স্নিপেট ব্যবহার, আর Codeforces-এ প্রবলেম সলভ করার প্র্যাকটিস করবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=LtcvVe72bV8&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=6"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="LtcvVe72bV8" data-index="6" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/LtcvVe72bV8/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/LtcvVe72bV8/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">06</span>
-                  <span class="episode-title">i++ vs ++i, +=, -=, = ও Nested Loop ব্যাখ্যা</span>
+                  <span class="episode-top">
+                    <span class="episode-index">06</span>
+                    <span class="episode-title">i++ vs ++i, +=, -=, = ও Nested Loop ব্যাখ্যা</span>
+                  </span>
+                  <span class="episode-desc">i++ বনাম ++i, কম্পাউন্ড অপারেটর (+=, -=) আর nested loop-এর সূক্ষ্ম পার্থক্যগুলো বুঝবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=GEm7bh3r9fU&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=7"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="GEm7bh3r9fU" data-index="7" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/GEm7bh3r9fU/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/GEm7bh3r9fU/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">07</span>
-                  <span class="episode-title">Array Tutorial — Declaration, User Input & Element Access</span>
+                  <span class="episode-top">
+                    <span class="episode-index">07</span>
+                    <span class="episode-title">Array Tutorial — Declaration, User Input & Element Access</span>
+                  </span>
+                  <span class="episode-desc">Array ডিক্লেয়ার করা, ইউজারের কাছ থেকে ইনপুট নেওয়া এবং এলিমেন্ট অ্যাক্সেস করা শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=0TMqoQ_ZQkY&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=8"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="0TMqoQ_ZQkY" data-index="8" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/0TMqoQ_ZQkY/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/0TMqoQ_ZQkY/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">08</span>
-                  <span class="episode-title">Array Element Insert, Delete, Swap & Reverse — Two Pointer
-                    Technique</span>
+                  <span class="episode-top">
+                    <span class="episode-index">08</span>
+                    <span class="episode-title">Array Element Insert, Delete, Swap & Reverse — Two Pointer Technique</span>
+                  </span>
+                  <span class="episode-desc">Array-তে এলিমেন্ট ইনসার্ট, ডিলিট, সোয়াপ, রিভার্স করা আর Two Pointer টেকনিক শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=Ro2cIHQbzIk&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=9"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="Ro2cIHQbzIk" data-index="9" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/Ro2cIHQbzIk/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/Ro2cIHQbzIk/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">09</span>
-                  <span class="episode-title">String কি? Null Character, String Length, gets vs fgets</span>
+                  <span class="episode-top">
+                    <span class="episode-index">09</span>
+                    <span class="episode-title">String কি? Null Character, String Length, gets vs fgets</span>
+                  </span>
+                  <span class="episode-desc">String আসলে কী, null character কী কাজ করে, আর gets() বনাম fgets()-এর পার্থক্য বুঝবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=kIeYg7xmZi8&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=10"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="kIeYg7xmZi8" data-index="10" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/kIeYg7xmZi8/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/kIeYg7xmZi8/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">10</span>
-                  <span class="episode-title">strcpy() এবং strcat() কিভাবে কাজ করে?</span>
+                  <span class="episode-top">
+                    <span class="episode-index">10</span>
+                    <span class="episode-title">strcpy() এবং strcat() কিভাবে কাজ করে?</span>
+                  </span>
+                  <span class="episode-desc">strcpy() এবং strcat() ফাংশন ভেতরে ঠিক কীভাবে কাজ করে তা বিস্তারিত বুঝবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=0C-2Oealp_c&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=11"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="0C-2Oealp_c" data-index="11" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/0C-2Oealp_c/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/0C-2Oealp_c/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">11</span>
-                  <span class="episode-title">Types of Data Structure</span>
+                  <span class="episode-top">
+                    <span class="episode-index">11</span>
+                    <span class="episode-title">Types of Data Structure</span>
+                  </span>
+                  <span class="episode-desc">বিভিন্ন ধরনের Data Structure (linear, non-linear) নিয়ে প্রাথমিক পরিচিতি পাবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=_A2ne4N3VnI&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=12"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="_A2ne4N3VnI" data-index="12" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/_A2ne4N3VnI/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/_A2ne4N3VnI/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">12</span>
-                  <span class="episode-title">যেকোনো Pattern প্রিন্ট করার লজিক</span>
+                  <span class="episode-top">
+                    <span class="episode-index">12</span>
+                    <span class="episode-title">যেকোনো Pattern প্রিন্ট করার লজিক</span>
+                  </span>
+                  <span class="episode-desc">নেস্টেড লুপ দিয়ে যেকোনো নাম্বার/স্টার প্যাটার্ন প্রিন্ট করার লজিক শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=iHNBIv3aCKg&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=13"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="iHNBIv3aCKg" data-index="13" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/iHNBIv3aCKg/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/iHNBIv3aCKg/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">13</span>
-                  <span class="episode-title">Two Sum — দুটো নাম্বার দিয়ে Target Sum বের করা</span>
+                  <span class="episode-top">
+                    <span class="episode-index">13</span>
+                    <span class="episode-title">Two Sum — দুটো নাম্বার দিয়ে Target Sum বের করা</span>
+                  </span>
+                  <span class="episode-desc">Two Sum ক্লাসিক প্রবলেমটা সমাধান করে array ও লজিক বিল্ডিং-এর প্র্যাকটিস করবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=I2HwysNlZU8&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=14"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="I2HwysNlZU8" data-index="14" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/I2HwysNlZU8/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/I2HwysNlZU8/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">14</span>
-                  <span class="episode-title">Selection Sort কী? কিভাবে কাজ করে?</span>
+                  <span class="episode-top">
+                    <span class="episode-index">14</span>
+                    <span class="episode-title">Selection Sort কী? কিভাবে কাজ করে?</span>
+                  </span>
+                  <span class="episode-desc">Selection Sort অ্যালগরিদম ধাপে ধাপে কীভাবে কাজ করে, ভিজ্যুয়ালি দেখে বুঝবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=CYIUA8zw4J8&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=15"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="CYIUA8zw4J8" data-index="15" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/CYIUA8zw4J8/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/CYIUA8zw4J8/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">15</span>
-                  <span class="episode-title">Function কি? Scope, Parameter, Return Type & User Defined Function</span>
+                  <span class="episode-top">
+                    <span class="episode-index">15</span>
+                    <span class="episode-title">Function কি? Scope, Parameter, Return Type & User Defined Function</span>
+                  </span>
+                  <span class="episode-desc">Function-এর scope, parameter, return type এবং নিজের user-defined function বানানো শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=q5EHbPTVW0k&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=16"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="q5EHbPTVW0k" data-index="16" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/q5EHbPTVW0k/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/q5EHbPTVW0k/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">16</span>
-                  <span class="episode-title">Pointer কি? কেন ব্যবহার করি? scanf(&), Pass by Reference</span>
+                  <span class="episode-top">
+                    <span class="episode-index">16</span>
+                    <span class="episode-title">Pointer কি? কেন ব্যবহার করি? scanf(&), Pass by Reference</span>
+                  </span>
+                  <span class="episode-desc">Pointer আসলে কী, কেন দরকার, scanf(&) আর Pass by Reference কীভাবে কাজ করে তা শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=dzaIjjPUx2U&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=17"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="dzaIjjPUx2U" data-index="17" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/dzaIjjPUx2U/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/dzaIjjPUx2U/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">17</span>
-                  <span class="episode-title">Recursion কি? Print 1 to N, Array & Logic</span>
+                  <span class="episode-top">
+                    <span class="episode-index">17</span>
+                    <span class="episode-title">Recursion কি? Print 1 to N, Array & Logic</span>
+                  </span>
+                  <span class="episode-desc">Recursive function দিয়ে সমস্যা সমাধান — 1 থেকে N প্রিন্ট আর array-তে রিকার্শনের প্রয়োগ শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=YlSZberUoSw&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=18"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="YlSZberUoSw" data-index="18" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/YlSZberUoSw/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/YlSZberUoSw/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">18</span>
-                  <span class="episode-title">2D Array কি? কেন ব্যবহার করবো?</span>
+                  <span class="episode-top">
+                    <span class="episode-index">18</span>
+                    <span class="episode-title">2D Array কি? কেন ব্যবহার করবো?</span>
+                  </span>
+                  <span class="episode-desc">2D Array কী, কেন দরকার হয় আর কীভাবে ডিক্লেয়ার ও ব্যবহার করবেন তা শিখবেন।</span>
                 </span>
-              </a>
+              </button>
             </li>
             <li class="episode-item">
-              <a href="https://www.youtube.com/watch?v=mp6H74D8Rew&list=PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e&index=19"
-                target="_blank" rel="noopener noreferrer">
+              <button type="button" class="episode-item-btn" data-video-id="mp6H74D8Rew" data-index="19" aria-pressed="false">
                 <span class="episode-thumb">
-                  <img src="https://i.ytimg.com/vi/mp6H74D8Rew/hqdefault.jpg" alt="" loading="lazy" width="168"
-                    height="94">
+                  <img src="https://i.ytimg.com/vi/mp6H74D8Rew/hqdefault.jpg" alt="" loading="lazy" width="168" height="94">
                   <span class="episode-play" aria-hidden="true">▶</span>
                 </span>
                 <span class="episode-meta">
-                  <span class="episode-index">19</span>
-                  <span class="episode-title">সম্পূর্ণ কোর্স একসাথে — Zero to Advanced (9+ ঘণ্টা)</span>
+                  <span class="episode-top">
+                    <span class="episode-index">19</span>
+                    <span class="episode-title">সম্পূর্ণ কোর্স একসাথে — Zero to Advanced (9+ ঘণ্টা)</span>
+                  </span>
+                  <span class="episode-desc">পুরো কোর্সটা একটানা, একসাথে — একদম শূন্য থেকে অ্যাডভান্সড পর্যন্ত রিভিশনের জন্য।</span>
                 </span>
-              </a>
+              </button>
             </li>
-
           </ol>
         </div>
       </div>

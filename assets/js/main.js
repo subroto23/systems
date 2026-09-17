@@ -222,6 +222,36 @@
     });
   }
 
+  // ---------- Video course: play episodes inline instead of leaving the site ----------
+  function initCoursePlayer() {
+    const player = document.getElementById("coursePlayer");
+    const nowPlaying = document.getElementById("nowPlayingTitle");
+    const buttons = document.querySelectorAll(".episode-item-btn");
+    if (!player || !buttons.length) return;
+
+    const PLAYLIST_ID = "PLN0gL8cCV7zyIcctNqzy1OxO-gGsmDw9e";
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const videoId = btn.dataset.videoId;
+        const index = btn.dataset.index;
+        const title = btn.querySelector(".episode-title").textContent;
+
+        player.src = `https://www.youtube.com/embed/${videoId}?list=${PLAYLIST_ID}&index=${index}&autoplay=1`;
+        if (nowPlaying) nowPlaying.textContent = title;
+
+        buttons.forEach(b => {
+          b.classList.remove("is-active");
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.classList.add("is-active");
+        btn.setAttribute("aria-pressed", "true");
+
+        document.querySelector(".course-player").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  }
+
   // ---------- Init ----------
   function init() {
     initTheme();
@@ -234,6 +264,7 @@
     renderGrid();
     initSearch();
     injectStructuredData();
+    initCoursePlayer();
   }
 
   document.addEventListener("DOMContentLoaded", init);
