@@ -534,15 +534,15 @@
                     <div><span style="color:var(--purple);">await</span> prisma.<span
                             style="color:var(--accent);">$transaction</span>(<span
                             style="color:var(--yellow);">async</span> (tx) <span style="color:var(--yellow);">=></span>
-                        {{'{'}} </div>
+                        {{} </div>
                     <div>&nbsp;&nbsp;<span style="color:var(--purple);">await</span> tx.account.<span
-                            style="color:var(--accent);">update</span>({'{'} where: {'{'} id: rahimId {'}'}, data: {'{'}
-                        balance: {'{'} <span style="color:var(--red);">decrement</span>: 5000 {'}'} {'}'} {'}'});</div>
+                            style="color:var(--accent);">update</span>({ where: { id: rahimId }, data: {
+                        balance: { <span style="color:var(--red);">decrement</span>: 5000 } } });</div>
                     <div>&nbsp;&nbsp;<span style="color:var(--purple);">await</span> tx.account.<span
-                            style="color:var(--accent);">update</span>({'{'} where: {'{'} id: karimId {'}'}, data: {'{'}
-                        balance: {'{'} <span style="color:var(--green);">increment</span>: 5000 {'}'} {'}'} {'}'});
+                            style="color:var(--accent);">update</span>({ where: { id: karimId }, data: {
+                        balance: { <span style="color:var(--green);">increment</span>: 5000 } } });
                     </div>
-                    <div>{'}'});&nbsp;&nbsp;<span style="color:var(--dim);">// error হলে দুটোই rollback</span></div>
+                    <div>});&nbsp;&nbsp;<span style="color:var(--dim);">// error হলে দুটোই rollback</span></div>
                 </div>
             </div>
         </div>
@@ -777,16 +777,16 @@
                             style="color:var(--purple);">await</span> prisma.<span
                             style="color:var(--accent);">$transaction</span>(<span
                             style="color:var(--yellow);">async</span> (tx) <span style="color:var(--yellow);">=></span>
-                        {'{'}</div>
+                        {</div>
                     <div>&nbsp;&nbsp;<span style="color:var(--dim);">// stock কমাও</span></div>
                     <div>&nbsp;&nbsp;<span style="color:var(--purple);">await</span> tx.product.<span
-                            style="color:var(--accent);">update</span>({'{'} where: {'{'} id {'}'}, data: {'{'} stock:
-                        {'{'} <span style="color:var(--red);">decrement</span>: 1 {'}'} {'}'} {'}'});</div>
+                            style="color:var(--accent);">update</span>({ where: { id }, data: { stock:
+                        { <span style="color:var(--red);">decrement</span>: 1 } } });</div>
                     <div>&nbsp;&nbsp;<span style="color:var(--dim);">// order তৈরি করো</span></div>
                     <div>&nbsp;&nbsp;<span style="color:var(--purple);">return</span> tx.order.<span
-                            style="color:var(--accent);">create</span>({'{'} data: {'{'} userId, productId, amount {'}'}
-                        {'}'});</div>
-                    <div>{'}'});</div>
+                            style="color:var(--accent);">create</span>({ data: { userId, productId, amount }
+                        });</div>
+                    <div>});</div>
                     <div style="color:var(--dim);">// এর যেকোনো একটা fail করলে দুটোই rollback হবে</div>
                 </div>
                 <p class="r" style="font-size:13px;color:var(--muted);">Rule of thumb: একাধিক table পরিবর্তন হলে সবসময়
