@@ -438,6 +438,39 @@
         button.nb:hover {
             border-color: var(--acc)
         }
+
+        @media (max-width: 700px) {
+            body {
+                height: 100dvh;
+                padding: 12px
+            }
+
+            .deck {
+                width: 100%;
+                height: min(560px, 82dvh)
+            }
+
+            .slide {
+                padding: 24px 20px;
+                overflow-y: auto
+            }
+
+            .two-col,
+            .three-col,
+            .compare {
+                grid-template-columns: 1fr
+            }
+
+            .flow {
+                justify-content: flex-start
+            }
+
+            #mode-bar,
+            #nav {
+                flex-wrap: wrap;
+                justify-content: center
+            }
+        }
     </style>
 
 
@@ -480,17 +513,17 @@
     <div class="deck">
         <!-- SLIDE 0: THUMBNAIL -->
         <div class="slide thumb active" data-slide="0">
-            <div class="thumb-shock">রহিম message পাঠাল —<br>করিম <span>তাৎক্ষণিক দেখল!</span></div>
-            <div class="thumb-sub">HTTP-তে করিমকে বারবার জিজ্ঞেস করতে হতো "নতুন message এসেছে?"<br>Socket.IO-তে message
+            <div class="thumb-shock r">রহিম message পাঠাল —<br>করিম <span>তাৎক্ষণিক দেখল!</span></div>
+            <div class="thumb-sub r">HTTP-তে করিমকে বারবার জিজ্ঞেস করতে হতো "নতুন message এসেছে?"<br>Socket.IO-তে message
                 আসলে সরাসরি push হয় — poll করতে হয় না</div>
-            <div class="thumb-pills">
+            <div class="thumb-pills r">
                 <span class="tpill">HTTP vs WebSocket</span>
                 <span class="tpill">4-Layer Security</span>
                 <span class="tpill">Viewer Count</span>
                 <span class="tpill">Token Bucket</span>
                 <span class="tpill">Redis Adapter</span>
             </div>
-            <div class="thumb-cta">Realtime System বুঝব আজকে</div>
+            <div class="thumb-cta r">Realtime System বুঝব আজকে</div>
         </div>
 
         <!-- SLIDE 1: HTTP vs Socket -->
@@ -673,3 +706,102 @@
                     </div>
                     <div class="code r" style="font-size:10.5px">socket.on('join-class', async (classId) => {
                         const roomKey = `viewers:${classId}`;
+                        await redis.sadd(roomKey, socket.user.id);
+                        const count = await redis.scard(roomKey);
+                        io.to(`class:${classId}`).emit('viewer-count', count);
+                        });</div>
+                </div>
+                <div class="col">
+                    <div class="card r">
+                        <h3>Disconnect হলে কী হয়?</h3>
+                        <ul>
+                            <li>socket.on('disconnect') ট্রিগার হয়</li>
+                            <li>SREM দিয়ে ঐ user-কে সেট থেকে বাদ দেওয়া হয়</li>
+                            <li>নতুন count আবার সবাইকে broadcast করা হয়</li>
+                        </ul>
+                    </div>
+                    <div class="code r" style="font-size:10.5px">socket.on('disconnect', async () => {
+                        await redis.srem(roomKey, socket.user.id);
+                        const count = await redis.scard(roomKey);
+                        io.to(`class:${classId}`).emit('viewer-count', count);
+                        });</div>
+                    <div class="good-box r"><span>💡</span>
+                        <div>একটা সাধারণ in-memory Map ব্যবহার করলে multiple server-এ count ভুল হতো — প্রতিটা server নিজের
+                            মতো count রাখত। Redis SET সব server-এর জন্য একই shared state রাখে বলেই count সবসময় সঠিক
+                            থাকে।</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- /deck -->
+
+    <div id="dots"></div>
+    <div id="mode-bar">
+        <span id="lbl-all" class="active-label">সব একসাথে</span>
+        <label class="tog"><input type="checkbox" id="tog-inp" onchange="setMode(this.checked)">
+            <div class="tog-track"></div>
+            <div class="tog-thumb"></div>
+        </label>
+        <span id="lbl-step">ধাপে ধাপে</span>
+    </div>
+    <div id="nav">
+        <button class="nb" onclick="prevSlide()">← আগে</button>
+        <button class="nb" onclick="advance()">পরে →</button>
+    </div>
+
+    <script>
+        const TOTAL = document.querySelectorAll('.slide').length;
+        let current = 0;
+        let revealMode = false;
+        let revealIdx = 999;
+
+        function buildDots() {
+            const d = document.getElementById('dots');
+            for (let i = 0; i < TOTAL; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (i === 0 ? ' on' : '');
+                dot.onclick = () => goSlide(i);
+                d.appendChild(dot);
+            }
+        }
+        function updateUI() {
+            document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === current));
+        }
+        function getReveals(idx) {
+            return document.querySelectorAll('.slide[data-slide="' + idx + '"] .r');
+        }
+        function showReveals(idx, n) {
+            getReveals(idx).forEach((r, i) => r.classList.toggle('visible', i < n));
+        }
+        function setMode(on) {
+            revealMode = on;
+            document.getElementById('lbl-all').className = on ? '' : 'active-label';
+            document.getElementById('lbl-step').className = on ? 'active-label' : '';
+            if (on) { showReveals(current, 0); revealIdx = 0; }
+            else { showReveals(current, 999); revealIdx = 999; }
+        }
+        function advance() {
+            if (!revealMode) { nextSlide(); return; }
+            const rs = getReveals(current);
+            if (revealIdx < rs.length) { rs[revealIdx].classList.add('visible'); revealIdx++; }
+            else { nextSlide(); }
+        }
+        function nextSlide() { if (current < TOTAL - 1) goSlide(current + 1); }
+        function prevSlide() { if (current > 0) goSlide(current - 1); }
+        function goSlide(idx) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.querySelector('.slide[data-slide="' + idx + '"]').classList.add('active');
+            current = idx;
+            if (revealMode) { showReveals(idx, 0); revealIdx = 0; }
+            else { showReveals(idx, 999); revealIdx = 999; }
+            updateUI();
+        }
+        document.addEventListener('keydown', e => {
+            if (['Space', 'ArrowRight', 'ArrowDown'].includes(e.code)) { e.preventDefault(); advance(); }
+            else if (['ArrowLeft', 'ArrowUp'].includes(e.code)) { e.preventDefault(); prevSlide(); }
+        });
+        document.querySelector('.thumb-cta').addEventListener('click', () => advance());
+        buildDots();
+        updateUI();
+        showReveals(0, 999);
+    </script>
