@@ -42,7 +42,7 @@ const PROJECTS = [
   {
     id: "how_to_use_redis",
     title: "প্রোডাকশনে Redis",
-    tagline: "Redis প্রোডাকশনে ব্যবহার করার প্র্যাকটিক্যাল গাইড",
+    tagline: "প্রোডাকশনে Redis সার্ভার কীভাবে হালকা, ফাস্ট ও স্ট্যাবল রাখবেন?",
     description: "Redis প্রোডাকশন এনভায়রনমেন্টে কীভাবে সেটআপ, কনফিগার ও মেইনটেইন করতে হয় — persistence, memory eviction, connection pooling ও কমন পিটফল সহ প্র্যাকটিক্যাল, ভিজ্যুয়াল ব্যাখ্যা।",
     url: "projects/how_to_use_redis/",
     category: "Infrastructure",
@@ -53,7 +53,7 @@ const PROJECTS = [
   {
     id: "notification",
     title: "Push Notification System",
-    tagline: "লাখো ইউজারকে রিয়েল-টাইম পুশ নোটিফিকেশন — স্কেলেবল ও রিলায়েবল",
+    tagline: "৫ লাখ+ ইউজারকে একসাথে পুশ নোটিফিকেশন কীভাবে পাঠাবেন?",
     description: "queue-based (BullMQ) worker আর্কিটেকচার দিয়ে ৫ লাখ+ ইউজারকে batch-এ (FCM প্রতি কলে ৫০০ token) নোটিফিকেশন পাঠায়। cursor-based pagination, throttling, Redis distributed lock দিয়ে duplicate-job প্রতিরোধ, retry with exponential backoff, dead-token cleanup এবং cache-stampede প্রোটেকশন — সব একসাথে অ্যানিমেটেড স্টোরি আকারে ব্যাখ্যা করা আছে।",
     url: "projects/notification/",
     category: "Infrastructure",
@@ -75,7 +75,7 @@ const PROJECTS = [
   {
     id: "project-active-chat",
     title: "Active Chat System — Deep Dive",
-    tagline: "রিয়েল-টাইম চ্যাট আর্কিটেকচার — গভীরভাবে বিশ্লেষণ",
+    tagline: "৫,০০০ স্টুডেন্ট একসাথে চ্যাট করলে সার্ভার কীভাবে সামলাবেন?",
     description: "মেসেজ ডেলিভারি, অনলাইন/অফলাইন স্ট্যাটাস, রুম ম্যানেজমেন্ট ও স্কেলিং চ্যালেঞ্জসহ একটা প্রোডাকশন-গ্রেড রিয়েল-টাইম চ্যাট সিস্টেমের ভেতরের আর্কিটেকচার ডিটেইলে ব্যাখ্যা করা হয়েছে।",
     url: "projects/project-active-chat/",
     category: "Realtime",
@@ -97,7 +97,7 @@ const PROJECTS = [
   {
     id: "project-auth-system",
     title: "subrohub Auth System",
-    tagline: "subrohub-এর জন্য বানানো সেন্ট্রালাইজড Auth সিস্টেম",
+    tagline: "১০-২০ লাখ ইউজারকে একটাই Auth সিস্টেম দিয়ে কীভাবে সামলাবেন?",
     description: "মাল্টি-অ্যাপ এনভায়রনমেন্টে একটাই সেন্ট্রালাইজড Auth সিস্টেম দিয়ে লগইন, টোকেন ম্যানেজমেন্ট ও পারমিশন কন্ট্রোল কীভাবে হ্যান্ডেল করা হয়েছে তার প্র্যাকটিক্যাল ব্যাখ্যা।",
     url: "projects/project-auth-system/",
     category: "Security",
@@ -108,7 +108,7 @@ const PROJECTS = [
   {
     id: "project-comment",
     title: "Comment System — Production Architecture",
-    tagline: "নেস্টেড কমেন্ট ও রিপ্লাই — প্রোডাকশন-গ্রেড আর্কিটেকচার",
+    tagline: "হাজারো নেস্টেড কমেন্ট-রিপ্লাই কীভাবে দ্রুত লোড করবেন?",
     description: "সেলফ-রেফারেন্সিয়াল ও রিকার্সিভ ডেটা স্ট্রাকচার দিয়ে নেস্টেড কমেন্ট/রিপ্লাই সিস্টেম কীভাবে এফিশিয়েন্টভাবে ডিজাইন ও কোয়েরি করা যায় তার প্রোডাকশন-রেডি আর্কিটেকচার ব্যাখ্যা করা হয়েছে।",
     url: "projects/project-comment/",
     category: "Database",
@@ -141,7 +141,7 @@ const PROJECTS = [
   {
     id: "project-reusable-code",
     title: "PostgreSQL + Prisma — Real-World Design Patterns",
-    tagline: "PostgreSQL আর Prisma দিয়ে বাস্তব প্রজেক্টের ডিজাইন প্যাটার্ন",
+    tagline: "বড় প্রজেক্টে PostgreSQL আর Prisma কোড কীভাবে রিইউজেবল রাখবেন?",
     description: "PostgreSQL ও Prisma ORM একসাথে ব্যবহার করে বাস্তব প্রজেক্টে কীভাবে রিইউজেবল, মডিউল-বেজড ও মেইনটেইনেবল ডিজাইন প্যাটার্ন তৈরি করা যায় তার প্র্যাকটিক্যাল ব্যাখ্যা।",
     url: "projects/project-reusable-code/",
     category: "Database",

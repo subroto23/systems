@@ -1,9 +1,16 @@
 {
   "title": "প্রোডাকশনে Redis",
-  "tagline": "Redis প্রোডাকশনে ব্যবহার করার প্র্যাকটিক্যাল গাইড",
+  "tagline": "প্রোডাকশনে Redis সার্ভার কীভাবে হালকা, ফাস্ট ও স্ট্যাবল রাখবেন?",
   "description": "Redis প্রোডাকশন এনভায়রনমেন্টে কীভাবে সেটআপ, কনফিগার ও মেইনটেইন করতে হয় — persistence, memory eviction, connection pooling ও কমন পিটফল সহ প্র্যাকটিক্যাল, ভিজ্যুয়াল ব্যাখ্যা।",
   "category": "Infrastructure",
-  "tags": ["redis", "production", "guide", "persistence", "caching", "infrastructure"],
+  "tags": [
+    "redis",
+    "production",
+    "guide",
+    "persistence",
+    "caching",
+    "infrastructure"
+  ],
   "status": "live",
   "icon": "🛠️"
 }

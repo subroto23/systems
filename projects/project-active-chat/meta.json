@@ -1,9 +1,15 @@
 {
   "title": "Active Chat System — Deep Dive",
-  "tagline": "রিয়েল-টাইম চ্যাট আর্কিটেকচার — গভীরভাবে বিশ্লেষণ",
+  "tagline": "৫,০০০ স্টুডেন্ট একসাথে চ্যাট করলে সার্ভার কীভাবে সামলাবেন?",
   "description": "মেসেজ ডেলিভারি, অনলাইন/অফলাইন স্ট্যাটাস, রুম ম্যানেজমেন্ট ও স্কেলিং চ্যালেঞ্জসহ একটা প্রোডাকশন-গ্রেড রিয়েল-টাইম চ্যাট সিস্টেমের ভেতরের আর্কিটেকচার ডিটেইলে ব্যাখ্যা করা হয়েছে।",
   "category": "Realtime",
-  "tags": ["chat", "realtime", "websocket", "deep-dive", "architecture"],
+  "tags": [
+    "chat",
+    "realtime",
+    "websocket",
+    "deep-dive",
+    "architecture"
+  ],
   "status": "live",
   "icon": "💬"
 }

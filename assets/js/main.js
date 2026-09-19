@@ -107,8 +107,8 @@
           <span class="card-icon" aria-hidden="true">${p.icon || "🧩"}</span>
           <span class="content-badge">📖 ইন্টারঅ্যাক্টিভ গল্প</span>
         </div>
-        <h3 class="card-title">${escapeHtml(p.title)}</h3>
-        <p class="card-tagline">${escapeHtml(p.tagline)}</p>
+        <span class="card-eyebrow">${escapeHtml(p.title)}</span>
+        <h3 class="card-title">${escapeHtml(p.tagline)}</h3>
         <p class="card-desc">${escapeHtml(p.description)}</p>
         <div class="card-footer">
           <span class="card-category">${escapeHtml(p.category)}</span>
