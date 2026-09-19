@@ -11,12 +11,6 @@
   const navToggle = document.getElementById("navToggle");
   const mainNav = document.getElementById("mainNav");
 
-  const STATUS_LABEL = {
-    live: "লাইভ",
-    beta: "বিটা",
-    development: "ডেভেলপমেন্টে"
-  };
-
   let activeCategory = "all";
   let activeQuery = "";
 
@@ -106,20 +100,19 @@
   }
 
   function cardTemplate(p, index) {
-    const statusLabel = STATUS_LABEL[p.status] || p.status;
     const delay = Math.min(index, 8) * 60;
     return `
       <a class="project-card reveal" style="transition-delay:${delay}ms" href="${escapeAttr(p.url)}" target="_blank" rel="noopener noreferrer" data-id="${escapeAttr(p.id)}">
         <div class="card-top">
           <span class="card-icon" aria-hidden="true">${p.icon || "🧩"}</span>
-          <span class="status-badge status-${escapeAttr(p.status)}">${escapeHtml(statusLabel)}</span>
+          <span class="content-badge">📖 ইন্টারঅ্যাক্টিভ গল্প</span>
         </div>
         <h3 class="card-title">${escapeHtml(p.title)}</h3>
         <p class="card-tagline">${escapeHtml(p.tagline)}</p>
         <p class="card-desc">${escapeHtml(p.description)}</p>
         <div class="card-footer">
           <span class="card-category">${escapeHtml(p.category)}</span>
-          <span class="card-cta">সিস্টেম দেখুন
+          <span class="card-cta">পুরো গল্পটা পড়ুন
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </span>
         </div>

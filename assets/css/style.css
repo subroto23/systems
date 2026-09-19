@@ -419,15 +419,15 @@ a { color: inherit; text-decoration: none; }
   background: var(--bg-subtle);
   border-radius: 12px;
 }
-.status-badge {
+.content-badge {
   font-size: 0.72rem;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-subtle));
+  color: var(--accent);
+  white-space: nowrap;
 }
-.status-live { background: var(--success-bg); color: var(--success); }
-.status-beta { background: var(--warn-bg); color: var(--warn); }
-.status-development { background: var(--dev-bg); color: var(--dev); }
 
 .card-title {
   font-size: 1.08rem;
