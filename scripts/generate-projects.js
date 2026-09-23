@@ -289,6 +289,51 @@ function injectGa(projects) {
   }
 }
 
+const CLARITY_START = "<!-- AUTO-CLARITY:START (scripts/generate-projects.js জেনারেট করে — সরাসরি এডিট করবেন না) -->";
+const CLARITY_END = "<!-- AUTO-CLARITY:END -->";
+const CLARITY_PROJECT_ID = "ymunb10rl6";
+
+function clarityBlock() {
+  return `${CLARITY_START}
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "${CLARITY_PROJECT_ID}");
+</script>
+${CLARITY_END}`;
+}
+
+function injectClarity(projects) {
+  for (const p of projects) {
+    const filePath = path.join(PROJECTS_DIR, p.id, "index.html");
+    if (!fs.existsSync(filePath)) continue;
+
+    let html = fs.readFileSync(filePath, "utf8");
+
+    let prevStart = html.indexOf(CLARITY_START);
+    if (prevStart !== -1) {
+      const prevEnd = html.indexOf(CLARITY_END, prevStart);
+      if (prevEnd !== -1) {
+        if (html[prevStart - 1] === "\n") prevStart -= 1;
+        html = html.slice(0, prevStart) + html.slice(prevEnd + CLARITY_END.length);
+      }
+    }
+
+    const headMatch = html.match(/<head[^>]*>/);
+    if (!headMatch) {
+      console.warn(`⚠️  projects/${p.id}/index.html-এ <head> পাওয়া যায়নি — Clarity ট্যাগ যোগ করা গেল না।`);
+      fs.writeFileSync(filePath, html, "utf8");
+      continue;
+    }
+
+    const insertAt = headMatch.index + headMatch[0].length;
+    html = html.slice(0, insertAt) + "\n" + clarityBlock() + html.slice(insertAt);
+    fs.writeFileSync(filePath, html, "utf8");
+  }
+}
+
 const BACKLINK_START = "<!-- AUTO-BACKLINK:START (scripts/generate-projects.js জেনারেট করে — সরাসরি এডিট করবেন না) -->";
 const BACKLINK_END = "<!-- AUTO-BACKLINK:END -->";
 
@@ -383,9 +428,10 @@ function main() {
   fs.writeFileSync(SITEMAP_FILE, renderSitemap(projects), "utf8");
   fs.writeFileSync(LLMS_FILE, renderLlmsTxt(projects), "utf8");
   injectGa(projects);
+  injectClarity(projects);
   injectSeo(projects);
   injectBackLink(projects);
-  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো, এবং প্রতিটা প্রজেক্ট পেজে GA/SEO/favicon/ব্যাক-লিংক ইনজেক্ট করা হলো।`);
+  console.log(`✅ ${projects.length} টা প্রজেক্ট দিয়ে assets/js/projects.js, sitemap.xml, llms.txt জেনারেট হলো, এবং প্রতিটা প্রজেক্ট পেজে GA/Clarity/SEO/favicon/ব্যাক-লিংক ইনজেক্ট করা হলো।`);
 }
 
 main();
